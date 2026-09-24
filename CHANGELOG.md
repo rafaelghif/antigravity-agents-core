@@ -9,14 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Master Skill Routing Directory & Quality-First Manifesto (`docs/agents/skill-directory.md`)**: Comprehensive master reference mapping all 64 workspace skills across 10 operational categories, with explicit trigger conditions, input requirements, output artifacts, and quality-first verification requirements.
+- **Environment Template & Diagnostics (`.env.example`)**: Added comprehensive environment template matching `.env` across Gitea, GitHub, and MCP database drivers, with `Environment Config` diagnostic check integrated into `aac doctor`.
 - **Universal PreInvocation Hook Contract (`memory-engine.cjs`)**: Conformed hook payload output to the official Antigravity specification returning `{ injectSteps: [{ ephemeralMessage: "..." }] }`, actively injecting session continuity reminders into agent context at invocation.
 - **Multi-Language Quality Guard Expansion (`quality-guard.cjs`)**: Added automated detection for `throw new Error("not implemented/todo/stub")` and placeholder API endpoints (`dummy.api`, `mock.api`, `placeholder.com`), intercepting stubs before filesystem writes.
 - **Cross-Platform CJS Guardrail (`.agents/skills/git-guardrails/scripts/block-dangerous-git.cjs`)**: Added dedicated CommonJS guardrail script to ensure consistent PreToolUse interception regardless of target repository's module type.
+- **Distribution Package Portability Audit**: Added automated test verifying zero hardcoded local machine paths across npm package tarballs and scaffolded project trees.
 
 ### Changed
 - **MCP Configuration Template Parity (`.agents/mcp_config.example.json`)**: Synchronized example template to match `.agents/mcp_config.json` 100% byte-for-byte across all 6 services (`git`, `github`, `gitea`, `postgres`, `mysql`, `mssql`).
 - **Preamble & Instruction Budget (`AGENTS.md`)**: Streamlined root instructions to stay strictly within the 12,000-character budget (`11,965` characters) while integrating references to the master skill catalog.
-- **Documentation Overhaul (`README.md`)**: Updated documentation to version 5.3.0, expanding the skills matrix to cover all 10 categories, detailing all 8 lifecycle hook groups, reflecting 44 automated test assertions, and documenting full database MCP connection schemas.
+- **Documentation Overhaul (`README.md`)**: Updated documentation to version 5.3.0, expanding the skills matrix to cover all 10 categories, detailing all 8 lifecycle hook groups, reflecting 45 automated test assertions, and documenting full database MCP connection schemas.
 - **Version Bump**: Bumped version to `5.3.0` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation adhering to SemVer 2.0.0.
 
 ### Fixed
