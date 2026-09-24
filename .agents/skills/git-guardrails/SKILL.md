@@ -27,7 +27,7 @@ When blocked, the hook returns `{"decision": "deny", "reason": "..."}` on stdout
 Copy the guardrail script into `.agents/hooks/`:
 
 - **Windows (PowerShell)**: `.agents/hooks/block-dangerous-git.ps1`
-- **Cross-Platform / Node**: `.agents/hooks/block-dangerous-git.js`
+- **Cross-Platform / Node**: `.agents/hooks/block-dangerous-git.cjs`
 
 ### 2. Configure `.agents/hooks.json`
 
@@ -64,7 +64,7 @@ Add the `PreToolUse` hook definition:
         "hooks": [
           {
             "type": "command",
-            "command": "node .agents/hooks/block-dangerous-git.js",
+            "command": "node hooks/block-dangerous-git.cjs",
             "timeout": 5
           }
         ]
