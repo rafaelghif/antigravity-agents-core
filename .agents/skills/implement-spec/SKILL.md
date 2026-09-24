@@ -17,13 +17,13 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 
 ## Steps
 
-1. Read the spec and tickets. Read enough to understand the task graph.
+1. Read the spec and tickets. Inspect workspace rules: [architecture-and-flow.md](../../rules/architecture-and-flow.md), [production-integrity.md](../../rules/production-integrity.md), and [coding-standards.md](../../rules/coding-standards.md). Synchronize task DAG via `node bin/cli.mjs tasks sync` if tickets are stored under `.scratch/<feature-slug>/issues/`.
 
 2. (optional) Use an **exploration subagent** to conduct any exploration required by the tickets - relevant codebase files or external documentation. Ensure the exploration subagent can save files - it should save its markdown notes in a directory outside the repo, accessible by all future subagents. This lets **implementer subagents** focus on implementation rather than exploration.
 
 3. Create a branch, and a draft PR. The PR should be marked as 'closing' the spec issue and tickets.
 
-4. Use **implementer subagents** to implement each ticket via `invoke_subagent` with `Workspace: "branch"` (or `"share"`):
+4. Use **implementer subagents** to implement each ticket on the current DAG frontier via `invoke_subagent` with `Workspace: "branch"` (or `"share"`):
    ```json
    invoke_subagent({
      "Subagents": [
@@ -32,13 +32,13 @@ Communication to and from subagents should be sparse. Communicate primarily thro
          "TypeName": "self",
          "Workspace": "branch",
          "Model": "flash",
-         "Prompt": "<ticket details and context pointers>"
+         "Prompt": "<ticket details>\n\nStrict Constraints:\n- Adhere strictly to production-integrity.md: ZERO dummy data, mock stubs, or fake services.\n- Adhere to architecture-and-flow.md: preserve domain purity and respect module seams.\n- Execute the ticket's verificationCmd and ensure all tests pass before completing.\n- Make atomic conventional commits."
        }
      ]
    })
    ```
 
-5. Once an **implementer subagent** completes, merge its work to the PR branch with a **merger subagent** or main thread merge.
+5. Once an **implementer subagent** completes, verify that automated tests pass, merge its work to the PR branch, and mark the ticket completed (`node bin/cli.mjs tasks complete <ticket-id>`).
 
 6. If this changes the **frontier** of available tickets, kick off more **implementer subagents** to work on the new tickets concurrently.
 

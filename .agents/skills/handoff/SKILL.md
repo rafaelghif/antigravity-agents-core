@@ -7,7 +7,7 @@ description: >-
 
 # Antigravity Session Handoff
 
-Write a handoff document summarizing the current conversation so a fresh agent can continue the work seamlessly. Save it to `.scratch/handoff.md` or the conversation artifact directory.
+Write a handoff document summarizing the current conversation so a fresh agent can continue the work seamlessly, implementing Tier 4 of [memory-management.md](../../rules/memory-management.md). Save it to `.scratch/handoff.md` or the conversation artifact directory.
 
 ## Structure & Template
 

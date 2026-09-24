@@ -11,7 +11,7 @@ Synthesizes conversation context, user requirements, and repository topology int
 
 ## 1. Core Principles
 
-- **Zero Assumptions**: Never guess missing requirements or API contracts. If behavior, constraints, or schemas are undefined, stop and clarify via `ask_question` or `/grill-me`.
+- **Zero Assumptions**: Never guess missing requirements or API contracts. Follow [production-integrity.md](../../rules/production-integrity.md). If behavior, constraints, or schemas are undefined, stop and clarify via `ask_question` or `/grill-me`.
 - **Make Illegal States Unrepresentable**: Model domain states, transitions, and invariants explicitly with state machines.
 - **Contract-First & Testable**: Every requirement must specify concrete Given-When-Then acceptance criteria verifiable at public seams.
 - **Bounded Scope (Strict Anti-Scope)**: Define what is explicitly out-of-scope to protect against scope creep.

@@ -21,7 +21,7 @@ We implement a unified, zero-dependency autonomous guardrail architecture powere
    - Detects leaked API keys, tokens, and private keys before tool execution.
 
 2. **Quality Code Guard (`quality-guard.cjs`)**:
-   - `PreToolUse` hook strictly enforcing production realism and the anti-dummy/mock policy ([production-integrity.md](file:///.agents/rules/production-integrity.md)).
+   - `PreToolUse` hook strictly enforcing production realism and the anti-dummy/mock policy ([production-integrity.md](../../.agents/rules/production-integrity.md)).
    - Enforces genuine types and concrete implementations in production code while permitting fixtures in test folders (`tests/`, `*.test.*`).
 
 3. **Task Orchestrator & Wave Planner (`task-orchestrator.cjs`)**:

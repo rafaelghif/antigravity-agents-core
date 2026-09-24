@@ -368,3 +368,62 @@ test('quality-guard catches multi-language stubs in Python, Rust, and Go', () =>
   assert.match(rsRes.reason, /Rust todo!/);
 });
 
+test('all local markdown links across repository resolve to existing files', () => {
+  function walkDir(dir, cb) {
+    fs.readdirSync(dir).forEach(file => {
+      const fullPath = path.join(dir, file);
+      if (fs.statSync(fullPath).isDirectory()) {
+        if (file !== 'node_modules' && file !== '.git' && file !== '.gemini' && file !== '.scratch') {
+          walkDir(fullPath, cb);
+        }
+      } else if (file.endsWith('.md')) {
+        cb(fullPath);
+      }
+    });
+  }
+
+  const broken = [];
+  walkDir(rootDir, (filePath) => {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const withoutCodeBlocks = content.replace(/```[\s\S]*?```/g, '').replace(/`[^`]+`/g, '');
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    let m;
+    while ((m = linkRegex.exec(withoutCodeBlocks)) !== null) {
+      const text = m[1];
+      const target = m[2].trim().split('#')[0];
+      if (!target || target.startsWith('http') || target.startsWith('conversation://') || target.startsWith('mailto:') || target.startsWith('<') || target.startsWith('file:///<workspace>')) {
+        continue;
+      }
+      const resolved = target.startsWith('/')
+        ? path.resolve(rootDir, '.' + target)
+        : path.resolve(path.dirname(filePath), target);
+      if (!fs.existsSync(resolved)) {
+        broken.push({ file: path.relative(rootDir, filePath), text, target });
+      }
+    }
+  });
+
+  assert.deepEqual(broken, [], `Found broken markdown links: ${JSON.stringify(broken)}`);
+});
+
+test('AGENTS.md, rules, and skills cross-references are synchronized', () => {
+  const agentsMd = fs.readFileSync(path.join(rootDir, 'AGENTS.md'), 'utf-8');
+  const rulesDir = path.join(rootDir, '.agents', 'rules');
+  const skillsDir = path.join(rootDir, '.agents', 'skills');
+
+  // Verify all 7 rules exist and are listed in AGENTS.md
+  const ruleFiles = fs.readdirSync(rulesDir).filter(f => f.endsWith('.md'));
+  assert.equal(ruleFiles.length, 7);
+  for (const rf of ruleFiles) {
+    assert.ok(agentsMd.includes(rf), `AGENTS.md must cite rule ${rf}`);
+  }
+
+  // Verify skills in AGENTS.md decision matrix exist
+  const skillMatches = agentsMd.match(/\.agents\/skills\/([a-zA-Z0-9_-]+)\/SKILL\.md/g) || [];
+  for (const sm of skillMatches) {
+    const skillName = sm.split('/')[2];
+    const skillPath = path.join(skillsDir, skillName, 'SKILL.md');
+    assert.ok(fs.existsSync(skillPath), `Skill ${skillName} cited in AGENTS.md must exist at ${skillPath}`);
+  }
+});
+

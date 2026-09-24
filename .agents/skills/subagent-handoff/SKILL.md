@@ -12,10 +12,10 @@ Compacts the current conversation state into a structured handoff prompt and spa
 ## Process
 
 1. **Synthesize Handoff Prompt**:
-   - Objective & current goal.
+   - Objective & current goal aligned with [memory-management.md](../../rules/memory-management.md).
    - What has been done (completed files, tests run, decisions made).
    - What remains to be done (concrete next steps).
-   - Context pointers: point directly to repository files using markdown links (e.g. `[AGENTS.md](AGENTS.md)` or `file:///` links in chat).
+   - Context pointers: point directly to repository files using markdown links (e.g. `[AGENTS.md](../../../AGENTS.md)` or `file:///` links in chat).
    - Suggested skills for the subagent to inspect via `view_file`.
 
 2. **Spawn Autonomous Subagent**:

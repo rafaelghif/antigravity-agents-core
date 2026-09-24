@@ -5,7 +5,7 @@ description: >
   asked to "write a commit", "commit message", /commit, or /caveman-commit.
 ---
 
-Write commit messages terse and exact. Conventional Commits format. No fluff. Why over what.
+Write commit messages terse and exact. Conventional Commits format per [git-workflow.md](../../rules/git-workflow.md). No fluff. Why over what.
 
 ## Rules
 

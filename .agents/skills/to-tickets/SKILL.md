@@ -33,6 +33,7 @@ Break the work into **tracer bullet** tickets.
 - Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests): vertical, NOT a horizontal slice of one layer
 - A completed slice is demoable or verifiable on its own
 - Each slice is sized to fit in a single fresh context window
+- Adhere to [architecture-and-flow.md](../../rules/architecture-and-flow.md) and [production-integrity.md](../../rules/production-integrity.md): specify real test seams, runnable verification commands, and zero dummy/mock placeholders
 - Any prefactoring should be done first
 
 </vertical-slice-rules>
