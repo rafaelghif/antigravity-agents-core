@@ -9,7 +9,17 @@ test('AGENTS.md remains strictly below 12000 characters limit', () => {
   const content = fs.readFileSync(path.join(rootDir, 'AGENTS.md'), 'utf-8');
   assert.ok(content.length < 12000, `AGENTS.md length ${content.length} exceeds 12000 characters`);
   assert.match(content, /memory-management\.md/, 'AGENTS.md must list memory-management.md');
+  assert.match(content, /production-integrity\.md/, 'AGENTS.md must list production-integrity.md');
   assert.match(content, /## 8\. Agent Skills & Memory Architecture/, 'AGENTS.md must have section 8');
+});
+
+test('production-integrity rule exists with trigger: always_on', () => {
+  const rulePath = path.join(rootDir, '.agents', 'rules', 'production-integrity.md');
+  assert.ok(fs.existsSync(rulePath), 'production-integrity.md must exist');
+  const content = fs.readFileSync(rulePath, 'utf-8');
+  assert.match(content, /trigger:\s*always_on/, 'Rule must specify trigger: always_on');
+  assert.match(content, /Zero Assumptions & Explicit Clarification Mandate/, 'Rule must enforce zero assumptions');
+  assert.match(content, /Zero Dummy, Fake, or Mock Policy/, 'Rule must enforce anti-dummy/mock policy');
 });
 
 test('memory-management rule exists with trigger: always_on', () => {
