@@ -18,6 +18,7 @@
 <p align="center">
   <a href="#-quick-start-multi-platform">Quick Start</a> •
   <a href="#-architecture-overview">Architecture</a> •
+  <a href="#-always-on-operational-rules">Always-On Rules</a> •
   <a href="#-repository-layout">Repository Layout</a> •
   <a href="#-autonomous-skills-suite">Skill Catalog</a> •
   <a href="#-5-tier-memory-management">Memory System</a> •
@@ -46,6 +47,20 @@
     <td width="33%" align="center">
       <h3>🔒 Zero Global Pollution</h3>
       <p>Strictly workspace-scoped within <code>.agents/</code>. Zero machine-global pollution (<code>~/.gemini/config/</code>) and zero <code>package.json</code> pollution.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center">
+      <h3>🛡️ Production Realism</h3>
+      <p>Strict anti-dummy/mock standard via <b>Production Integrity</b>. Zero unverified assumptions, real schemas, and genuine error boundaries.</p>
+    </td>
+    <td width="33%" align="center">
+      <h3>⚡ Lifecycle Hooks</h3>
+      <p>PreToolUse interception blocking dangerous git commands and quality-gate Stop hooks enforcing test passage before session termination.</p>
+    </td>
+    <td width="33%" align="center">
+      <h3>🧩 5-Tier Memory Hierarchy</h3>
+      <p>Clean context partitioning: intra-session, workspace directives, living domain models, cross-session handoff, and task graphs.</p>
     </td>
   </tr>
 </table>
@@ -125,6 +140,21 @@ flowchart TD
 
 ---
 
+## 📜 Always-On Operational Rules
+
+AAC enforces deterministic engineering quality, communication brevity, and security through modular rules loaded into Antigravity context on every turn (`trigger: always_on`):
+
+| Rule | Protocol / Philosophy | Core Directives | Primary File |
+| :--- | :--- | :--- | :--- |
+| `production-integrity` | **Zero Assumptions & Anti-Mock Standard** | Strict ban on dummy/fake/mock data in production code (`src/`, `lib/`, `app/`). Zero speculation; mandatory clarification via `/grill-me` or `ask_question`; test fixture isolation. | [production-integrity.md](file:///D:/Project/antigravity-agents/.agents/rules/production-integrity.md) |
+| `ponytail` | **7-Rung Minimalist Code Ladder** | Laziest senior dev mode: YAGNI &rarr; Existing Helpers &rarr; Standard Library &rarr; Platform Native &rarr; Installed Dep &rarr; One-Liner &rarr; Minimal Diff. Fix root causes, not symptoms. | [ponytail.md](file:///D:/Project/antigravity-agents/.agents/rules/ponytail.md) |
+| `caveman` | **Ultra-Compressed Communication** | Eliminates conversational fluff, polite filler, and tool narration. Delivers 100% technical substance, exact code, commands, and file links. | [caveman.md](file:///D:/Project/antigravity-agents/.agents/rules/caveman.md) |
+| `coding-standards` | **Production Code Quality & SRP** | Single Responsibility Principle, fail-fast boundary validation, explicit error handling, and targeted single-block file modifications. | [coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md) |
+| `git-workflow` | **Conventional Commits & Atomic History** | Enforces conventional commit prefixes (`feat:`, `fix:`, `chore:`, etc.) and single-unit atomic changes without mixing cosmetic and functional diffs. | [git-workflow.md](file:///D:/Project/antigravity-agents/.agents/rules/git-workflow.md) |
+| `memory-management` | **5-Tier Context Isolation** | Manages working context across 5 tiers: intra-session, workspace directives, domain models, cross-session handoff (`.scratch/handoff.md`), and issue task graphs. | [memory-management.md](file:///D:/Project/antigravity-agents/.agents/rules/memory-management.md) |
+
+---
+
 ## 📂 Repository Layout
 
 ```text
@@ -143,8 +173,9 @@ antigravity-agents/
 │   │   ├── caveman.md                 # Ultra-compressed token communication protocol
 │   │   ├── coding-standards.md        # SRP, fail-fast, and targeted replacement rules
 │   │   ├── git-workflow.md            # Conventional Commits and atomic changes
+│   │   ├── memory-management.md       # 5-tier memory hierarchy & cross-session protocol
 │   │   ├── ponytail.md                # 7-rung minimalist code ladder (YAGNI to one-liners)
-│   │   └── memory-management.md       # 5-tier memory hierarchy & cross-session protocol
+│   │   └── production-integrity.md    # Zero assumptions, anti-dummy policy & production realism
 │   └── skills/                        # 64 On-demand skills (Progressive disclosure)
 ├── bin/                               # Universal CLI executable
 │   └── cli.mjs                        # Multi-platform installer (init, audit, doctor, list)
@@ -255,7 +286,7 @@ To maintain crisp context without attention degradation or token bloat, AAC part
 ```
 
 1. **Intra-Session (Tier 1)**: Ephemeral working context managed via progressive disclosure.
-2. **Workspace Directives (Tier 2)**: Core guidelines in `AGENTS.md` and rules in `.agents/rules/` (`trigger: always_on`).
+2. **Workspace Directives (Tier 2)**: Core guidelines in `AGENTS.md` and modular rules in `.agents/rules/` (`production-integrity.md`, `ponytail.md`, `caveman.md`, `coding-standards.md`, `git-workflow.md`, `memory-management.md`) with `trigger: always_on`.
 3. **Domain Knowledge (Tier 3)**: Living domain glossary in `CONTEXT.md` and immutable decisions in `docs/adr/`.
 4. **Session Bridge (Tier 4)**: Cold-start checkpoint saved to `.scratch/handoff.md` before exit. Rehydrated in new sessions via `@handoff.md`.
 5. **Durable Task Graph (Tier 5)**: External source of truth for work items managed via GitHub or Gitea issues.
@@ -360,6 +391,7 @@ npm test
 ✔ lifecycle hook verify-on-stop.cjs executes quality gate on model_stop
 ✔ lifecycle hook verify-on-stop.cjs returns continue when tests fail
 ✔ AGENTS.md remains strictly below 12000 characters limit
+✔ production-integrity rule exists with trigger: always_on
 ✔ memory-management rule exists with trigger: always_on
 ✔ CONTEXT.md living domain document exists at root
 ✔ ADR 0001 records 5-tier memory decision
@@ -367,7 +399,7 @@ npm test
 ✔ gitignore correctly ignores .scratch contents and preserves .gitkeep
 ✔ session handoff template exists
 ✔ all 64 skills comply with Antigravity operational criteria
-ℹ pass 28, fail 0
+ℹ pass 29, fail 0
 ```
 
 ---
