@@ -18,7 +18,14 @@ const DUMMY_STUB_PATTERNS = [
   { pattern: /return\s+['"`]not implemented['"`]/i, description: 'Hardcoded "not implemented" stub return' },
   { pattern: /\braise\s+NotImplementedError\b/, description: 'Python NotImplementedError stub' },
   { pattern: /\b(?:todo!|unimplemented!)\s*\(/, description: 'Rust todo!/unimplemented! macro stub' },
-  { pattern: /\bpanic\s*\(\s*['"`](?:not implemented|todo)['"`]\s*\)/i, description: 'Go panic stub' }
+  { pattern: /\bpanic\s*\(\s*['"`](?:not implemented|todo)['"`]\s*\)/i, description: 'Go panic stub' },
+  { pattern: /(?:const|let|var)\s+(?:mock|fake|dummy)[A-Za-z0-9_]*\s*=\s*\[/i, description: 'Mock array fixture in production code' },
+  { pattern: /(?:const|let|var)\s+(?:mock|fake|dummy)[A-Za-z0-9_]*\s*=\s*\{/i, description: 'Mock object fixture in production code' },
+  { pattern: /\b(?:mockDatabase|fakeDatabase|inMemoryDb|dummyDb|mockStore|fakeStore)\b/i, description: 'Simulated in-memory database' },
+  { pattern: /\bclass\s+(?:Mock|Fake|Dummy)[A-Za-z0-9_]+/i, description: 'Mock/fake class in production code' },
+  { pattern: /\/\/\s*(?:simulate|faking|mocking)\s+(?:database|api|db|network|service)\b/i, description: 'Simulated backend/database comment' },
+  { pattern: /\breturn\s*\[\s*\{\s*(?:id|name|title):\s*['"`](?:mock|dummy|sample|fake)[-_]?[0-9]*['"`]/i, description: 'Hardcoded mock collection return' },
+  { pattern: /\b(?:apiKey|apiSecret|token|secret)\s*[:=]\s*['"`](?:mock|fake|dummy|test|placeholder)[-_]?[a-zA-Z0-9]*['"`]/i, description: 'Dummy/mock credential in production' }
 ];
 
 function isTestFile(filePath) {
@@ -118,12 +125,18 @@ if (require.main === module) {
         const targetFile = toolArgs.TargetFile || '';
         const content = (toolArgs.CodeContent || '') + '\n' + (toolArgs.ReplacementContent || '');
 
-        if (!isTestFile(targetFile) && !targetFile.endsWith('.md') && !targetFile.includes('/.scratch/')) {
+        if (
+          !isTestFile(targetFile) &&
+          !targetFile.endsWith('.md') &&
+          !targetFile.includes('/.scratch/') &&
+          !targetFile.endsWith('quality-guard.cjs') &&
+          !targetFile.endsWith('code-analyzer.cjs')
+        ) {
           for (const stub of DUMMY_STUB_PATTERNS) {
             if (stub.pattern.test(content)) {
               process.stdout.write(JSON.stringify({
                 decision: 'deny',
-                reason: `QUALITY GATE: ${stub.description} detected in production file '${path.basename(targetFile)}'. Production code must wire genuine types and end-to-end integration without fake stubs. See rule: .agents/rules/production-integrity.md`
+                reason: `ANTI-DUMMY VIOLATION: ${stub.description} detected in production file '${path.basename(targetFile)}'. You are strictly forbidden from assuming or inventing mock data, simulated in-memory databases, or placeholder stubs. STOP immediately and ask the user for the real schema, credentials, or requirements using 'ask_question'. See: .agents/rules/production-integrity.md`
               }));
               process.exit(0);
             }

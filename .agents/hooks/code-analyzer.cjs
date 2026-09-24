@@ -28,7 +28,14 @@ const DUMMY_STUB_PATTERNS = [
   { pattern: /return\s+['"`]not implemented['"`]/i, name: 'Hardcoded "not implemented" stub return' },
   { pattern: /\braise\s+NotImplementedError\b/, name: 'Python NotImplementedError stub' },
   { pattern: /\b(?:todo!|unimplemented!)\s*\(/, name: 'Rust todo!/unimplemented! macro stub' },
-  { pattern: /\bpanic\s*\(\s*['"`](?:not implemented|todo)['"`]\s*\)/i, name: 'Go panic stub' }
+  { pattern: /\bpanic\s*\(\s*['"`](?:not implemented|todo)['"`]\s*\)/i, name: 'Go panic stub' },
+  { pattern: /(?:const|let|var)\s+(?:mock|fake|dummy)[A-Za-z0-9_]*\s*=\s*\[/i, name: 'Mock array fixture in production code' },
+  { pattern: /(?:const|let|var)\s+(?:mock|fake|dummy)[A-Za-z0-9_]*\s*=\s*\{/i, name: 'Mock object fixture in production code' },
+  { pattern: /\b(?:mockDatabase|fakeDatabase|inMemoryDb|dummyDb|mockStore|fakeStore)\b/i, name: 'Simulated in-memory database' },
+  { pattern: /\bclass\s+(?:Mock|Fake|Dummy)[A-Za-z0-9_]+/i, name: 'Mock/fake class in production code' },
+  { pattern: /\/\/\s*(?:simulate|faking|mocking)\s+(?:database|api|db|network|service)\b/i, name: 'Simulated backend/database comment' },
+  { pattern: /\breturn\s*\[\s*\{\s*(?:id|name|title):\s*['"`](?:mock|dummy|sample|fake)[-_]?[0-9]*['"`]/i, name: 'Hardcoded mock collection return' },
+  { pattern: /\b(?:apiKey|apiSecret|token|secret)\s*[:=]\s*['"`](?:mock|fake|dummy|test|placeholder)[-_]?[a-zA-Z0-9]*['"`]/i, name: 'Dummy/mock credential in production' }
 ];
 
 function isTestPath(filePath) {
@@ -357,8 +364,13 @@ function reviewDiff(diffText, workspaceDir = process.cwd()) {
       const addedContent = line.slice(1);
       const isTest = isTestPath(currentFile);
 
-      // Skip rule files themselves
-      if (currentFile.endsWith('code-analyzer.cjs') || currentFile.endsWith('quality-guard.cjs')) {
+      // Skip documentation, rule manifests, and scratch files
+      if (
+        currentFile.endsWith('.md') ||
+        currentFile.includes('/.scratch/') ||
+        currentFile.endsWith('code-analyzer.cjs') ||
+        currentFile.endsWith('quality-guard.cjs')
+      ) {
         continue;
       }
 

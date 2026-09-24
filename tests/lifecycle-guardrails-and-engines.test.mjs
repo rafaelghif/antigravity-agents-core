@@ -116,6 +116,20 @@ test('quality-guard hook enforces anti-dummy/mock policy on production files', (
   });
   const testRes = JSON.parse(execSync(`node "${hookScript}"`, { input: testPayload, encoding: 'utf-8' }));
   assert.equal(testRes.decision, 'allow');
+
+  // 3. Mock in-memory array in production file blocked
+  const mockStorePayload = JSON.stringify({
+    toolCall: {
+      name: 'write_to_file',
+      args: {
+        TargetFile: '/workspace/src/users.ts',
+        CodeContent: 'const mockUsers = [{ id: 1 }];'
+      }
+    }
+  });
+  const mockStoreRes = JSON.parse(execSync(`node "${hookScript}"`, { input: mockStorePayload, encoding: 'utf-8' }));
+  assert.equal(mockStoreRes.decision, 'deny');
+  assert.match(mockStoreRes.reason, /Mock array fixture/);
 });
 
 test('task-orchestrator computes DAG topological waves and handles dependencies', () => {
