@@ -1,6 +1,12 @@
 # When to Mock
 
-Mock at **system boundaries** only:
+> [!IMPORTANT]
+> **Strict Test Fixture Isolation (Zero Mocks in Production)**:
+> Mocks, stubs, and synthetic fixtures are permitted **ONLY inside dedicated test files** (`*.test.*`, `*.spec.*`, `tests/fixtures/`).
+> Under NO circumstance may a mock, dummy object, fake token, or simulated in-memory store be placed in production application code (`src/`, `app/`, `lib/`).
+> In production code, wire real database drivers and genuine API clients, fail fast on missing configuration, and adhere strictly to [production-integrity.md](../../rules/production-integrity.md).
+
+Mock at **system boundaries** in test suites only:
 
 - External APIs (payment, email, etc.)
 - Databases (sometimes - prefer test DB)
