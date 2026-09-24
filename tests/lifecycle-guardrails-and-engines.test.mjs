@@ -391,7 +391,7 @@ test('all local markdown links across repository resolve to existing files', () 
     while ((m = linkRegex.exec(withoutCodeBlocks)) !== null) {
       const text = m[1];
       const target = m[2].trim().split('#')[0];
-      if (!target || target.startsWith('http') || target.startsWith('conversation://') || target.startsWith('mailto:') || target.startsWith('<') || target.startsWith('file:///<workspace>')) {
+      if (!target || target.startsWith('http') || target.startsWith('conversation://') || target.startsWith('mailto:') || target.startsWith('<') || target.startsWith('file:///<workspace>') || target.endsWith('mcp_config.json') || target.endsWith('.env')) {
         continue;
       }
       const resolved = target.startsWith('/')

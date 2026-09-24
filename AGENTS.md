@@ -59,7 +59,7 @@ When resolving behavior, strictly follow this precedence order:
    - [memory-management.md](.agents/rules/memory-management.md): 5-tier memory hierarchy and cross-session handoff protocol.
 3. **Lifecycle Hooks**: [.agents/hooks.json](.agents/hooks.json) (PreToolUse, PostToolUse, PreInvocation, PostInvocation, Stop).
 4. **Workspace Plugins & Sidecars** ([.agents/plugins/](.agents/plugins)): Packaged MCP servers and sidecars registered via [.agents/plugins.json](.agents/plugins.json).
-5. **Workspace MCP Servers**: [.agents/mcp_config.json](.agents/mcp_config.json) (Project-scoped tool servers, gitignored; template in [.agents/mcp_config.example.json](.agents/mcp_config.example.json)).
+5. **Workspace MCP Servers**: `.agents/mcp_config.json` (Project-scoped tool servers, gitignored; template in [.agents/mcp_config.example.json](.agents/mcp_config.example.json)).
 6. **On-Demand Skills** ([.agents/skills/](.agents/skills)): Progressive disclosure via `view_file` on `SKILL.md`. Registered in [.agents/skills.json](.agents/skills.json).
 
 ---
