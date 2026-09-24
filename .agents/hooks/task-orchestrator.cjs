@@ -212,6 +212,74 @@ function formatTaskSummary(workspaceDir) {
   return out;
 }
 
+function syncMarkdownTickets(workspaceDir) {
+  const root = resolveWorkspace(workspaceDir);
+  const scratchDir = path.join(root, '.scratch');
+  if (!fs.existsSync(scratchDir)) return { synced: 0, tasks: [] };
+
+  const syncedTasks = [];
+
+  function scanIssues(dir) {
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          scanIssues(full);
+        } else if (entry.isFile() && entry.name.endsWith('.md') && !entry.name.includes('handoff')) {
+          const content = fs.readFileSync(full, 'utf-8');
+          const headerMatch = content.match(/^#\s*([0-9A-Za-z_-]+):\s*(.+)$/m);
+          if (headerMatch) {
+            const id = headerMatch[1].trim();
+            const title = headerMatch[2].trim();
+
+            let verificationCmd = '';
+            const cmdMatch = content.match(/\*\*Verification command:\*\*\s*(.+)$/m) || content.match(/## Verification command\s*\n+([^\n#]+)/m);
+            if (cmdMatch) verificationCmd = cmdMatch[1].trim();
+
+            const blockedByMatch = content.match(/\*\*Blocked by:\*\*\s*(.+)$/m) || content.match(/## Blocked by\s*\n+([^\n#]+)/m);
+            let dependsOn = [];
+            if (blockedByMatch && !/none/i.test(blockedByMatch[1])) {
+              dependsOn = blockedByMatch[1].split(/[,;\n]/).map(s => s.replace(/^[-*]\s*/, '').trim()).filter(Boolean);
+            }
+
+            let blastRadius = '';
+            const blastMatch = content.match(/\*\*Blast radius & Scope:\*\*\s*(.+)$/m) || content.match(/## Blast radius & Scope\s*\n+([^\n#]+)/m);
+            if (blastMatch) blastRadius = blastMatch[1].trim();
+
+            syncedTasks.push({
+              id,
+              title,
+              status: 'pending',
+              dependsOn,
+              verificationCmd,
+              blastRadius,
+              sourceFile: path.relative(root, full).replace(/\\/g, '/')
+            });
+          }
+        }
+      }
+    } catch {}
+  }
+
+  scanIssues(scratchDir);
+
+  if (syncedTasks.length > 0) {
+    const data = loadTasks(workspaceDir);
+    for (const st of syncedTasks) {
+      const idx = data.tasks.findIndex(t => t.id === st.id);
+      if (idx >= 0) {
+        data.tasks[idx] = { ...data.tasks[idx], ...st, status: data.tasks[idx].status || st.status };
+      } else {
+        data.tasks.push(st);
+      }
+    }
+    saveTasks(workspaceDir, data);
+  }
+
+  return { synced: syncedTasks.length, tasks: syncedTasks };
+}
+
 // Module export for CLI and other hooks
 module.exports = {
   loadTasks,
@@ -222,6 +290,7 @@ module.exports = {
   calculateWaves,
   getRunnableTasks,
   formatTaskSummary,
+  syncMarkdownTickets,
   getTasksFilePath
 };
 
@@ -325,8 +394,13 @@ if (require.main === module) {
       }
       break;
     }
+    case 'sync': {
+      const res = syncMarkdownTickets(targetDir);
+      console.log(`Synchronized ${res.synced} ticket(s) from .scratch into tasks.json.`);
+      break;
+    }
     default:
-      console.log('Commands: summary, list, waves, next, add, update, verify');
+      console.log('Commands: summary, list, waves, next, add, update, verify, sync');
       break;
   }
 }

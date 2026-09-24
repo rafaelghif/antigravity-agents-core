@@ -434,7 +434,33 @@ function reviewDiff(diffText, workspaceDir = process.cwd()) {
         });
       }
 
-      // 3. Ponytail & Production Realism Axis
+      // 3. Architecture & Seam Integrity Axis
+      if (!isTest && /(?:^|\/)(?:domain|core|entities|usecases)\//i.test(currentFile)) {
+        if (/(?:from|require\s*\()\s*['"](?:express|fastify|koa|axios|pg|mysql|mysql2|sqlite3|typeorm|prisma|mongoose|redis|ioredis)['"]/i.test(addedContent)) {
+          findings.push({
+            axis: 'Architecture',
+            severity: 'error',
+            file: currentFile,
+            line: lineNumber,
+            message: 'Hexagonal/Clean Architecture violation: Domain core must remain pure and cannot import infrastructure or database drivers.',
+            suggestion: 'Define a port interface in domain and implement it inside an infrastructure adapter.'
+          });
+        }
+      }
+
+      // 4. Logic & Numerical Safety Axis
+      if (!isTest && /\b(?:netPrice|totalPrice|unitPrice|accountBalance|transactionAmount)\s*[:=]\s*[0-9]+\.[0-9]+/i.test(addedContent)) {
+        findings.push({
+          axis: 'Logic',
+          severity: 'warning',
+          file: currentFile,
+          line: lineNumber,
+          message: 'Floating-point literal assigned to currency/money identifier.',
+          suggestion: 'Use integer minor units (e.g. cents) or decimal library to prevent IEEE-754 precision errors.'
+        });
+      }
+
+      // 5. Ponytail & Production Realism Axis
       if (!isTest) {
         for (const stub of DUMMY_STUB_PATTERNS) {
           if (stub.pattern.test(addedContent)) {

@@ -29,12 +29,20 @@ An agent must **never guess or assume** the language, framework, dependencies, o
 Before adding or restructuring files, map the repository's architectural structure:
 
 - **Classify Architecture**:
-  - **Hexagonal / Clean Architecture** (`domain/`, `ports/`, `adapters/`, `infrastructure/`): Domain entities and use cases must remain 100% pure; they must NEVER import database, HTTP, or infrastructure packages.
-  - **Modular Deep-Seam** (`internal/`, `pkg/`, `modules/`, `packages/`): Each module must expose a narrow public interface hiding internal complexity. Callers cross at seams.
-  - **Layered MVC** (`controllers/`, `services/`, `models/`, `views/`): Unidirectional flow from controller to service to model. Never query database directly from controllers or views.
+  - **Hexagonal / Clean Architecture** (`domain/`, `ports/`, `adapters/`, `infrastructure/`):
+    - Domain Core (Entities, Value Objects, Aggregates) must remain 100% pure. They must NEVER import database drivers, HTTP frameworks, or cloud SDKs.
+    - Application Use Cases orchestrate domain models and communicate with external resources exclusively via Inbound/Outbound Port interfaces.
+    - Adapters implement Port interfaces (e.g. `PostgresOrderRepository` implements `OrderRepositoryPort`).
+  - **Modular Deep-Seam** (`internal/`, `pkg/`, `modules/`, `packages/`):
+    - Each module must expose a narrow public interface hiding internal complexity. Callers cross strictly at defined seams.
+    - Internal implementations (`internal/`, `private/`) must never be imported across package boundaries.
+  - **Layered MVC** (`controllers/`, `services/`, `models/`, `views/`):
+    - Unidirectional flow from controller to service to model. Never query database directly from controllers or views.
 - **Dependency Direction & Seam Integrity**:
-  - Dependencies must point inward toward the domain or higher-level policy.
-  - Ban cyclic dependencies between modules or packages.
+  - Dependencies must point strictly inward toward the domain or higher-level business policy.
+  - **Zero Cyclic Dependencies**: Ban circular imports between modules or packages (`A -> B -> A`).
+  - **Information Hiding**: Never leak database representations (ActiveRecord models, SQL rows, ORM entities) or raw HTTP payloads across module seams. Return pure domain types.
+  - **Command-Query Separation (CQS)**: Mutating commands must not return query entities; queries must remain pure without side effects.
   - Evaluate module depth: a module must offer substantial implementation leverage behind a minimal interface. Eliminate shallow pass-through wrappers.
 
 ---

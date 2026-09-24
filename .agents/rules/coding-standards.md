@@ -96,3 +96,22 @@ Unverified code is considered incomplete and broken by default. Every non-trivia
   - Eliminate shallow pass-through classes and wrappers that do nothing except delegate calls.
 - **Strict Dependency Direction**:
   - Core domain logic and business entities must remain 100% pure and independent of database schemas, HTTP frameworks, or cloud SDKs.
+
+---
+
+## 6. Robust Business Logic & State Invariant Engineering
+
+World-class engineering requires bulletproof domain logic, exhaustive boundary coverage, and defensive state management:
+
+- **Type-Driven Design (Make Illegal States Unrepresentable)**:
+  - Model domain states with Discriminated Unions / Sum Types rather than optional fields across one giant bag of state.
+  - Ban boolean flag clusters (`isPending`, `isProcessing`, `isCompleted` where impossible states can coexist).
+  - Encapsulate invariants in value objects or entity factory constructors. If state is invalid, fail at instantiation.
+- **Idempotency & Concurrency Safety**:
+  - Every mutating operation (payment processing, inventory decrement, state transitions) must support idempotency keys to guarantee safe client retries.
+  - Guard against race conditions using atomic operations (`UPDATE ... WHERE version = :expected`), optimistic concurrency tokens, or serializable locks.
+- **Exhaustive Boundary & Temporal Precision**:
+  - Verify boundary conditions: zero values, empty collections, negative quantities, boundary offsets.
+  - Temporal invariants: Always store and compute timestamps in UTC / ISO-8601; apply timezone conversions only at presentation seams.
+  - Monetary precision: Never use IEEE-754 binary floats for currency calculations; use integer minor units (cents) or arbitrary-precision decimal representations.
+

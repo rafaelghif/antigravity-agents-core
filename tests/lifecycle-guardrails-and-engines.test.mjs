@@ -167,6 +167,37 @@ test('task-orchestrator computes DAG topological waves and handles dependencies'
     const verifyFail = taskOrchestrator.verifyTask(tempDir, 'T-F');
     assert.equal(verifyFail.success, false);
     assert.equal(verifyFail.task.status, 'blocked');
+
+    // Markdown ticket sync test
+    const featureIssuesDir = path.join(tempDir, '.scratch', 'cart-checkout', 'issues');
+    fs.mkdirSync(featureIssuesDir, { recursive: true });
+    fs.writeFileSync(path.join(featureIssuesDir, '01-cart-schema.md'), `# 01: Cart Schema
+**What to build:** Cart schema definition
+**Seam under test:** src/cart.js
+**Verification command:** node -e "process.exit(0)"
+**Blast radius & Scope:** src/cart.js
+**Blocked by:** None
+**Status:** ready-for-agent
+
+- [ ] Cart schema validates item count
+- [ ] Cart rejects negative quantities
+`);
+    fs.writeFileSync(path.join(featureIssuesDir, '02-cart-api.md'), `# 02: Cart API
+**What to build:** Cart checkout endpoint
+**Verification command:** node -e "process.exit(0)"
+**Blocked by:** 01
+**Status:** ready-for-agent
+`);
+    const syncRes = taskOrchestrator.syncMarkdownTickets(tempDir);
+    assert.equal(syncRes.synced, 2);
+    const syncedTasks = taskOrchestrator.loadTasks(tempDir);
+    const task01 = syncedTasks.tasks.find(t => t.id === '01');
+    assert.ok(task01);
+    assert.equal(task01.title, 'Cart Schema');
+    assert.equal(task01.verificationCmd, 'node -e "process.exit(0)"');
+    const task02 = syncedTasks.tasks.find(t => t.id === '02');
+    assert.ok(task02);
+    assert.deepEqual(task02.dependsOn, ['01']);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -209,6 +240,18 @@ test('code-analyzer accurately computes cyclomatic complexity and deep module ra
 `;
     const review = codeAnalyzer.reviewDiff(diff);
     assert.ok(review.errors >= 2, `Expected >= 2 errors in diff, got ${review.errors}`);
+
+    // Architecture and Logic checks
+    const archDiff = `
+--- a/domain/order.js
++++ b/domain/order.js
+@@ -1,2 +1,3 @@
++const pg = require("pg");
++const totalPrice = 19.99;
+`;
+    const archReview = codeAnalyzer.reviewDiff(archDiff);
+    assert.ok(archReview.findings.some(f => f.axis === 'Architecture' && f.severity === 'error'));
+    assert.ok(archReview.findings.some(f => f.axis === 'Logic' && f.severity === 'warning'));
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

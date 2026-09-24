@@ -618,8 +618,13 @@ function runTasks() {
       }
       break;
     }
+    case 'sync': {
+      const res = taskOrchestrator.syncMarkdownTickets(target);
+      console.log(`✅ Synchronized ${res.synced} ticket(s) from .scratch into .scratch/tasks.json`);
+      break;
+    }
     default:
-      console.log('Commands: aac tasks [summary|list|waves|next|add|update|verify]');
+      console.log('Commands: aac tasks [summary|list|waves|next|add|update|verify|sync]');
       break;
   }
 }

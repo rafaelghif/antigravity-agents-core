@@ -21,9 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Automated Code Reviewer & Complexity Analyzer (`code-analyzer.cjs`)**: Multi-axis diff reviewer (Standards, Security, Ponytail) and complexity analyzer (LOC, cyclomatic branch complexity, Deep Module Ratio).
 - **Memory Engine & PreInvocation Rehydration (`memory-engine.cjs`)**: PreInvocation hook rehydrating cold starts from `.scratch/handoff.md` and maintaining snapshots in `.scratch/active_context.json`.
 - **Extended CLI Tooling (`bin/cli.mjs`)**: Added `aac scan`, `aac quality`, `aac review`, `aac analyze`, `aac tasks`, and `aac memory` subcommands with zero runtime dependencies.
-- **ADR 0003**: Recorded architecture decision for automated lifecycle guardrails and task & memory engine architecture.
-- **Installer Upgrade Switches**: Added `-Upgrade` switch to `install.ps1` and `--upgrade` flag to `install.sh` for standalone script upgrades.
-- **Comprehensive Upgrade Test Suite**: Added automated tests verifying CLI upgrade, `install.ps1 -Upgrade`, and `install.sh --upgrade` behavior, ensuring user domain models and credentials remain 100% byte-for-byte intact.
+- **PRD & Technical Specification Protocol (`to-spec/SKILL.md`)**: Upgraded to 10-point production PRD standard including problem statement, user personas & journeys, explicit anti-scope non-goals, functional Given/When/Then acceptance criteria, NFR latency/throughput budgets, Mermaid state machine diagrams, data schemas, error codes, and telemetry.
+- **Task Management & Markdown Sync Engine (`to-tickets`, `task-orchestrator.cjs`)**: Added automated synchronization of markdown tickets into `.scratch/tasks.json` via `aac tasks sync`, runnable automated verification commands (`verificationCmd`), blast radius boundaries, and seam tracking.
+- **Clean Architecture & Domain Purity Protocol (`architecture-and-flow.md`)**: Enforced Hexagonal/Clean Architecture boundaries prohibiting domain core from importing database/HTTP packages, zero cyclic dependencies, and Command-Query Separation (CQS).
+- **Codebase Design & Deep Modules (`codebase-design/SKILL.md`)**: Codified information hiding, eliminating leaked ORM/SQL representations, and maximizing implementation leverage behind minimal public seams.
+- **Robust Business Logic Standards (`coding-standards.md`)**: Added Section 6 on type-driven design ("make illegal states unrepresentable"), idempotency keys for mutations, optimistic locking, UTC temporal precision, and non-floating-point monetary representations.
+- **Architectural & Semantic Diff Linters (`code-analyzer.cjs`)**: Added checks in `reviewDiff` catching hexagonal architecture layer violations, financial floating-point arithmetic, and deep nesting.
 
 ### Changed
 - **Version Bump**: Bumped framework version to `5.2.0` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`), adhering strictly to SemVer 2.0.0 for backwards-compatible feature additions.

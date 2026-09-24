@@ -25,11 +25,14 @@ Welcome to **antigravity-agents**. Root instruction set unconditionally loaded i
     5. **Installed Dependency**: Use already installed packages.
     6. **One-Liner**: Express cleanly in one line if possible.
     7. **Minimal Diff**: Fix root cause, not symptoms.
-- **Techstack, Topology & Flow-First Verification**:
-  - Never treat code generically or apply blind templates. Inspect workspace manifests (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.), directory topology, module seams, and end-to-end data/execution flow before editing, reviewing, or planning tasks. Follow [architecture-and-flow.md](.agents/rules/architecture-and-flow.md).
-- **World-Class Craftsmanship (DRY, Tested, Human-Readable)**:
-  - Deliver senior staff engineer quality: intention-revealing naming, zero cryptic abbreviations, and flattened control flow with early guard clauses.
-  - Enforce strict DRY: reuse existing repository patterns, schemas, and standard library rungs before adding code.
+- **Techstack, Architecture & Deep Module Seams**:
+  - Never treat code generically. Inspect manifests (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.), directory topology, and execution flows before modifying code. Follow [architecture-and-flow.md](.agents/rules/architecture-and-flow.md).
+  - Preserve domain core purity (entities/use-cases never import database/HTTP frameworks). Design deep modules maximizing implementation leverage behind minimal public seams.
+- **Task Management & Vertical Slicing**:
+  - Break features into tracer-bullet vertical slices declaring dependency DAGs and automated verification commands (`verificationCmd`). Never mark tasks complete without test execution proof.
+- **World-Class Craftsmanship & Robust Logic**:
+  - Deliver staff engineer quality: intention-revealing naming, zero cryptic abbreviations, flattened control flow with early guard clauses, and strict DRY.
+  - Make illegal states unrepresentable via strong domain types. Enforce idempotency on mutations, UTC temporal safety, and race-condition guards.
   - Mandatory Automated Verification: Non-trivial code must leave companion tests behind; execute automated test suites before claiming completion. Follow [coding-standards.md](.agents/rules/coding-standards.md).
 - **Clickable Links (Mandatory)**:
   - In chat responses, every file path, directory, or code symbol mentioned MUST be formatted as a GitHub-style markdown link using the `file://` scheme with forward slashes and the absolute workspace path:
