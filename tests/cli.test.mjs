@@ -415,6 +415,36 @@ test('install.sh --upgrade updates framework files while preserving CONTEXT.md',
   }
 });
 
+test('distribution package contains zero hardcoded local machine paths', () => {
+  const tempBase = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-pack-test-'));
+  try {
+    const packOutput = execSync(`npm pack --pack-destination "${tempBase}"`, { cwd: rootDir, encoding: 'utf-8' }).trim();
+    const tarballName = packOutput.split('\n').pop().trim();
+    const tarballPath = path.join(tempBase, tarballName);
+    const unpackedDir = path.join(tempBase, 'unpacked');
+    fs.mkdirSync(unpackedDir);
+    execSync(`tar -xzf "${tarballPath}" -C "${unpackedDir}"`);
+    const packageDir = path.join(unpackedDir, 'package');
 
+    // Verify .env.example exists in the published package
+    assert.ok(fs.existsSync(path.join(packageDir, '.env.example')), '.env.example must be included in published npm package');
 
-
+    // Recursively check all files for hardcoded local machine paths
+    function scanDir(dir) {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          scanDir(fullPath);
+        } else if (entry.isFile() && !entry.name.endsWith('.tgz')) {
+          const content = fs.readFileSync(fullPath, 'utf-8');
+          assert.strictEqual(content.includes('/home/rafaelghifari'), false, `File ${fullPath} must not contain local machine home path`);
+          assert.strictEqual(content.includes('C:\\Users\\'), false, `File ${fullPath} must not contain Windows user profile path`);
+        }
+      }
+    }
+    scanDir(packageDir);
+  } finally {
+    fs.rmSync(tempBase, { recursive: true, force: true });
+  }
+});

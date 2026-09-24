@@ -61,6 +61,7 @@
     "CLAUDE.md",
     "CONTEXT.md",
     "skills-lock.json",
+    ".env.example",
     "install.ps1",
     "install.sh",
     "README.md",

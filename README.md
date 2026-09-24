@@ -566,6 +566,7 @@ npm test
 ✔ CLI upgrade updates framework rules and directives while strictly preserving user CONTEXT.md and secrets
 ﹣ install.ps1 -Upgrade updates framework files while preserving CONTEXT.md
 ✔ install.sh --upgrade updates framework files while preserving CONTEXT.md
+✔ distribution package contains zero hardcoded local machine paths
 ✔ security-scanner hook blocks dangerous commands and leaked secrets
 ✔ quality-guard hook enforces anti-dummy/mock policy on production files
 ✔ task-orchestrator computes DAG topological waves and handles dependencies
@@ -586,8 +587,8 @@ npm test
 ✔ gitignore correctly ignores .scratch contents and preserves .gitkeep
 ✔ session handoff template exists
 ✔ all 64 skills comply with Antigravity operational criteria
-ℹ tests 44
-ℹ pass 42
+ℹ tests 45
+ℹ pass 43
 ℹ fail 0
 ℹ skipped 2
 ```
