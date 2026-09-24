@@ -8,7 +8,7 @@
 *Engineered for Gemini 3.8 Flash (High) • Native Progressive Disclosure • Lifecycle Hooks • Multi-Agent Workspaces*
 
 <p align="center">
-  <a href="https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v5.3.0"><img src="https://img.shields.io/badge/version-5.3.0-blue.svg?style=for-the-badge&logo=git" alt="Version 5.3.0" /></a>
+  <a href="https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v5.3.1"><img src="https://img.shields.io/badge/version-5.3.1-blue.svg?style=for-the-badge&logo=git" alt="Version 5.3.1" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity_2.0-8A2BE2.svg?style=for-the-badge&logo=google" alt="Platform" /></a>
   <a href="https://antigravity.google/docs/rules-workflows"><img src="https://img.shields.io/badge/optimized_for-Gemini_3.8_Flash-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Gemini 3.8 Flash" /></a>
   <a href="#-autonomous-skills-suite"><img src="https://img.shields.io/badge/skills-64_verified-success.svg?style=for-the-badge" alt="64 Skills" /></a>
@@ -552,7 +552,7 @@ npm test
 ✔ SKILL.md closes the longitudinal outcome loop honestly
 ✔ SKILL.md never turns a behavioral finding into an imperative
 ✔ SKILL.md has no placeholders
-✔ CLI --version prints v5.3.0
+✔ CLI --version prints v5.3.1
 ✔ CLI --help prints usage banner
 ✔ CLI list displays skills count
 ✔ CLI doctor performs environment health checks

@@ -22,7 +22,7 @@ if [ "$UPGRADE" = true ]; then
   ACTION_TEXT="Upgrading"
 fi
 
-echo -e "\n🚀 ${ACTION_TEXT} AAC (Antigravity Agent Core v5.3.0)..."
+echo -e "\n🚀 ${ACTION_TEXT} AAC (Antigravity Agent Core v5.3.1)..."
 echo -e "Target: ${TARGET_DIR}\n"
 
 TEMP_ZIP="/tmp/aac-main.zip"

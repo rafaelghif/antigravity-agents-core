@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.1] - 2026-09-24
+
+### Fixed
+- **Publish Pipeline Idempotency (`.github/workflows/publish-package.yml`)**: Added pre-publish existence checks for both npm and GitHub Packages registries to prevent pipeline failure when publishing already-published versions.
+- **Node.js Runner Runtime (`.github/workflows/publish-package.yml`)**: Upgraded GitHub Actions workflow runner Node.js runtime from Node.js 20 to Node.js 22, resolving runner deprecation warnings.
+- **CI Test Suite Markdown Link Integrity (`tests/lifecycle-guardrails-and-engines.test.mjs`, `AGENTS.md`)**: Formatted gitignored private secrets (`.agents/mcp_config.json`) as code blocks to prevent broken-link false positives during CI checks in clean checkout environments.
+- **Git Push Operator Consent Override (`.agents/hooks/block-dangerous-git.cjs`, `.agents/hooks/security-scanner.cjs`)**: Added `AAC_ALLOW_GIT_PUSH=1` environment variable support to allow deliberate maintainer release pushes while keeping automated agent guardrails active.
+
 ## [5.3.0] - 2026-09-24
 
 ### Added
@@ -165,6 +173,7 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Comprehensive Antigravity Settings Sanitizer**: Implemented `sanitize_antigravity_settings` in `scripts/health_check.py`.
 - **Consumer Workspace Validation Scope**: Scoped global CLI settings validation in `scripts/validate.py` to framework development runs only.
 
+[5.3.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.5...v5.1.0
