@@ -20,7 +20,7 @@ Operational protocol prohibiting hallucinations, silent assumptions, dummy imple
 - **Mandatory Clarification Action**:
   - When information is missing from the above sources, you MUST ask the user.
   - Use the native `ask_question` tool for structured questions or choices.
-  - When planning or exploring complex design decisions, activate or recommend `/grill-me` ([grilling/SKILL.md](file:///D:/Project/antigravity-agents/.agents/skills/grilling/SKILL.md)) to explore the design tree round-by-round.
+  - When planning or exploring complex design decisions, activate or recommend `/grill-me` ([grilling/SKILL.md](../skills/grilling/SKILL.md)) to explore the design tree round-by-round.
   - Never proceed with code changes based on an unverified guess.
 
 ---

@@ -80,6 +80,10 @@ function synthesizeHandoff(rootDir, conversationId, transcriptPath, terminationR
     ? statusLines.map(l => `- \`${l}\``).join('\n')
     : '- Working tree clean (all changes committed)';
 
+  const normalizedRoot = rootDir.replace(/\\/g, '/');
+  const rootUri = normalizedRoot.startsWith('/') ? normalizedRoot : `/${normalizedRoot}`;
+  const skillsBase = `file://${rootUri}/.agents/skills`;
+
   const content = `# Automated Session Handoff
 
 **Timestamp**: ${now}  
@@ -110,9 +114,9 @@ ${diffStat ? `### Git Diff Stat:\n\`\`\`text\n${diffStat}\n\`\`\`\n` : ''}
 3. Resume the goal stated above.
 
 ## 5. Suggested Skills
-- [handoff](file:///D:/Project/antigravity-agents/.agents/skills/handoff/SKILL.md)
-- [diagnosing-bugs](file:///D:/Project/antigravity-agents/.agents/skills/diagnosing-bugs/SKILL.md)
-- [verify-and-stop](file:///D:/Project/antigravity-agents/.agents/skills/verify-and-stop/SKILL.md)
+- [handoff](${skillsBase}/handoff/SKILL.md)
+- [diagnosing-bugs](${skillsBase}/diagnosing-bugs/SKILL.md)
+- [verify-and-stop](${skillsBase}/verify-and-stop/SKILL.md)
 `;
 
   try {

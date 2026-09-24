@@ -8,10 +8,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const packageRoot = path.resolve(__dirname, '..');
+const require = createRequire(import.meta.url);
 
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
@@ -33,6 +35,12 @@ COMMANDS:
   audit         Audit workspace skills, rules, hooks, and integrity
   doctor        Diagnose environment, runtime, and configuration health
   list          List all available skills with triggers and descriptions
+  scan          Scan workspace for leaked credentials, secrets, and dangerous commands
+  quality       Check production code for anti-dummy/mock and realism violations
+  review        Review git diff against Standards, Security, and Ponytail principles
+  analyze       Analyze codebase metrics (LOC, cyclomatic complexity, deep module ratios)
+  tasks         Manage DAG task graph and calculate execution waves (.scratch/tasks.json)
+  memory        Manage Antigravity 5-tier memory, snapshots, and cold-start rehydration
   help          Show this help banner
 
 OPTIONS:
@@ -476,6 +484,179 @@ function runList() {
   console.log(`\nTotal: ${skills.length} skills available.\n`);
 }
 
+function runScan() {
+  const target = args[1] && !args[1].startsWith('-') ? args[1] : process.cwd();
+  const securityScanner = require('../.agents/hooks/security-scanner.cjs');
+  const issues = securityScanner.scanDirectory(target);
+  console.log(`\n🛡️ Security & Secret Scanner Report for: ${path.resolve(target)}\n`);
+  if (issues.length === 0) {
+    console.log('✅ No exposed secrets or credentials detected in workspace files.\n');
+  } else {
+    console.log(`⚠️ Detected ${issues.length} potential secret(s):\n`);
+    issues.forEach(iss => console.log(` - ❌ [${iss.type}] ${iss.file}:${iss.line}`));
+    console.log('\nRemediation: Store credentials in environment variables or .agents/mcp_config.json.\n');
+    process.exit(1);
+  }
+}
+
+function runQuality() {
+  const target = args[1] && !args[1].startsWith('-') ? args[1] : process.cwd();
+  const qualityGuard = require('../.agents/hooks/quality-guard.cjs');
+  const issues = qualityGuard.checkDirectory(target);
+  console.log(`\n💎 Quality Code & Production Integrity Report for: ${path.resolve(target)}\n`);
+  if (issues.length === 0) {
+    console.log('✅ 100% Production Realism: No fake tokens, dummy IDs, or incomplete TODOs found in production code.\n');
+  } else {
+    console.log(`⚠️ Detected ${issues.length} dummy/mock violation(s) in production code:\n`);
+    issues.forEach(iss => console.log(` - ❌ ${iss.file}:${iss.line} -> ${iss.description}`));
+    console.log('\nRemediation: Wire real types and concrete implementations. Move test fixtures to tests/ folder.\n');
+    process.exit(1);
+  }
+}
+
+function runReview() {
+  const target = args[1] && !args[1].startsWith('-') ? args[1] : process.cwd();
+  const codeAnalyzer = require('../.agents/hooks/code-analyzer.cjs');
+  const diff = codeAnalyzer.getGitDiff(target);
+  const review = codeAnalyzer.reviewDiff(diff, target);
+  console.log(codeAnalyzer.formatReviewReport(review));
+  if (review.errors > 0) {
+    process.exit(1);
+  }
+}
+
+function runAnalyze() {
+  const target = args[1] && !args[1].startsWith('-') ? args[1] : process.cwd();
+  const codeAnalyzer = require('../.agents/hooks/code-analyzer.cjs');
+  const resolved = path.resolve(target);
+  if (!fs.existsSync(resolved)) {
+    console.error(`Target path does not exist: ${resolved}`);
+    process.exit(1);
+  }
+  const stat = fs.statSync(resolved);
+  if (stat.isDirectory()) {
+    const summary = codeAnalyzer.analyzeDirectory(resolved);
+    console.log(`\n📊 Codebase Metrics for: ${summary.directory}`);
+    console.log(`   Files Scanned:          ${summary.totalFiles}`);
+    console.log(`   Total Code Lines:       ${summary.totalLOC}`);
+    console.log(`   Avg Complexity:         ${summary.avgComplexity}`);
+    console.log(`   Deep Modules (>=25):    ${summary.deepModules}`);
+    console.log(`   Shallow Modules (<10):   ${summary.shallowModules}\n`);
+    console.log('Top complex files:');
+    summary.files.slice(0, 10).forEach((f, idx) => {
+      console.log(`   ${idx + 1}. ${f.fileName.padEnd(25)} LOC: ${String(f.codeLines).padStart(5)} | Complexity: ${String(f.cyclomaticComplexity).padStart(3)} | Ratio: ${String(f.deepModuleRatio).padStart(4)} (${f.moduleDepth})`);
+    });
+    console.log('');
+  } else {
+    const f = codeAnalyzer.analyzeFile(resolved);
+    console.log(JSON.stringify(f, null, 2));
+  }
+}
+
+function runTasks() {
+  const taskOrchestrator = require('../.agents/hooks/task-orchestrator.cjs');
+  const subcmd = args[1] || 'summary';
+  const target = process.cwd();
+
+  switch (subcmd) {
+    case 'summary':
+    case 'list':
+      console.log(taskOrchestrator.formatTaskSummary(target));
+      break;
+    case 'waves': {
+      const data = taskOrchestrator.loadTasks(target);
+      const calc = taskOrchestrator.calculateWaves(data.tasks);
+      console.log(JSON.stringify(calc, null, 2));
+      break;
+    }
+    case 'next': {
+      const runnable = taskOrchestrator.getRunnableTasks(target);
+      console.log(JSON.stringify(runnable, null, 2));
+      break;
+    }
+    case 'add': {
+      const id = args[2];
+      const title = args[3];
+      const deps = args[4] ? args[4].split(',') : [];
+      if (!id || !title) {
+        console.error('Usage: aac tasks add <id> <title> [dep1,dep2]');
+        process.exit(1);
+      }
+      const added = taskOrchestrator.addTask(target, { id, title, dependsOn: deps });
+      console.log(`✅ Added task ${added.id}: ${added.title}`);
+      break;
+    }
+    case 'update': {
+      const id = args[2];
+      const status = args[3];
+      const notes = args[4] || '';
+      if (!id || !status) {
+        console.error('Usage: aac tasks update <id> <status> [notes]');
+        process.exit(1);
+      }
+      const updated = taskOrchestrator.updateTask(target, id, { status, notes });
+      if (updated) {
+        console.log(`✅ Updated task ${id} -> ${status}`);
+      } else {
+        console.error(`Task ${id} not found.`);
+        process.exit(1);
+      }
+      break;
+    }
+    case 'verify': {
+      const id = args[2];
+      if (!id) {
+        console.error('Usage: aac tasks verify <id>');
+        process.exit(1);
+      }
+      const res = taskOrchestrator.verifyTask(target, id);
+      if (res.success) {
+        console.log(`✅ Task ${id} verified successfully!`);
+      } else {
+        console.error(`❌ Task ${id} verification failed: ${res.message || res.output}`);
+        process.exit(1);
+      }
+      break;
+    }
+    default:
+      console.log('Commands: aac tasks [summary|list|waves|next|add|update|verify]');
+      break;
+  }
+}
+
+function runMemory() {
+  const memoryEngine = require('../.agents/hooks/memory-engine.cjs');
+  const subcmd = args[1] || 'status';
+  const target = process.cwd();
+
+  switch (subcmd) {
+    case 'status': {
+      const tiers = memoryEngine.getMemoryTiersStatus(target);
+      console.log(`\n🧠 Antigravity 5-Tier Memory Architecture Status:\n`);
+      for (const [key, val] of Object.entries(tiers)) {
+        const mark = val.ready ? '✅' : '⚠️';
+        console.log(`${mark} ${val.name}`);
+        console.log(`   └─ ${val.details}`);
+      }
+      console.log('');
+      break;
+    }
+    case 'snapshot': {
+      const snap = memoryEngine.snapshotContext(target);
+      console.log('✅ Context snapshot updated in .scratch/active_context.json');
+      console.log(JSON.stringify(snap, null, 2));
+      break;
+    }
+    case 'rehydrate': {
+      console.log(memoryEngine.rehydrateContext(target));
+      break;
+    }
+    default:
+      console.log('Commands: aac memory [status|snapshot|rehydrate]');
+      break;
+  }
+}
+
 switch (command) {
   case 'init':
     runInit();
@@ -491,6 +672,25 @@ switch (command) {
     break;
   case 'list':
     runList();
+    break;
+  case 'scan':
+    runScan();
+    break;
+  case 'quality':
+    runQuality();
+    break;
+  case 'review':
+    runReview();
+    break;
+  case 'analyze':
+    runAnalyze();
+    break;
+  case 'tasks':
+  case 'task':
+    runTasks();
+    break;
+  case 'memory':
+    runMemory();
     break;
   case 'version':
   case '-v':

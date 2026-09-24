@@ -5,6 +5,17 @@
 .scratch/*
 !.scratch/.gitkeep
 handoff.md
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.agents/brain/
+.agents/inbox/
+.agents/harness/
+.agents/state/
+.agents/*settings*.json
+opencode.json
+
 
 # Credentials, Secrets & Tokens (MCP, PATs, local environment)
 .agents/mcp_config.json

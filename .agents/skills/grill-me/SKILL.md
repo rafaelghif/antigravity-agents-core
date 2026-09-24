@@ -10,4 +10,4 @@ description: >-
 
 Conduct an intensive interview session to sharpen requirements and design before implementation.
 
-Follow the step-by-step decision-tree interview procedure defined in [grilling/SKILL.md](file:///D:/Project/antigravity-agents/.agents/skills/grilling/SKILL.md).
+Follow the step-by-step decision-tree interview procedure defined in [grilling/SKILL.md](../grilling/SKILL.md).

@@ -1,11 +1,7 @@
 {
-  "command": "powershell",
+  "command": "node",
   "args": [
-    "-NoProfile",
-    "-ExecutionPolicy",
-    "Bypass",
-    "-File",
-    "health-check.ps1"
+    "health-check.cjs"
   ],
   "restart_policy": "on-failure",
   "description": "Background repository health check and branch hygiene monitor"

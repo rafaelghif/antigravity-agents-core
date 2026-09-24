@@ -67,14 +67,14 @@ Offer **multi-context** (a root `CONTEXT-MAP.md` pointing to per-context `CONTEX
 
 Show the user a draft of:
 
-- The `## Agent skills` block to add to [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md)
+- The `## Agent skills` block to add to [AGENTS.md](../../../AGENTS.md)
 - The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
 
 Let them edit before writing.
 
 ### 4. Write
 
-Edit [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md) at the workspace root (creating it if it does not exist).
+Edit [AGENTS.md](../../../AGENTS.md) at the workspace root (creating it if it does not exist).
 
 If an `## Agent skills` block already exists in `AGENTS.md`, update its contents in-place rather than appending a duplicate. Don't overwrite user edits to the surrounding sections.
 

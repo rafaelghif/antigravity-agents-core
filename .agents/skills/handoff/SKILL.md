@@ -11,7 +11,7 @@ Write a handoff document summarizing the current conversation so a fresh agent c
 
 ## Structure & Template
 
-Follow the standardized structure defined in [handoff.template.md](file:///D:/Project/antigravity-agents/docs/templates/handoff.template.md):
+Follow the standardized structure defined in [handoff.template.md](../../../docs/templates/handoff.template.md):
 1. **Goal**: High-level goal of the session.
 2. **Current State**: Active Git branch, commit SHA, and working tree status (`git status`).
 3. **Completed Items**: Bulleted list of verified items finished in this session.

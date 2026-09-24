@@ -110,8 +110,8 @@ test('install.sh scaffolds workspace with zero package.json pollution', (t) => {
   if (isWindows) {
     const testDirName = 'aac-sh-' + Date.now();
     try {
-      const script = `/mnt/d/Project/antigravity-agents/install.sh`;
-      execSync(`wsl bash -c "mkdir -p /tmp/${testDirName} && cd /tmp/${testDirName} && ${script}"`, { encoding: 'utf-8' });
+      const wslScript = rootDir.replace(/^([a-zA-Z]):/, (_, drive) => `/mnt/${drive.toLowerCase()}`).replace(/\\/g, '/') + '/install.sh';
+      execSync(`wsl bash -c "mkdir -p /tmp/${testDirName} && cd /tmp/${testDirName} && ${wslScript}"`, { encoding: 'utf-8' });
       const checkFiles = execSync(`wsl bash -c "test -d /tmp/${testDirName}/.agents && test -d /tmp/${testDirName}/docs && test -f /tmp/${testDirName}/AGENTS.md && test -f /tmp/${testDirName}/GEMINI.md && test -f /tmp/${testDirName}/CLAUDE.md && test -f /tmp/${testDirName}/CONTEXT.md && test -f /tmp/${testDirName}/skills-lock.json && test -d /tmp/${testDirName}/.scratch && test -f /tmp/${testDirName}/.scratch/.gitkeep && test -f /tmp/${testDirName}/.gitignore && test ! -f /tmp/${testDirName}/package.json && echo ALL_PASSED"`, { encoding: 'utf-8' });
       assert.match(checkFiles, /ALL_PASSED/);
     } finally {
@@ -383,8 +383,8 @@ test('install.sh --upgrade updates framework files while preserving CONTEXT.md',
   if (isWindows) {
     const testDirName = 'aac-sh-up-' + Date.now();
     try {
-      const script = `/mnt/d/Project/antigravity-agents/install.sh`;
-      execSync(`wsl bash -c "mkdir -p /tmp/${testDirName} && cd /tmp/${testDirName} && ${script}"`, { encoding: 'utf-8' });
+      const wslScript = rootDir.replace(/^([a-zA-Z]):/, (_, drive) => `/mnt/${drive.toLowerCase()}`).replace(/\\/g, '/') + '/install.sh';
+      execSync(`wsl bash -c "mkdir -p /tmp/${testDirName} && cd /tmp/${testDirName} && ${wslScript}"`, { encoding: 'utf-8' });
       execSync(`wsl bash -c "echo 'CUSTOM_USER_CONTEXT' > /tmp/${testDirName}/CONTEXT.md"`, { encoding: 'utf-8' });
       const output = execSync(`wsl bash -c "cd /tmp/${testDirName} && ${script} --upgrade"`, { encoding: 'utf-8' });
       assert.match(output, /Upgrading AAC/);

@@ -30,6 +30,16 @@ test('memory-management rule exists with trigger: always_on', () => {
   assert.match(content, /Five-Tier Memory Hierarchy/, 'Rule must describe 5 tiers');
 });
 
+test('architecture-and-flow rule exists with trigger: always_on', () => {
+  const rulePath = path.join(rootDir, '.agents', 'rules', 'architecture-and-flow.md');
+  assert.ok(fs.existsSync(rulePath), 'architecture-and-flow.md must exist');
+  const content = fs.readFileSync(rulePath, 'utf-8');
+  assert.match(content, /trigger:\s*always_on/, 'Rule must specify trigger: always_on');
+  assert.match(content, /Mandatory Techstack & Toolchain Discovery/, 'Rule must enforce techstack discovery');
+  assert.match(content, /Codebase Topology & Dependency Seam Mapping/, 'Rule must enforce topology mapping');
+  assert.match(content, /End-to-End Execution & Data Flow Tracing/, 'Rule must enforce flow tracing');
+});
+
 test('CONTEXT.md living domain document exists at root', () => {
   const contextPath = path.join(rootDir, 'CONTEXT.md');
   assert.ok(fs.existsSync(contextPath), 'CONTEXT.md must exist');

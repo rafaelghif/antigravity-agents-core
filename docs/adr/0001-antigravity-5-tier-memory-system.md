@@ -12,9 +12,9 @@ Google Antigravity enforces strict context isolation per session. Relying on raw
 We adopt a **5-Tier Memory Architecture** within the repository:
 
 1. **Tier 1 (Ephemeral Working Context)**: Managed via Antigravity's progressive disclosure. Only skill names/descriptions load initially; detailed procedures load on-demand via `view_file`.
-2. **Tier 2 (Unconditional Directives)**: [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md) (<12k chars) and [.agents/rules/](file:///D:/Project/antigravity-agents/.agents/rules) with `trigger: always_on`.
-3. **Tier 3 (Domain & Architectural Knowledge)**: Living [CONTEXT.md](file:///D:/Project/antigravity-agents/CONTEXT.md) and immutable ADRs under `docs/adr/`.
-4. **Tier 4 (Session Bridge Handoff)**: Compact `.scratch/handoff.md` written by the exiting agent via [handoff](file:///D:/Project/antigravity-agents/.agents/skills/handoff/SKILL.md) and rehydrated via `@handoff.md` or `conversation://<id>`.
+2. **Tier 2 (Unconditional Directives)**: [AGENTS.md](../../AGENTS.md) (<12k chars) and [.agents/rules/](../../.agents/rules) with `trigger: always_on`.
+3. **Tier 3 (Domain & Architectural Knowledge)**: Living [CONTEXT.md](../../CONTEXT.md) and immutable ADRs under `docs/adr/`.
+4. **Tier 4 (Session Bridge Handoff)**: Compact `.scratch/handoff.md` written by the exiting agent via [handoff](../../.agents/skills/handoff/SKILL.md) and rehydrated via `@handoff.md` or `conversation://<id>`.
 5. **Tier 5 (External Task Graph)**: Issue trackers (Gitea / GitHub) via MCP as the durable source of truth.
 
 ## Consequences

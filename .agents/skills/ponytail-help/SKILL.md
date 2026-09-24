@@ -49,7 +49,7 @@ Resolution: prompt directive > rule configuration > `full`.
 
 ## Management
 
-Skills are maintained within your workspace in [`.agents/skills/`](file:///D:/Project/antigravity-agents/.agents/skills). Antigravity automatically discovers and applies workspace skills and rules.
+Skills are maintained within your workspace in [`.agents/skills/`](..). Antigravity automatically discovers and applies workspace skills and rules.
 
 ## More
 

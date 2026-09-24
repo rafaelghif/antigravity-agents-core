@@ -25,9 +25,15 @@ Welcome to **antigravity-agents**. Root instruction set unconditionally loaded i
     5. **Installed Dependency**: Use already installed packages.
     6. **One-Liner**: Express cleanly in one line if possible.
     7. **Minimal Diff**: Fix root cause, not symptoms.
+- **Techstack, Topology & Flow-First Verification**:
+  - Never treat code generically or apply blind templates. Inspect workspace manifests (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.), directory topology, module seams, and end-to-end data/execution flow before editing, reviewing, or planning tasks. Follow [architecture-and-flow.md](.agents/rules/architecture-and-flow.md).
+- **World-Class Craftsmanship (DRY, Tested, Human-Readable)**:
+  - Deliver senior staff engineer quality: intention-revealing naming, zero cryptic abbreviations, and flattened control flow with early guard clauses.
+  - Enforce strict DRY: reuse existing repository patterns, schemas, and standard library rungs before adding code.
+  - Mandatory Automated Verification: Non-trivial code must leave companion tests behind; execute automated test suites before claiming completion. Follow [coding-standards.md](.agents/rules/coding-standards.md).
 - **Clickable Links (Mandatory)**:
-  - Every file path, directory, or code symbol mentioned MUST be formatted as a GitHub-style markdown link using the `file://` scheme with forward slashes:
-    - Example: [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md) or [coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md)
+  - In chat responses, every file path, directory, or code symbol mentioned MUST be formatted as a GitHub-style markdown link using the `file://` scheme with forward slashes and the absolute workspace path:
+    - Example: [AGENTS.md](file:///<workspace>/AGENTS.md) or [coding-standards.md](file:///<workspace>/.agents/rules/coding-standards.md)
 - **Documentation & Comment Integrity**:
   - Never strip existing comments, licenses, or docstrings unless explicitly requested.
 
@@ -35,22 +41,23 @@ Welcome to **antigravity-agents**. Root instruction set unconditionally loaded i
 
 ## 2. Rule Hierarchy & Antigravity Customizations
 
-This repository strictly operates on **workspace-level configurations** within [.agents/](file:///D:/Project/antigravity-agents/.agents). Never write to or depend on machine-global configurations (`~/.gemini/config/`).
+This repository strictly operates on **workspace-level configurations** within [.agents/](.agents). Never write to or depend on machine-global configurations (`~/.gemini/config/`).
 
 When resolving behavior, strictly follow this precedence order:
 
-1. **Root Instructions**: [AGENTS.md](file:///D:/Project/antigravity-agents/AGENTS.md) (Highest workspace precedence, limit 12k chars).
-2. **Modular Rules** ([.agents/rules/](file:///D:/Project/antigravity-agents/.agents/rules), `trigger: always_on`):
-   - [production-integrity.md](file:///D:/Project/antigravity-agents/.agents/rules/production-integrity.md): Zero assumptions, anti-dummy/mock standard, and production realism.
-   - [ponytail.md](file:///D:/Project/antigravity-agents/.agents/rules/ponytail.md): 7-rung minimalist code ladder.
-   - [caveman.md](file:///D:/Project/antigravity-agents/.agents/rules/caveman.md): Fluff-free, compressed communication protocol.
-   - [coding-standards.md](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md): Code quality, SRP, error handling, and targeted replacement.
-   - [git-workflow.md](file:///D:/Project/antigravity-agents/.agents/rules/git-workflow.md): Conventional commits (`feat:`, `fix:`, `chore:`, etc.) and atomic commits.
-   - [memory-management.md](file:///D:/Project/antigravity-agents/.agents/rules/memory-management.md): 5-tier memory hierarchy and cross-session handoff protocol.
-3. **Lifecycle Hooks**: [.agents/hooks.json](file:///D:/Project/antigravity-agents/.agents/hooks.json) (PreToolUse, PostToolUse, PreInvocation, PostInvocation, Stop).
-4. **Workspace Plugins & Sidecars** ([.agents/plugins/](file:///D:/Project/antigravity-agents/.agents/plugins)): Packaged MCP servers and sidecars registered via [.agents/plugins.json](file:///D:/Project/antigravity-agents/.agents/plugins.json).
-5. **Workspace MCP Servers**: [.agents/mcp_config.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.json) (Project-scoped tool servers, gitignored; template in [.agents/mcp_config.example.json](file:///D:/Project/antigravity-agents/.agents/mcp_config.example.json)).
-6. **On-Demand Skills** ([.agents/skills/](file:///D:/Project/antigravity-agents/.agents/skills)): Progressive disclosure via `view_file` on `SKILL.md`. Registered in [.agents/skills.json](file:///D:/Project/antigravity-agents/.agents/skills.json).
+1. **Root Instructions**: [AGENTS.md](AGENTS.md) (Highest workspace precedence, limit 12k chars).
+2. **Modular Rules** ([.agents/rules/](.agents/rules), `trigger: always_on`):
+   - [architecture-and-flow.md](.agents/rules/architecture-and-flow.md): Techstack discovery, architectural topology, and end-to-end flow tracing.
+   - [production-integrity.md](.agents/rules/production-integrity.md): Zero assumptions, anti-dummy/mock standard, and production realism.
+   - [ponytail.md](.agents/rules/ponytail.md): 7-rung minimalist code ladder.
+   - [caveman.md](.agents/rules/caveman.md): Fluff-free, compressed communication protocol.
+   - [coding-standards.md](.agents/rules/coding-standards.md): Code quality, SRP, error handling, and targeted replacement.
+   - [git-workflow.md](.agents/rules/git-workflow.md): Conventional commits (`feat:`, `fix:`, `chore:`, etc.) and atomic commits.
+   - [memory-management.md](.agents/rules/memory-management.md): 5-tier memory hierarchy and cross-session handoff protocol.
+3. **Lifecycle Hooks**: [.agents/hooks.json](.agents/hooks.json) (PreToolUse, PostToolUse, PreInvocation, PostInvocation, Stop).
+4. **Workspace Plugins & Sidecars** ([.agents/plugins/](.agents/plugins)): Packaged MCP servers and sidecars registered via [.agents/plugins.json](.agents/plugins.json).
+5. **Workspace MCP Servers**: [.agents/mcp_config.json](.agents/mcp_config.json) (Project-scoped tool servers, gitignored; template in [.agents/mcp_config.example.json](.agents/mcp_config.example.json)).
+6. **On-Demand Skills** ([.agents/skills/](.agents/skills)): Progressive disclosure via `view_file` on `SKILL.md`. Registered in [.agents/skills.json](.agents/skills.json).
 
 ---
 
@@ -60,26 +67,26 @@ Do NOT wait for the user to invoke slash commands. Match user intent directly to
 
 | User Intent / Trigger | Skill to Activate |
 | :--- | :--- |
-| Ambiguous requirements, unclear design, or missing context | [`grill-me`](file:///D:/Project/antigravity-agents/.agents/skills/grill-me/SKILL.md) / `ask_question` |
-| Unsure which skill/workflow to use | [`ask-matt`](file:///D:/Project/antigravity-agents/.agents/skills/ask-matt/SKILL.md) |
-| Interview, pressure-test plan, or stress-test idea | [`grill-me`](file:///D:/Project/antigravity-agents/.agents/skills/grill-me/SKILL.md) / [`grilling`](file:///D:/Project/antigravity-agents/.agents/skills/grilling/SKILL.md) |
-| Stress-test plan while writing ADRs & glossary | [`grill-with-docs`](file:///D:/Project/antigravity-agents/.agents/skills/grill-with-docs/SKILL.md) |
-| Turn conversation into technical specification | [`to-spec`](file:///D:/Project/antigravity-agents/.agents/skills/to-spec/SKILL.md) |
-| Break plan/spec into dependency-linked tickets | [`to-tickets`](file:///D:/Project/antigravity-agents/.agents/skills/to-tickets/SKILL.md) |
-| Map large, multi-session efforts into milestones | [`wayfinder`](file:///D:/Project/antigravity-agents/.agents/skills/wayfinder/SKILL.md) |
-| Build features test-first (TDD red-green loop) | [`tdd`](file:///D:/Project/antigravity-agents/.agents/skills/tdd/SKILL.md) |
-| Implement features from tickets or specification | [`implement`](file:///D:/Project/antigravity-agents/.agents/skills/implement/SKILL.md) |
-| Implement whole spec with concurrent subagents | [`implement-spec`](file:///D:/Project/antigravity-agents/.agents/skills/implement-spec/SKILL.md) |
-| Hard bug, intermittent failure, or regression | [`diagnosing-bugs`](file:///D:/Project/antigravity-agents/.agents/skills/diagnosing-bugs/SKILL.md) |
-| Narrow, surgical bug fix without scope creep | [`surgical-patch`](file:///D:/Project/antigravity-agents/.agents/skills/surgical-patch/SKILL.md) |
-| Restructure code while preserving behavior | [`safe-refactor`](file:///D:/Project/antigravity-agents/.agents/skills/safe-refactor/SKILL.md) |
-| Audit whole repo or diff for over-engineering | [`ponytail-review`](file:///D:/Project/antigravity-agents/.agents/skills/ponytail-review/SKILL.md) / [`ponytail-audit`](file:///D:/Project/antigravity-agents/.agents/skills/ponytail-audit/SKILL.md) |
-| Review diff against spec and coding standards | [`code-review`](file:///D:/Project/antigravity-agents/.agents/skills/code-review/SKILL.md) |
-| Triage issues or pull requests | [`triage`](file:///D:/Project/antigravity-agents/.agents/skills/triage/SKILL.md) |
-| Prepare session handoff document | [`handoff`](file:///D:/Project/antigravity-agents/.agents/skills/handoff/SKILL.md) |
-| Dispatch background worker for session handoff | [`subagent-handoff`](file:///D:/Project/antigravity-agents/.agents/skills/subagent-handoff/SKILL.md) |
-| Set up git command interceptors/guardrails | [`git-guardrails`](file:///D:/Project/antigravity-agents/.agents/skills/git-guardrails/SKILL.md) |
-| Conduct post-session retrospective | [`retro`](file:///D:/Project/antigravity-agents/.agents/skills/retro/SKILL.md) |
+| Ambiguous requirements, unclear design, or missing context | [`grill-me`](.agents/skills/grill-me/SKILL.md) / `ask_question` |
+| Unsure which skill/workflow to use | [`ask-matt`](.agents/skills/ask-matt/SKILL.md) |
+| Interview, pressure-test plan, or stress-test idea | [`grill-me`](.agents/skills/grill-me/SKILL.md) / [`grilling`](.agents/skills/grilling/SKILL.md) |
+| Stress-test plan while writing ADRs & glossary | [`grill-with-docs`](.agents/skills/grill-with-docs/SKILL.md) |
+| Turn conversation into technical specification | [`to-spec`](.agents/skills/to-spec/SKILL.md) |
+| Break plan/spec into dependency-linked tickets | [`to-tickets`](.agents/skills/to-tickets/SKILL.md) |
+| Map large, multi-session efforts into milestones | [`wayfinder`](.agents/skills/wayfinder/SKILL.md) |
+| Build features test-first (TDD red-green loop) | [`tdd`](.agents/skills/tdd/SKILL.md) |
+| Implement features from tickets or specification | [`implement`](.agents/skills/implement/SKILL.md) |
+| Implement whole spec with concurrent subagents | [`implement-spec`](.agents/skills/implement-spec/SKILL.md) |
+| Hard bug, intermittent failure, or regression | [`diagnosing-bugs`](.agents/skills/diagnosing-bugs/SKILL.md) |
+| Narrow, surgical bug fix without scope creep | [`surgical-patch`](.agents/skills/surgical-patch/SKILL.md) |
+| Restructure code while preserving behavior | [`safe-refactor`](.agents/skills/safe-refactor/SKILL.md) |
+| Audit whole repo or diff for over-engineering | [`ponytail-review`](.agents/skills/ponytail-review/SKILL.md) / [`ponytail-audit`](.agents/skills/ponytail-audit/SKILL.md) |
+| Review diff against spec and coding standards | [`code-review`](.agents/skills/code-review/SKILL.md) |
+| Triage issues or pull requests | [`triage`](.agents/skills/triage/SKILL.md) |
+| Prepare session handoff document | [`handoff`](.agents/skills/handoff/SKILL.md) |
+| Dispatch background worker for session handoff | [`subagent-handoff`](.agents/skills/subagent-handoff/SKILL.md) |
+| Set up git command interceptors/guardrails | [`git-guardrails`](.agents/skills/git-guardrails/SKILL.md) |
+| Conduct post-session retrospective | [`retro`](.agents/skills/retro/SKILL.md) |
 
 ---
 
@@ -90,19 +97,21 @@ Antigravity operates with specific native tools. Never hallucinate Claude or non
 - **Reading Files & Skills**: Use `view_file` (with `StartLine` and `EndLine` for slices). Inspect `SKILL.md` directly.
 - **Editing Files**: Use `replace_file_content` for targeted single contiguous blocks. Never rewrite entire files for small edits.
 - **Creating Files**: Use `write_to_file` only for brand new files. Set `Overwrite: true` only when intentionally replacing.
-- **Searching & Codebase Inspection**: Use `run_command` with PowerShell (`Get-ChildItem`, `Select-String`, or `rg`).
+- **Searching & Codebase Inspection**: Use `run_command` with cross-platform tools (`git grep`, `rg`) or platform-native commands (`grep`/`find` on POSIX, `Select-String`/`Get-ChildItem` on PowerShell).
 - **Clarification & Decisions**: Use `ask_question` for interactive multiple-choice questions or requirement disambiguation.
 - **Subagents**: Use `invoke_subagent` (`TypeName: "research"` or `"self"`, `Workspace: "inherit"`, `Model: "flash"`). Monitor via `manage_subagents` and `send_message`.
 - **Background Tasks**: Manage background commands using `manage_task` (`list`, `kill`, `status`, `send_input`).
 
 ---
 
-## 5. Execution Environment (Windows / PowerShell)
+## 5. Execution Environment & Platform Portability
 
-- **Operating System**: Windows. Shell: **PowerShell**.
-- **Command Separators**: **NEVER use `&&`** (invalid in PowerShell 5.1). Use `;` to chain commands.
-- **Path Formatting**: Quote paths with spaces. Forward slashes are preferred in markdown links.
-- **Safety**: Never execute destructive commands (`rmdir /s`, hard reset, forced push) without consent.
+- **Host Environment**: Respect host OS and Shell dynamically specified in the system prompt (`linux`/`bash`, `darwin`/`zsh`, `windows`/`powershell` or `cmd`).
+- **Command Chaining**:
+  - In Windows PowerShell 5.1: **NEVER use `&&`** (invalid syntax). Use `;` to sequence commands.
+  - In POSIX Shells (bash/zsh on Linux/macOS): Standard command chaining (`&&`, `;`, `|`) is supported and preferred.
+- **Path Formatting**: Forward slashes are preferred in markdown links. Quote paths containing spaces.
+- **Safety**: Never execute destructive commands (`rm -rf /`, `rmdir /s`, `git reset --hard`, `git push --force`) without explicit consent.
 
 ---
 
@@ -118,19 +127,20 @@ Before declaring any task complete:
 ## 7. Strict Negative Constraints (Zero Exceptions)
 
 - **DO NOT** output conversational filler ("Sure thing!", "I understand", "Here is the result").
-- **DO NOT** use `&&` statement separators in terminal commands.
+- **DO NOT** use `&&` statement separators in Windows PowerShell 5.1 (use `;` instead).
 - **DO NOT** attempt to call a generic `Skill` tool; inspect `SKILL.md` using `view_file`.
 - **DO NOT** use Claude Code configurations (`.claude/`, `CLAUDE.md`); use Antigravity native (`.agents/`, `AGENTS.md`).
 - **DO NOT** write speculative code or premature abstractions; enforce the Ponytail ladder.
 - **DO NOT** assume, guess, or invent requirements, schemas, or domain logic. When in doubt, STOP and ask via `ask_question` or suggest `/grill-me`.
 - **DO NOT** write dummy, fake, mock, or hardcoded placeholder logic in production code (no `fakeData`, `dummy_id`, `TODO: implement later`, or stubbed responses).
-- **DO NOT** omit the `file://` scheme or forward slashes when printing file links.
+- **DO NOT** omit the `file://` scheme or forward slashes when printing file links in responses.
 
 ---
 
 ## 8. Agent Skills & Memory Architecture
 
-- **Issue Tracker**: GitHub (`gh` CLI / MCP) with Gitea MCP fallback. See [issue-tracker.md](file:///D:/Project/antigravity-agents/docs/agents/issue-tracker.md).
-- **Triage Labels**: Canonical 5-role triage vocabulary. See [triage-labels.md](file:///D:/Project/antigravity-agents/docs/agents/triage-labels.md).
-- **Domain Docs**: Single-context layout ([CONTEXT.md](file:///D:/Project/antigravity-agents/CONTEXT.md) and [docs/adr/](file:///D:/Project/antigravity-agents/docs/adr)). See [domain.md](file:///D:/Project/antigravity-agents/docs/agents/domain.md).
-- **Session Continuity**: Pre-exit checkpoint to `.scratch/handoff.md` via [handoff](file:///D:/Project/antigravity-agents/.agents/skills/handoff/SKILL.md); cold-start rehydrate via `@handoff.md`.
+- **Issue Tracker**: GitHub (`gh` CLI / MCP) with Gitea MCP fallback. See [issue-tracker.md](docs/agents/issue-tracker.md).
+- **Triage Labels**: Canonical 5-role triage vocabulary. See [triage-labels.md](docs/agents/triage-labels.md).
+- **Domain Docs**: Single-context layout ([CONTEXT.md](CONTEXT.md) and [docs/adr/](docs/adr)). See [domain.md](docs/agents/domain.md).
+- **Session Continuity**: Pre-exit checkpoint to `.scratch/handoff.md` via [handoff](.agents/skills/handoff/SKILL.md); cold-start rehydrate via `@handoff.md`.
+

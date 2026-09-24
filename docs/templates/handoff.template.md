@@ -28,4 +28,4 @@
 
 ## 6. Suggested Skills
 <!-- Skills the next agent should load via view_file -->
-- `[skill-name](file:///D:/Project/antigravity-agents/.agents/skills/<name>/SKILL.md)`
+- `[skill-name](file:///<workspace-path>/.agents/skills/<name>/SKILL.md)`

@@ -23,7 +23,7 @@ A **seam** is the public boundary you test at: the interface where you observe b
 
 Ask: "What's the public interface, and which seams should we test?"
 
-When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), inspect "[codebase-design](file:///D:/Project/antigravity-agents/.agents/skills/codebase-design/SKILL.md)" via `view_file` for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
+When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), inspect "[codebase-design](../codebase-design/SKILL.md)" via `view_file` for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
 
 ## Anti-patterns
 
@@ -33,6 +33,8 @@ When the shape of that interface is itself in question (how deep the module is, 
 
 ## Rules of the loop
 
-- **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
+- **Step 0: Techstack & Test Runner Discovery.** Inspect project manifests (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.) per [architecture-and-flow.md](../../rules/architecture-and-flow.md) to detect the native test framework (Jest, Vitest, Node test runner, pytest, go test, cargo test, JUnit). Adapt all test syntax and conventions strictly to the detected runner.
+- **Red before green.** Write the failing test first using `write_to_file` or `replace_file_content`, execute the test runner via `run_command`, and verify it fails for the expected reason. Then write only enough clean code to pass it. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One seam, one test, one minimal implementation per cycle.
-- **Refactoring is not part of the loop.** It belongs to the review stage (see the `code-review` skill), not the red → green implementation cycle.
+- **World-Class Craftsmanship & DRY.** Write intention-revealing test names, extract shared test setups cleanly, use independent expected values, and keep test fixtures strictly in test directories per [coding-standards.md](../../rules/coding-standards.md) and [production-integrity.md](../../rules/production-integrity.md).
+- **Refactoring is not part of the loop.** It belongs to the review stage (see [code-review](../code-review/SKILL.md) and [safe-refactor](../safe-refactor/SKILL.md)), not the red → green implementation cycle.

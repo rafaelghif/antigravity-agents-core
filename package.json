@@ -32,16 +32,29 @@
     "aac": "bin/cli.mjs"
   },
   "scripts": {
-    "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs .agents/skills/caveman-learn/tests/skill-file.test.mjs",
+    "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs tests/lifecycle-guardrails-and-engines.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs .agents/skills/caveman-learn/tests/skill-file.test.mjs",
     "audit": "node bin/cli.mjs audit",
     "doctor": "node bin/cli.mjs doctor",
-    "skills": "node bin/cli.mjs list"
+    "skills": "node bin/cli.mjs list",
+    "scan": "node bin/cli.mjs scan",
+    "quality": "node bin/cli.mjs quality",
+    "review": "node bin/cli.mjs review",
+    "analyze": "node bin/cli.mjs analyze",
+    "tasks": "node bin/cli.mjs tasks",
+    "memory": "node bin/cli.mjs memory"
   },
   "files": [
     "bin/",
     ".agents/",
     "!.agents/mcp_config.json",
     "!.agents/**/mcp_config.json",
+    "!.agents/brain/**",
+    "!.agents/inbox/**",
+    "!.agents/harness/**",
+    "!.agents/state/**",
+    "!.agents/*settings*.json",
+    "!**/*.pyc",
+    "!**/__pycache__/**",
     "docs/",
     "AGENTS.md",
     "GEMINI.md",

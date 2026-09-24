@@ -14,6 +14,46 @@
       }
     ]
   },
+  "security-scanner": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "run_command|write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/security-scanner.cjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "quality-guard": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/quality-guard.cjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "context-rehydration": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "node hooks/memory-engine.cjs",
+        "timeout": 5
+      }
+    ]
+  },
   "quality-gate": {
     "enabled": true,
     "Stop": [
@@ -21,6 +61,26 @@
         "type": "command",
         "command": "node hooks/verify-on-stop.cjs",
         "timeout": 15
+      }
+    ]
+  },
+  "code-review-gate": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node hooks/code-analyzer.cjs",
+        "timeout": 10
+      }
+    ]
+  },
+  "task-orchestration": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node hooks/task-orchestrator.cjs",
+        "timeout": 5
       }
     ]
   },

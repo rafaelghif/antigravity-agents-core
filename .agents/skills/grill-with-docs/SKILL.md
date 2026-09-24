@@ -11,5 +11,5 @@ description: >-
 Conduct an interview session that sharpens plans while maintaining domain documentation.
 
 Follow the combined procedures in:
-1. [grilling/SKILL.md](file:///D:/Project/antigravity-agents/.agents/skills/grilling/SKILL.md) for the iterative decision-tree interview.
-2. [domain-modeling/SKILL.md](file:///D:/Project/antigravity-agents/.agents/skills/domain-modeling/SKILL.md) to record new glossary terms in `CONTEXT.md` and document decisions in `docs/adr/`.
+1. [grilling/SKILL.md](../grilling/SKILL.md) for the iterative decision-tree interview.
+2. [domain-modeling/SKILL.md](../domain-modeling/SKILL.md) to record new glossary terms in `CONTEXT.md` and document decisions in `docs/adr/`.
