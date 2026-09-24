@@ -188,13 +188,24 @@ if (require.main === module) {
         ? path.resolve(payload.workspacePaths[0])
         : resolveWorkspace();
 
-      // PreInvocation lifecycle rehydration
-      if (payload.stepIdx !== undefined && payload.stepIdx <= 1) {
+      // Check if called as PreInvocation hook
+      const isPreInvocation = payload.invocationNum !== undefined || (payload.toolCall === undefined && payload.terminationReason === undefined);
+
+      if (isPreInvocation) {
         const scratchDir = path.join(rootDir, '.scratch');
         const handoffPath = path.join(scratchDir, 'handoff.md');
-        if (fs.existsSync(handoffPath)) {
-          process.stderr.write(`[memory-engine] Detected prior session handoff (.scratch/handoff.md).\n`);
+        const injectSteps = [];
+
+        // On initial turns, inject session continuity message if prior handoff exists
+        const isInitialTurn = (payload.invocationNum === 1 || payload.stepIdx === 0 || payload.initialNumSteps === 0 || payload.stepIdx === undefined);
+        if (isInitialTurn && fs.existsSync(handoffPath)) {
+          injectSteps.push({
+            ephemeralMessage: 'Session Continuity (Tier 4): Active session handoff detected at .scratch/handoff.md. Inspect .scratch/handoff.md via view_file to rehydrate previous progress and immediate next actions.'
+          });
         }
+
+        process.stdout.write(JSON.stringify({ injectSteps }));
+        process.exit(0);
       }
 
       // Stop hook snapshot consolidation
