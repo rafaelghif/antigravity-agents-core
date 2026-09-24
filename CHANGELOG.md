@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.0] - 2026-09-24
+
+### Added
+- **Master Skill Routing Directory & Quality-First Manifesto (`docs/agents/skill-directory.md`)**: Comprehensive master reference mapping all 64 workspace skills across 10 operational categories, with explicit trigger conditions, input requirements, output artifacts, and quality-first verification requirements.
+- **Universal PreInvocation Hook Contract (`memory-engine.cjs`)**: Conformed hook payload output to the official Antigravity specification returning `{ injectSteps: [{ ephemeralMessage: "..." }] }`, actively injecting session continuity reminders into agent context at invocation.
+- **Multi-Language Quality Guard Expansion (`quality-guard.cjs`)**: Added automated detection for `throw new Error("not implemented/todo/stub")` and placeholder API endpoints (`dummy.api`, `mock.api`, `placeholder.com`), intercepting stubs before filesystem writes.
+- **Cross-Platform CJS Guardrail (`.agents/skills/git-guardrails/scripts/block-dangerous-git.cjs`)**: Added dedicated CommonJS guardrail script to ensure consistent PreToolUse interception regardless of target repository's module type.
+
+### Changed
+- **MCP Configuration Template Parity (`.agents/mcp_config.example.json`)**: Synchronized example template to match `.agents/mcp_config.json` 100% byte-for-byte across all 6 services (`git`, `github`, `gitea`, `postgres`, `mysql`, `mssql`).
+- **Preamble & Instruction Budget (`AGENTS.md`)**: Streamlined root instructions to stay strictly within the 12,000-character budget (`11,965` characters) while integrating references to the master skill catalog.
+- **Documentation Overhaul (`README.md`)**: Updated documentation to version 5.3.0, expanding the skills matrix to cover all 10 categories, detailing all 8 lifecycle hook groups, reflecting 44 automated test assertions, and documenting full database MCP connection schemas.
+- **Version Bump**: Bumped version to `5.3.0` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation adhering to SemVer 2.0.0.
+
+### Fixed
+- **Git Guardrails Skill References**: Updated [`.agents/skills/git-guardrails/SKILL.md`](.agents/skills/git-guardrails/SKILL.md) to reference `block-dangerous-git.cjs` instead of `.js`.
+- **Internal Documentation Link Standardization**: Standardized repository markdown links in documentation files to relative paths, preventing machine-specific path failures.
+- **Test Double Isolation Standards (`tdd/mocking.md`)**: Added explicit governance banner prohibiting synthetic mocks, stubs, and in-memory simulated stores in production code paths (`src/`, `app/`, `lib/`).
+
 ## [5.2.0] - 2026-09-24
 
 ### Added
@@ -144,6 +163,11 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Comprehensive Antigravity Settings Sanitizer**: Implemented `sanitize_antigravity_settings` in `scripts/health_check.py`.
 - **Consumer Workspace Validation Scope**: Scoped global CLI settings validation in `scripts/validate.py` to framework development runs only.
 
+[5.3.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.2.0...v5.3.0
+[5.2.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.1.0...v5.2.0
+[5.1.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.5...v5.1.0
+[5.0.5]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.4...v5.0.5
+[5.0.4]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.3...v5.0.4
 [5.0.3]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.2...v5.0.3
 [5.0.2]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.1...v5.0.2
 [5.0.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.0.0...v5.0.1

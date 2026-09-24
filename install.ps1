@@ -11,7 +11,7 @@ param(
 $targetDir = Get-Location
 
 $actionText = if ($Upgrade) { "Upgrading" } else { "Installing" }
-Write-Host "`n🚀 $actionText AAC (Antigravity Agent Core v5.2.0)..." -ForegroundColor Cyan
+Write-Host "`n🚀 $actionText AAC (Antigravity Agent Core v5.3.0)..." -ForegroundColor Cyan
 Write-Host "Target: $targetDir`n" -ForegroundColor Gray
 
 $repoUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"

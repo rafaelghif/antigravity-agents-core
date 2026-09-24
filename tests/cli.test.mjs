@@ -8,9 +8,9 @@ import os from 'node:os';
 const rootDir = path.resolve('.');
 const cliPath = path.join(rootDir, 'bin', 'cli.mjs');
 
-test('CLI --version prints v5.2.0', () => {
+test('CLI --version prints v5.3.0', () => {
   const output = execSync(`node "${cliPath}" --version`, { encoding: 'utf-8' });
-  assert.match(output, /@rafaelghif\/aac-core v5\.2\.0/);
+  assert.match(output, /@rafaelghif\/aac-core v5\.3\.0/);
 });
 
 test('CLI --help prints usage banner', () => {
@@ -294,7 +294,7 @@ test('CLI upgrade updates framework rules and directives while strictly preservi
 
     // 2. Run upgrade
     const output = execSync(`node "${cliPath}" upgrade`, { cwd: tempDir, encoding: 'utf-8' });
-    assert.match(output, /Upgrading AAC \(Antigravity Agent Core\) to v5\.2\.0/);
+    assert.match(output, /Upgrading AAC \(Antigravity Agent Core\) to v5\.3\.0/);
     assert.match(output, /Preserved user domain context: CONTEXT\.md/);
     assert.match(output, /Preserved workspace secrets: \.agents\/mcp_config\.json/);
 
