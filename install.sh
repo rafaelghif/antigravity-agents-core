@@ -6,8 +6,23 @@
 
 set -e
 
+UPGRADE=false
+for arg in "$@"; do
+  case $arg in
+    --upgrade)
+      UPGRADE=true
+      shift
+      ;;
+  esac
+done
+
 TARGET_DIR="$(pwd)"
-echo -e "\n🚀 Installing AAC (Antigravity Agent Core v5.1.0)..."
+ACTION_TEXT="Installing"
+if [ "$UPGRADE" = true ]; then
+  ACTION_TEXT="Upgrading"
+fi
+
+echo -e "\n🚀 ${ACTION_TEXT} AAC (Antigravity Agent Core v5.2.0)..."
 echo -e "Target: ${TARGET_DIR}\n"
 
 TEMP_ZIP="/tmp/aac-main.zip"
@@ -49,26 +64,36 @@ if [ "$(cd "$TARGET_DIR" && pwd -P 2>/dev/null)" = "$(cd "$SOURCE_ROOT" && pwd -
 fi
 
 # 1. Copy .agents directory
-echo "📦 Copying .agents/ (rules, skills, hooks, plugins)..."
+echo "📦 Synchronizing .agents/ (rules, skills, hooks, plugins)..."
 cp -r "${SOURCE_ROOT}/.agents" "${TARGET_DIR}/"
 
 # 2. Copy docs directory (ADRs, tracker configs, templates)
 if [ -d "${SOURCE_ROOT}/docs" ]; then
-  echo "📚 Copying docs/ (ADRs, agents domain & tracker configs, templates)..."
+  echo "📚 Synchronizing docs/ (ADRs, agents domain & tracker configs, templates)..."
   cp -r "${SOURCE_ROOT}/docs" "${TARGET_DIR}/"
 fi
 
 # 3. Copy root context and directives (NEVER copy package.json)
-for file in AGENTS.md GEMINI.md CLAUDE.md CONTEXT.md skills-lock.json; do
+for file in AGENTS.md GEMINI.md CLAUDE.md skills-lock.json; do
   if [ -f "${SOURCE_ROOT}/${file}" ]; then
-    if [ ! -f "${TARGET_DIR}/${file}" ]; then
-      cp "${SOURCE_ROOT}/${file}" "${TARGET_DIR}/${file}"
-      echo "📄 Created ${file}"
+    if [ ! -f "${TARGET_DIR}/${file}" ] || [ "$UPGRADE" = true ]; then
+      cp -f "${SOURCE_ROOT}/${file}" "${TARGET_DIR}/${file}"
+      echo "📄 Synchronized ${file}"
     else
       echo "⏩ Skipped ${file} (already exists)"
     fi
   fi
 done
+
+# 4. Strictly protect user-owned CONTEXT.md
+if [ -f "${SOURCE_ROOT}/CONTEXT.md" ]; then
+  if [ ! -f "${TARGET_DIR}/CONTEXT.md" ]; then
+    cp "${SOURCE_ROOT}/CONTEXT.md" "${TARGET_DIR}/CONTEXT.md"
+    echo "📄 Created CONTEXT.md"
+  else
+    echo "🔒 Preserved user domain context: CONTEXT.md (never overwritten)"
+  fi
+fi
 
 # 4. Create .scratch directory
 mkdir -p "${TARGET_DIR}/.scratch"

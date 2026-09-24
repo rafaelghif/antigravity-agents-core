@@ -1,6 +1,6 @@
 {
   "name": "@rafaelghif/aac-core",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "Autonomous engineering framework for Google Antigravity",
   "publishConfig": {
     "access": "public"

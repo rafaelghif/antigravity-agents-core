@@ -8,7 +8,7 @@
 *Engineered for Gemini 3.8 Flash (High) • Native Progressive Disclosure • Lifecycle Hooks • Multi-Agent Workspaces*
 
 <p align="center">
-  <a href="https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v5.1.0"><img src="https://img.shields.io/badge/version-5.1.0-blue.svg?style=for-the-badge&logo=git" alt="Version 5.1.0" /></a>
+  <a href="https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v5.2.0"><img src="https://img.shields.io/badge/version-5.2.0-blue.svg?style=for-the-badge&logo=git" alt="Version 5.2.0" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity_2.0-8A2BE2.svg?style=for-the-badge&logo=google" alt="Platform" /></a>
   <a href="https://antigravity.google/docs/rules-workflows"><img src="https://img.shields.io/badge/optimized_for-Gemini_3.8_Flash-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Gemini 3.8 Flash" /></a>
   <a href="#-autonomous-skills-suite"><img src="https://img.shields.io/badge/skills-64_verified-success.svg?style=for-the-badge" alt="64 Skills" /></a>
@@ -89,6 +89,28 @@ irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/in
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash
 ```
+
+### Upgrading an Existing Workspace
+If you are already running an earlier version of AAC (e.g. `v5.0.3` or `v5.1.0`), safely update core rules, skills, plugins, and lifecycle hooks with zero risk to your custom domain work:
+
+```bash
+# Universal NPX (recommended):
+npx @rafaelghif/aac-core upgrade
+
+# Windows PowerShell:
+powershell -ExecutionPolicy Bypass -File install.ps1 -Upgrade
+
+# Linux / macOS:
+bash install.sh --upgrade
+```
+
+> [!TIP]
+> **Strict Upgrade Protections**:
+> - 🔒 **Domain Glossary & Architecture**: Existing [`CONTEXT.md`](CONTEXT.md) is strictly preserved and never overwritten.
+> - 🔒 **Workspace Secrets**: Existing [`.agents/mcp_config.json`](.agents/mcp_config.json) API tokens and MCP settings remain untouched.
+> - 🔄 **Smart Hooks Merging**: Updates framework lifecycle hooks while preserving all user-added custom hooks and toggle states (`enabled: false/true`).
+> - 📁 **Scratchpad Continuity**: Existing [`.scratch/`](.scratch) session handoffs are fully preserved.
+> - 🛡️ **Zero Pollution**: Guaranteed never to create or mutate `package.json` in your project.
 
 > [!IMPORTANT]
 > **Zero Package.json Pollution Guarantee**: The installer will **NEVER** create, overwrite, or mutate `package.json` in your target repository. It cleanly scaffolds `.agents/`, `AGENTS.md`, and `CONTEXT.md`, and appends ignore rules to your `.gitignore`.
@@ -400,7 +422,7 @@ npm test
 ✔ SKILL.md closes the longitudinal outcome loop honestly
 ✔ SKILL.md never turns a behavioral finding into an imperative
 ✔ SKILL.md has no placeholders
-✔ CLI --version prints v5.1.0
+✔ CLI --version prints v5.2.0
 ✔ CLI --help prints usage banner
 ✔ CLI list displays skills count
 ✔ CLI doctor performs environment health checks
@@ -411,6 +433,9 @@ npm test
 ✔ lifecycle hook verify-on-stop.cjs executes quality gate on model_stop
 ✔ lifecycle hook verify-on-stop.cjs returns continue when tests fail
 ✔ lifecycle hook handoff-reminder.cjs guards session continuity on model_stop
+✔ CLI upgrade updates framework rules and directives while strictly preserving user CONTEXT.md and secrets
+✔ install.ps1 -Upgrade updates framework files while preserving CONTEXT.md
+✔ install.sh --upgrade updates framework files while preserving CONTEXT.md
 ✔ AGENTS.md remains strictly below 12000 characters limit
 ✔ production-integrity rule exists with trigger: always_on
 ✔ memory-management rule exists with trigger: always_on
@@ -420,7 +445,7 @@ npm test
 ✔ gitignore correctly ignores .scratch contents and preserves .gitkeep
 ✔ session handoff template exists
 ✔ all 64 skills comply with Antigravity operational criteria
-ℹ pass 30, fail 0
+ℹ pass 33, fail 0
 ```
 
 ---

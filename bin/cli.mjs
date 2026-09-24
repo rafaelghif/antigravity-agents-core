@@ -16,7 +16,7 @@ const packageRoot = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
 
-const VERSION = '5.1.0';
+const VERSION = '5.2.0';
 
 function showHelp() {
   console.log(`
@@ -29,6 +29,7 @@ USAGE:
 
 COMMANDS:
   init          Scaffold AAC into current workspace (never touches package.json)
+  upgrade       Safely update framework rules, skills, and hooks (preserves CONTEXT.md & secrets)
   audit         Audit workspace skills, rules, hooks, and integrity
   doctor        Diagnose environment, runtime, and configuration health
   list          List all available skills with triggers and descriptions
@@ -133,6 +134,174 @@ function runInit() {
    1. Open in Antigravity IDE or Antigravity 2.0.
    2. Configure MCP tokens by copying .agents/mcp_config.example.json to .agents/mcp_config.json
    3. Run 'npx @rafaelghif/aac-core doctor' to verify readiness.
+`);
+}
+
+function runUpgrade() {
+  const targetDir = process.cwd();
+  console.log(`\n🔄 Upgrading AAC (Antigravity Agent Core) to v${VERSION} in:\n   ${targetDir}\n`);
+
+  if (path.resolve(targetDir) === path.resolve(packageRoot)) {
+    console.log('ℹ️ Current directory is the framework source repository itself (nothing to upgrade).');
+    return;
+  }
+
+  const hasAgents = fs.existsSync(path.join(targetDir, '.agents'));
+  const hasAgentsMd = fs.existsSync(path.join(targetDir, 'AGENTS.md'));
+
+  if (!hasAgents && !hasAgentsMd) {
+    console.warn('⚠️ No existing Antigravity workspace detected in this directory.');
+    console.log('👉 Run "npx @rafaelghif/aac-core init" to scaffold a fresh workspace first.\n');
+    return;
+  }
+
+  // 1. Upgrade .agents/ directory (rules, skills, plugins, hooks)
+  console.log('📦 Updating framework directives (.agents/rules, .agents/skills, .agents/plugins, .agents/hooks)...');
+
+  const subdirs = ['rules', 'skills', 'plugins', 'hooks'];
+  for (const sub of subdirs) {
+    const srcSub = path.join(packageRoot, '.agents', sub);
+    const dstSub = path.join(targetDir, '.agents', sub);
+    if (fs.existsSync(srcSub)) {
+      fs.cpSync(srcSub, dstSub, { recursive: true, force: true });
+      console.log(`   ✔ Synchronized .agents/${sub}/`);
+    }
+  }
+
+  // Update registry files in .agents/
+  const metaFiles = ['skills.json', 'plugins.json', 'mcp_config.example.json'];
+  for (const mf of metaFiles) {
+    const srcMf = path.join(packageRoot, '.agents', mf);
+    const dstMf = path.join(targetDir, '.agents', mf);
+    if (fs.existsSync(srcMf)) {
+      fs.copyFileSync(srcMf, dstMf);
+      console.log(`   ✔ Updated .agents/${mf}`);
+    }
+  }
+
+  // 2. Smart merge .agents/hooks.json
+  const sourceHooksConfig = path.join(packageRoot, '.agents', 'hooks.json');
+  const targetHooksConfig = path.join(targetDir, '.agents', 'hooks.json');
+  if (fs.existsSync(sourceHooksConfig)) {
+    let mergedHooks = {};
+    const frameworkHooks = JSON.parse(fs.readFileSync(sourceHooksConfig, 'utf-8'));
+    if (fs.existsSync(targetHooksConfig)) {
+      try {
+        const existingHooks = JSON.parse(fs.readFileSync(targetHooksConfig, 'utf-8'));
+        mergedHooks = { ...existingHooks };
+        for (const [groupName, groupDef] of Object.entries(frameworkHooks)) {
+          if (!mergedHooks[groupName]) {
+            mergedHooks[groupName] = groupDef;
+          } else {
+            const userEnabled = mergedHooks[groupName].enabled !== undefined ? mergedHooks[groupName].enabled : groupDef.enabled;
+            mergedHooks[groupName] = {
+              ...groupDef,
+              enabled: userEnabled
+            };
+          }
+        }
+      } catch {
+        console.warn('   ⚠️ Could not parse existing hooks.json, creating hooks.json.bak before updating.');
+        fs.copyFileSync(targetHooksConfig, targetHooksConfig + '.bak');
+        mergedHooks = frameworkHooks;
+      }
+    } else {
+      mergedHooks = frameworkHooks;
+    }
+    fs.writeFileSync(targetHooksConfig, JSON.stringify(mergedHooks, null, 2) + '\n', 'utf-8');
+    console.log('   ✔ Smart-merged .agents/hooks.json (custom hooks and user toggles preserved)');
+  }
+
+  // 3. Preserve credentials: .agents/mcp_config.json
+  const targetMcpConfig = path.join(targetDir, '.agents', 'mcp_config.json');
+  if (fs.existsSync(targetMcpConfig)) {
+    console.log('   🔒 Preserved workspace secrets: .agents/mcp_config.json');
+  }
+
+  // 4. Update docs directory (ADRs, templates, configs), preserving user ADRs
+  const sourceDocs = path.join(packageRoot, 'docs');
+  const targetDocs = path.join(targetDir, 'docs');
+  if (fs.existsSync(sourceDocs)) {
+    console.log('📚 Updating framework documentation (docs/agents, docs/templates, base ADRs)...');
+    fs.cpSync(sourceDocs, targetDocs, { recursive: true, force: true });
+    console.log('   ✔ Synchronized docs/ directory (custom user ADRs preserved)');
+  }
+
+  // 5. Update root framework files (AGENTS.md, GEMINI.md, CLAUDE.md, skills-lock.json)
+  const rootFrameworkFiles = ['AGENTS.md', 'GEMINI.md', 'CLAUDE.md', 'skills-lock.json'];
+  for (const rf of rootFrameworkFiles) {
+    const srcFile = path.join(packageRoot, rf);
+    const dstFile = path.join(targetDir, rf);
+    if (fs.existsSync(srcFile)) {
+      fs.copyFileSync(srcFile, dstFile);
+      console.log(`   ✔ Updated ${rf}`);
+    }
+  }
+
+  // 6. STRICT PRESERVATION: CONTEXT.md
+  const targetContext = path.join(targetDir, 'CONTEXT.md');
+  if (fs.existsSync(targetContext)) {
+    console.log('   🔒 Preserved user domain context: CONTEXT.md (never overwritten)');
+  } else {
+    const srcContext = path.join(packageRoot, 'CONTEXT.md');
+    if (fs.existsSync(srcContext)) {
+      fs.copyFileSync(srcContext, targetContext);
+      console.log('   📄 Created default CONTEXT.md (did not previously exist)');
+    }
+  }
+
+  // 7. Ensure .scratch directory is preserved
+  const scratchDir = path.join(targetDir, '.scratch');
+  if (!fs.existsSync(scratchDir)) {
+    fs.mkdirSync(scratchDir, { recursive: true });
+    fs.writeFileSync(path.join(scratchDir, '.gitkeep'), '# Ephemeral scratchpad directory\n');
+  }
+  console.log('   🔒 Preserved ephemeral scratchpad: .scratch/');
+
+  // 8. Update .gitignore with latest guardrails
+  const gitignorePath = path.join(targetDir, '.gitignore');
+  const gitignoreAdditions = [
+    '# Antigravity Runtime & Ephemeral State',
+    '.gemini/',
+    '*.log',
+    '*.tmp',
+    '.scratch/*',
+    '!.scratch/.gitkeep',
+    'handoff.md',
+    '',
+    '# Credentials & MCP Secrets',
+    '.agents/mcp_config.json',
+    '!.agents/mcp_config.example.json',
+    '.agents/plugins/**/mcp_config.json',
+    '!.agents/plugins/**/mcp_config.example.json'
+  ];
+
+  if (fs.existsSync(gitignorePath)) {
+    let gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8');
+    let modified = false;
+    for (const item of gitignoreAdditions) {
+      if (item && !gitignoreContent.includes(item)) {
+        gitignoreContent += `\n${item}`;
+        modified = true;
+      }
+    }
+    if (modified) {
+      fs.writeFileSync(gitignorePath, gitignoreContent.trim() + '\n', 'utf-8');
+      console.log('   🛡️ Synchronized .gitignore guardrails');
+    }
+  } else {
+    fs.writeFileSync(gitignorePath, gitignoreAdditions.join('\n') + '\n', 'utf-8');
+    console.log('   🛡️ Created .gitignore with Antigravity guardrails');
+  }
+
+  console.log(`
+✅ AAC upgrade to v${VERSION} complete!
+Summary of Protections:
+ - 🔒 CONTEXT.md preserved (custom domain model intact)
+ - 🔒 .agents/mcp_config.json preserved (API tokens and MCP configurations intact)
+ - 🔒 Custom hooks in .agents/hooks.json preserved
+ - 🔒 .scratch/ handoffs preserved
+ - 🔒 package.json untouched (zero pollution)
 `);
 }
 
@@ -310,6 +479,9 @@ function runList() {
 switch (command) {
   case 'init':
     runInit();
+    break;
+  case 'upgrade':
+    runUpgrade();
     break;
   case 'audit':
     runAudit();

@@ -3,10 +3,15 @@
 #   Local:  powershell -ExecutionPolicy Bypass -File install.ps1
 #   Remote: irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
 
+param(
+    [switch]$Upgrade
+)
+
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $targetDir = Get-Location
 
-Write-Host "`n🚀 Installing AAC (Antigravity Agent Core v5.1.0)..." -ForegroundColor Cyan
+$actionText = if ($Upgrade) { "Upgrading" } else { "Installing" }
+Write-Host "`n🚀 $actionText AAC (Antigravity Agent Core v5.2.0)..." -ForegroundColor Cyan
 Write-Host "Target: $targetDir`n" -ForegroundColor Gray
 
 $repoUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"
@@ -40,29 +45,71 @@ try {
         return
     }
 
+    # Backup existing hooks.json before .agents/ copy if upgrading
+    $existingHooks = $null
+    $targetHooksPath = Join-Path $targetDir ".agents\hooks.json"
+    if (Test-Path $targetHooksPath) {
+        try {
+            $existingHooks = Get-Content $targetHooksPath -Raw | ConvertFrom-Json
+        } catch { }
+    }
+
     # 1. Copy .agents directory
-    Write-Host "📦 Copying .agents/ (rules, skills, hooks, plugins)..." -ForegroundColor Yellow
+    Write-Host "📦 Synchronizing .agents/ (rules, skills, hooks, plugins)..." -ForegroundColor Yellow
     Copy-Item -Path (Join-Path $sourceRoot ".agents") -Destination $targetDir -Recurse -Force
+
+    # Smart-merge hooks.json if it existed
+    if ($existingHooks -and (Test-Path $targetHooksPath)) {
+        try {
+            $newHooks = Get-Content $targetHooksPath -Raw | ConvertFrom-Json
+            foreach ($prop in $newHooks.PSObject.Properties) {
+                if (-not $existingHooks.PSObject.Properties[$prop.Name]) {
+                    $existingHooks | Add-Member -MemberType NoteProperty -Name $prop.Name -Value $prop.Value
+                } else {
+                    $userEnabled = $existingHooks.($prop.Name).enabled
+                    $val = $prop.Value
+                    if ($null -ne $userEnabled) {
+                        $val.enabled = $userEnabled
+                    }
+                    $existingHooks.($prop.Name) = $val
+                }
+            }
+            $existingHooks | ConvertTo-Json -Depth 10 | Set-Content -Path $targetHooksPath -Encoding UTF8
+            Write-Host "🔄 Smart-merged .agents/hooks.json (retained custom hooks & user toggles)" -ForegroundColor Green
+        } catch { }
+    }
 
     # 2. Copy docs directory (ADRs, tracker configs, templates)
     $sourceDocs = Join-Path $sourceRoot "docs"
     if (Test-Path $sourceDocs) {
-        Write-Host "📚 Copying docs/ (ADRs, agents domain & tracker configs, templates)..." -ForegroundColor Yellow
+        Write-Host "📚 Synchronizing docs/ (ADRs, agents domain & tracker configs, templates)..." -ForegroundColor Yellow
         Copy-Item -Path $sourceDocs -Destination $targetDir -Recurse -Force
     }
 
     # 3. Copy root context and directives (NEVER COPY package.json)
-    $rootFiles = @("AGENTS.md", "GEMINI.md", "CLAUDE.md", "CONTEXT.md", "skills-lock.json")
+    $rootFiles = @("AGENTS.md", "GEMINI.md", "CLAUDE.md", "skills-lock.json")
     foreach ($file in $rootFiles) {
         $src = Join-Path $sourceRoot $file
         $dst = Join-Path $targetDir $file
         if (Test-Path $src) {
-            if (-not (Test-Path $dst)) {
+            if (-not (Test-Path $dst) -or $Upgrade) {
                 Copy-Item -Path $src -Destination $dst -Force
-                Write-Host "📄 Created $file" -ForegroundColor Green
+                Write-Host "📄 Synchronized $file" -ForegroundColor Green
             } else {
                 Write-Host "⏩ Skipped $file (already exists)" -ForegroundColor Gray
             }
+        }
+    }
+
+    # 4. Strictly protect user-owned CONTEXT.md
+    $srcContext = Join-Path $sourceRoot "CONTEXT.md"
+    $dstContext = Join-Path $targetDir "CONTEXT.md"
+    if (Test-Path $srcContext) {
+        if (-not (Test-Path $dstContext)) {
+            Copy-Item -Path $srcContext -Destination $dstContext -Force
+            Write-Host "📄 Created CONTEXT.md" -ForegroundColor Green
+        } else {
+            Write-Host "🔒 Preserved user domain context: CONTEXT.md (never overwritten)" -ForegroundColor Cyan
         }
     }
 

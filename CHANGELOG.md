@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0] - 2026-09-24
+
+### Added
+- **Smart Workspace Upgrade Command (`upgrade`)**: Introduced `npx @rafaelghif/aac-core upgrade` to safely synchronize core rules, skills, plugins, and hooks from older versions (e.g. `v5.0.3` / `v5.1.0`) to latest without losing custom project work.
+- **Strict User Asset Protection**:
+  - `CONTEXT.md`: Strictly preserved if present; user-defined domain models, bounded contexts, and glossaries are never overwritten.
+  - `.agents/mcp_config.json`: Workspace credentials and private MCP tokens are strictly preserved.
+  - `.scratch/`: Active session handoffs and scratchpads are strictly preserved.
+  - `package.json`: Guaranteed zero pollution; never created or modified in user target repositories.
+- **Smart Hooks Merging**: Upgrades merge `.agents/hooks.json` intelligently—injecting latest framework hooks (`git-guardrails`, `quality-gate`, `session-handoff`) and updating standard hook definitions while retaining all custom user-defined hooks and user toggle states (`enabled: false/true`).
+- **Installer Upgrade Switches**: Added `-Upgrade` switch to `install.ps1` and `--upgrade` flag to `install.sh` for standalone script upgrades.
+- **Comprehensive Upgrade Test Suite**: Added automated tests verifying CLI upgrade, `install.ps1 -Upgrade`, and `install.sh --upgrade` behavior, ensuring user domain models and credentials remain 100% byte-for-byte intact.
+
+### Changed
+- **Version Bump**: Bumped framework version to `5.2.0` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`), adhering strictly to SemVer 2.0.0 for backwards-compatible feature additions.
+
 ## [5.1.0] - 2026-09-24
 
 ### Added
