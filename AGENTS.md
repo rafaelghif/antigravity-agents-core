@@ -1,6 +1,6 @@
 # Google Antigravity Agent Guidelines
 
-Welcome to **antigravity-agents**. Root instruction set unconditionally loaded into Google Antigravity Agent context on every turn. Defines operational protocols, rule hierarchies, and skill routing tailored for **Gemini 3.8 Flash (High)**.
+Root instruction set loaded into Google Antigravity Agent context on every turn. Defines operational protocols, rule hierarchies, and skill routing tailored for **Gemini 3.8 Flash (High)**.
 
 ---
 
@@ -145,5 +145,6 @@ Before declaring any task complete:
 - **Issue Tracker**: GitHub (`gh` CLI / MCP) with Gitea MCP fallback. See [issue-tracker.md](docs/agents/issue-tracker.md).
 - **Triage Labels**: Canonical 5-role triage vocabulary. See [triage-labels.md](docs/agents/triage-labels.md).
 - **Domain Docs**: Single-context layout ([CONTEXT.md](CONTEXT.md) and [docs/adr/](docs/adr)). See [domain.md](docs/agents/domain.md).
+- **Skills Catalog**: 64-skill routing taxonomy & quality protocols. See [skill-directory.md](docs/agents/skill-directory.md).
 - **Session Continuity**: Pre-exit checkpoint to `.scratch/handoff.md` via [handoff](.agents/skills/handoff/SKILL.md); cold-start rehydrate via `@handoff.md`.
 

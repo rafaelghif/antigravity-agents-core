@@ -9,7 +9,7 @@ description: >-
 
 You don't remember every skill, so ask.
 
-A **flow** is a path through the skills. Most paths run along one **main flow**, and two **on-ramps** merge onto it. Everything else is standalone, or a vocabulary layer that runs underneath.
+A **flow** is a path through the skills. Most paths run along one **main flow**, and two **on-ramps** merge onto it. Everything else is standalone, or a vocabulary layer that runs underneath. For an exhaustive index of all 64 workspace skills across all 10 operational categories, consult [docs/agents/skill-directory.md](../../../docs/agents/skill-directory.md).
 
 ## The main flow: idea → ship
 

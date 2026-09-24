@@ -19,6 +19,8 @@ const DUMMY_STUB_PATTERNS = [
   { pattern: /\braise\s+NotImplementedError\b/, description: 'Python NotImplementedError stub' },
   { pattern: /\b(?:todo!|unimplemented!)\s*\(/, description: 'Rust todo!/unimplemented! macro stub' },
   { pattern: /\bpanic\s*\(\s*['"`](?:not implemented|todo)['"`]\s*\)/i, description: 'Go panic stub' },
+  { pattern: /throw\s+new\s+Error\s*\(\s*['"`](?:not implemented|todo|stub|placeholder)['"`]\s*\)/i, description: 'Hardcoded Error stub thrown' },
+  { pattern: /['"`]https?:\/\/(?:dummy\.api|mock\.api|placeholder\.com|api\.example\.com\/v[0-9]+\/(?:dummy|fake|mock))['"`]/i, description: 'Placeholder mock API URL' },
   { pattern: /(?:const|let|var)\s+(?:mock|fake|dummy)[A-Za-z0-9_]*\s*=\s*\[/i, description: 'Mock array fixture in production code' },
   { pattern: /(?:const|let|var)\s+(?:mock|fake|dummy)[A-Za-z0-9_]*\s*=\s*\{/i, description: 'Mock object fixture in production code' },
   { pattern: /\b(?:mockDatabase|fakeDatabase|inMemoryDb|dummyDb|mockStore|fakeStore)\b/i, description: 'Simulated in-memory database' },
