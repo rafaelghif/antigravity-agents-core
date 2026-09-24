@@ -78,7 +78,7 @@ function runInit() {
   }
 
   // 3. Copy root files
-  const rootFiles = ['AGENTS.md', 'GEMINI.md', 'CLAUDE.md', 'CONTEXT.md', 'skills-lock.json'];
+  const rootFiles = ['AGENTS.md', 'GEMINI.md', 'CLAUDE.md', 'CONTEXT.md', 'skills-lock.json', '.env.example'];
   for (const rf of rootFiles) {
     const srcFile = path.join(packageRoot, rf);
     const dstFile = path.join(targetDir, rf);
@@ -115,7 +115,10 @@ function runInit() {
     '.agents/mcp_config.json',
     '!.agents/mcp_config.example.json',
     '.agents/plugins/**/mcp_config.json',
-    '!.agents/plugins/**/mcp_config.example.json'
+    '!.agents/plugins/**/mcp_config.example.json',
+    '.env',
+    '.env.*',
+    '!.env.example'
   ];
 
   if (fs.existsSync(gitignorePath)) {
@@ -141,7 +144,8 @@ function runInit() {
 👉 Next steps:
    1. Open in Antigravity IDE or Antigravity 2.0.
    2. Configure MCP tokens by copying .agents/mcp_config.example.json to .agents/mcp_config.json
-   3. Run 'npx @rafaelghif/aac-core doctor' to verify readiness.
+   3. Configure environment variables by copying .env.example to .env
+   4. Run 'npx @rafaelghif/aac-core doctor' to verify readiness.
 `);
 }
 
@@ -235,8 +239,8 @@ function runUpgrade() {
     console.log('   ✔ Synchronized docs/ directory (custom user ADRs preserved)');
   }
 
-  // 5. Update root framework files (AGENTS.md, GEMINI.md, CLAUDE.md, skills-lock.json)
-  const rootFrameworkFiles = ['AGENTS.md', 'GEMINI.md', 'CLAUDE.md', 'skills-lock.json'];
+  // 5. Update root framework files (AGENTS.md, GEMINI.md, CLAUDE.md, skills-lock.json, .env.example)
+  const rootFrameworkFiles = ['AGENTS.md', 'GEMINI.md', 'CLAUDE.md', 'skills-lock.json', '.env.example'];
   for (const rf of rootFrameworkFiles) {
     const srcFile = path.join(packageRoot, rf);
     const dstFile = path.join(targetDir, rf);
@@ -281,7 +285,10 @@ function runUpgrade() {
     '.agents/mcp_config.json',
     '!.agents/mcp_config.example.json',
     '.agents/plugins/**/mcp_config.json',
-    '!.agents/plugins/**/mcp_config.example.json'
+    '!.agents/plugins/**/mcp_config.example.json',
+    '.env',
+    '.env.*',
+    '!.env.example'
   ];
 
   if (fs.existsSync(gitignorePath)) {
@@ -448,6 +455,16 @@ function runDoctor() {
         if (fs.existsSync(mcpPath)) return { ok: true, message: 'Active .agents/mcp_config.json found' };
         if (fs.existsSync(examplePath)) return { ok: true, message: 'Template mcp_config.example.json present (copy to mcp_config.json to activate)' };
         return { ok: false, message: 'Missing MCP configuration' };
+      }
+    },
+    {
+      name: 'Environment Config',
+      run: () => {
+        const envPath = path.join(process.cwd(), '.env');
+        const examplePath = path.join(process.cwd(), '.env.example');
+        if (fs.existsSync(envPath)) return { ok: true, message: 'Active .env found' };
+        if (fs.existsSync(examplePath)) return { ok: true, message: 'Template .env.example present (copy to .env to activate)' };
+        return { ok: false, message: 'Missing .env and .env.example' };
       }
     }
   ];

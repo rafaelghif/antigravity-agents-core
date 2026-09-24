@@ -48,6 +48,7 @@ function checkContent(content, filePath = '') {
     isTestFile(filePath) ||
     filePath.endsWith('.md') ||
     filePath.includes('/.scratch/') ||
+    filePath.includes('.example') ||
     filePath.endsWith('quality-guard.cjs') ||
     filePath.endsWith('code-analyzer.cjs')
   ) {

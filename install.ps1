@@ -87,7 +87,7 @@ try {
     }
 
     # 3. Copy root context and directives (NEVER COPY package.json)
-    $rootFiles = @("AGENTS.md", "GEMINI.md", "CLAUDE.md", "skills-lock.json")
+    $rootFiles = @("AGENTS.md", "GEMINI.md", "CLAUDE.md", "skills-lock.json", ".env.example")
     foreach ($file in $rootFiles) {
         $src = Join-Path $sourceRoot $file
         $dst = Join-Path $targetDir $file
@@ -138,6 +138,9 @@ handoff.md
 !.agents/mcp_config.example.json
 .agents/plugins/**/mcp_config.json
 !.agents/plugins/**/mcp_config.example.json
+.env
+.env.*
+!.env.example
 "@
 
     if (Test-Path $gitignorePath) {

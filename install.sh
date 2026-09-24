@@ -125,7 +125,7 @@ if [ -d "${SOURCE_ROOT}/docs" ]; then
 fi
 
 # 3. Copy root context and directives (NEVER copy package.json)
-for file in AGENTS.md GEMINI.md CLAUDE.md skills-lock.json; do
+for file in AGENTS.md GEMINI.md CLAUDE.md skills-lock.json .env.example; do
   if [ -f "${SOURCE_ROOT}/${file}" ]; then
     if [ ! -f "${TARGET_DIR}/${file}" ] || [ "$UPGRADE" = true ]; then
       cp -f "${SOURCE_ROOT}/${file}" "${TARGET_DIR}/${file}"
@@ -166,7 +166,10 @@ handoff.md
 .agents/mcp_config.json
 !.agents/mcp_config.example.json
 .agents/plugins/**/mcp_config.json
-!.agents/plugins/**/mcp_config.example.json"
+!.agents/plugins/**/mcp_config.example.json
+.env
+.env.*
+!.env.example"
 
 if [ -f "$GITIGNORE" ]; then
   if ! grep -q "\.scratch/\*" "$GITIGNORE"; then

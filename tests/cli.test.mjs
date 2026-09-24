@@ -35,6 +35,7 @@ test('CLI doctor performs environment health checks', () => {
   assert.match(output, /Workspace Scope/);
   assert.match(output, /Skills Integrity/);
   assert.match(output, /Hooks Integrity/);
+  assert.match(output, /Environment Config/);
 });
 
 test('CLI init never creates or overwrites package.json in target directory', () => {
@@ -48,6 +49,7 @@ test('CLI init never creates or overwrites package.json in target directory', ()
     assert.ok(fs.existsSync(path.join(tempDir, 'CLAUDE.md')), 'CLAUDE.md must be scaffolded');
     assert.ok(fs.existsSync(path.join(tempDir, 'CONTEXT.md')), 'CONTEXT.md must be scaffolded');
     assert.ok(fs.existsSync(path.join(tempDir, 'skills-lock.json')), 'skills-lock.json must be scaffolded');
+    assert.ok(fs.existsSync(path.join(tempDir, '.env.example')), '.env.example must be scaffolded');
     assert.ok(fs.existsSync(path.join(tempDir, '.scratch')), '.scratch/ must be scaffolded');
     assert.ok(fs.existsSync(path.join(tempDir, '.scratch', '.gitkeep')), '.scratch/.gitkeep must be scaffolded');
     assert.ok(fs.existsSync(path.join(tempDir, '.gitignore')), '.gitignore must be scaffolded');
@@ -73,6 +75,7 @@ test('install.ps1 scaffolds workspace with zero package.json pollution', (t) => 
     assert.ok(fs.existsSync(path.join(tempDir, 'CLAUDE.md')), 'CLAUDE.md must be scaffolded by install.ps1');
     assert.ok(fs.existsSync(path.join(tempDir, 'CONTEXT.md')), 'CONTEXT.md must be scaffolded by install.ps1');
     assert.ok(fs.existsSync(path.join(tempDir, 'skills-lock.json')), 'skills-lock.json must be scaffolded by install.ps1');
+    assert.ok(fs.existsSync(path.join(tempDir, '.env.example')), '.env.example must be scaffolded by install.ps1');
     assert.ok(fs.existsSync(path.join(tempDir, '.scratch')), '.scratch/ must be scaffolded by install.ps1');
     assert.ok(fs.existsSync(path.join(tempDir, '.scratch', '.gitkeep')), '.scratch/.gitkeep must be scaffolded by install.ps1');
     assert.ok(fs.existsSync(path.join(tempDir, '.gitignore')), '.gitignore must be scaffolded by install.ps1');
@@ -112,7 +115,7 @@ test('install.sh scaffolds workspace with zero package.json pollution', (t) => {
     try {
       const wslScript = rootDir.replace(/^([a-zA-Z]):/, (_, drive) => `/mnt/${drive.toLowerCase()}`).replace(/\\/g, '/') + '/install.sh';
       execSync(`wsl bash -c "mkdir -p /tmp/${testDirName} && cd /tmp/${testDirName} && ${wslScript}"`, { encoding: 'utf-8' });
-      const checkFiles = execSync(`wsl bash -c "test -d /tmp/${testDirName}/.agents && test -d /tmp/${testDirName}/docs && test -f /tmp/${testDirName}/AGENTS.md && test -f /tmp/${testDirName}/GEMINI.md && test -f /tmp/${testDirName}/CLAUDE.md && test -f /tmp/${testDirName}/CONTEXT.md && test -f /tmp/${testDirName}/skills-lock.json && test -d /tmp/${testDirName}/.scratch && test -f /tmp/${testDirName}/.scratch/.gitkeep && test -f /tmp/${testDirName}/.gitignore && test ! -f /tmp/${testDirName}/package.json && echo ALL_PASSED"`, { encoding: 'utf-8' });
+      const checkFiles = execSync(`wsl bash -c "test -d /tmp/${testDirName}/.agents && test -d /tmp/${testDirName}/docs && test -f /tmp/${testDirName}/AGENTS.md && test -f /tmp/${testDirName}/GEMINI.md && test -f /tmp/${testDirName}/CLAUDE.md && test -f /tmp/${testDirName}/CONTEXT.md && test -f /tmp/${testDirName}/skills-lock.json && test -f /tmp/${testDirName}/.env.example && test -d /tmp/${testDirName}/.scratch && test -f /tmp/${testDirName}/.scratch/.gitkeep && test -f /tmp/${testDirName}/.gitignore && test ! -f /tmp/${testDirName}/package.json && echo ALL_PASSED"`, { encoding: 'utf-8' });
       assert.match(checkFiles, /ALL_PASSED/);
     } finally {
       execSync(`wsl bash -c "rm -rf /tmp/${testDirName}"`, { stdio: 'pipe' });
@@ -128,6 +131,7 @@ test('install.sh scaffolds workspace with zero package.json pollution', (t) => {
       assert.ok(fs.existsSync(path.join(tempDir, 'CLAUDE.md')), 'CLAUDE.md must be scaffolded by install.sh');
       assert.ok(fs.existsSync(path.join(tempDir, 'CONTEXT.md')), 'CONTEXT.md must be scaffolded by install.sh');
       assert.ok(fs.existsSync(path.join(tempDir, 'skills-lock.json')), 'skills-lock.json must be scaffolded by install.sh');
+      assert.ok(fs.existsSync(path.join(tempDir, '.env.example')), '.env.example must be scaffolded by install.sh');
       assert.ok(fs.existsSync(path.join(tempDir, '.scratch')), '.scratch/ must be scaffolded by install.sh');
       assert.ok(fs.existsSync(path.join(tempDir, '.scratch', '.gitkeep')), '.scratch/.gitkeep must be scaffolded by install.sh');
       assert.ok(fs.existsSync(path.join(tempDir, '.gitignore')), '.gitignore must be scaffolded by install.sh');

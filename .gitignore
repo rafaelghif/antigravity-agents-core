@@ -24,6 +24,7 @@ opencode.json
 !.agents/plugins/**/mcp_config.example.json
 .env
 .env.*
+!.env.example
 *.local
 *.local.*
 *.pat
