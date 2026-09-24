@@ -188,7 +188,7 @@ antigravity-agents/
 │   ├── hooks/                         # Cross-platform hooks (block-dangerous-git.cjs, verify-on-stop.cjs)
 │   ├── plugins.json                   # Explicit workspace plugin registration
 │   ├── skills.json                    # Explicit workspace skills registration (64 skills)
-│   ├── mcp_config.example.json        # Sanitized template for Gitea and GitHub MCP
+│   ├── mcp_config.example.json        # Sanitized template for Git, GitHub, Gitea, and Database MCPs
 │   ├── plugins/                       # Workspace plugins packaging tools & sidecars
 │   │   └── workspace-integrations/    # Workspace integrations bundle
 │   ├── rules/                         # Workspace-level rules with 'trigger: always_on'
@@ -410,24 +410,50 @@ Copy `.agents/mcp_config.example.json` to `.agents/mcp_config.json` (gitignored)
 cp .agents/mcp_config.example.json .agents/mcp_config.json
 ```
 
-Configure local Gitea (stdio) and remote GitHub (SSE) connections:
+Configure Git, GitHub, Gitea, and database MCP connections:
 
 ```json
 {
   "mcpServers": {
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git"]
+    },
     "github": {
-      "serverUrl": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer YOUR_GITHUB_PAT"
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
     },
     "gitea": {
-      "command": "gitea-mcp",
-      "args": ["-t", "stdio"],
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "gitea/gitea-mcp:v0.1.0"],
       "env": {
-        "GITEA_HOST": "https://gitea.com",
-        "GITEA_ACCESS_TOKEN": "YOUR_GITEA_PAT"
+        "GITEA_HOST": "${GITEA_HOST}",
+        "GITEA_ACCESS_TOKEN": "${GITEA_TOKEN}"
       }
+    },
+    "postgres": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "npx -y @modelcontextprotocol/server-postgres postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_PG}/${DB_NAME}"
+      ]
+    },
+    "mysql": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "npx -y mcp-server-mysql mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_MYSQL}/${DB_NAME}"
+      ]
+    },
+    "mssql": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "npx -y @microsoft/mcp-sql-server \"Server=${DB_HOST},${DB_PORT_MSSQL};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};Encrypt=True;TrustServerCertificate=True;\""
+      ]
     }
   }
 }

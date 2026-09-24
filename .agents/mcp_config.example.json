@@ -1,21 +1,55 @@
 {
   "mcpServers": {
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git"
+      ]
+    },
     "github": {
-      "serverUrl": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer YOUR_GITHUB_PAT"
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
     },
     "gitea": {
-      "command": "gitea-mcp",
+      "command": "docker",
       "args": [
-        "-t",
-        "stdio"
+        "run",
+        "-i",
+        "--rm",
+        "gitea/gitea-mcp:v0.1.0"
       ],
       "env": {
-        "GITEA_HOST": "https://gitea.com",
-        "GITEA_ACCESS_TOKEN": "YOUR_GITEA_PAT"
+        "GITEA_HOST": "${GITEA_HOST}",
+        "GITEA_ACCESS_TOKEN": "${GITEA_TOKEN}"
       }
+    },
+    "postgres": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "npx -y @modelcontextprotocol/server-postgres postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_PG}/${DB_NAME}"
+      ]
+    },
+    "mysql": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "npx -y mcp-server-mysql mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_MYSQL}/${DB_NAME}"
+      ]
+    },
+    "mssql": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "npx -y @microsoft/mcp-sql-server \"Server=${DB_HOST},${DB_PORT_MSSQL};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};Encrypt=True;TrustServerCertificate=True;\""
+      ]
     }
   }
 }
