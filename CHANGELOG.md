@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.5] - 2026-09-24
+
+### Added
+- **Always-On Rules Documentation**: Comprehensive documentation of workspace always-on operational rules in [`README.md`](file:///D:/Project/antigravity-agents/README.md), including `production-integrity.md`, `ponytail.md`, `caveman.md`, `coding-standards.md`, `git-workflow.md`, and `memory-management.md`.
+
+### Changed
+- **CI/CD Dual Registry Automation**: Overhauled [`.github/workflows/publish-package.yml`](file:///D:/Project/antigravity-agents/.github/workflows/publish-package.yml) into a 3-job parallel pipeline to publish packages simultaneously to both npm public registry (`registry.npmjs.org`) and GitHub Packages (`npm.pkg.github.com`) upon release publication.
+- **Trigger De-duplication**: Removed duplicate `push: tags: ['v*']` trigger in GitHub Actions workflow to eliminate race conditions with the `release: [published]` trigger.
+- **Version Bump**: Bumped version to `5.0.5` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`).
+
 ## [5.0.4] - 2026-09-24
 
 ### Added
