@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.4] - 2026-09-24
+
+### Added
+- **Production Integrity & Zero-Assumption Protocol**: Implemented [`production-integrity.md`](file:///D:/Project/antigravity-agents/.agents/rules/production-integrity.md) (`trigger: always_on`) strictly prohibiting assumptions, hallucinations, dummy/fake mocks, and hardcoded placeholders in production code.
+- **Production Realism Standards**: Integrated production realism, zero-dummy policies, and test fixture isolation into [`coding-standards.md`](file:///D:/Project/antigravity-agents/.agents/rules/coding-standards.md) and [`AGENTS.md`](file:///D:/Project/antigravity-agents/AGENTS.md).
+- **Mandatory Clarification Routing**: Wired ambiguous requirements directly to `/grill-me` and native `ask_question` tool.
+
+### Changed
+- **Version Bump**: Bumped root framework `@rafaelghif/aac-core` to `v5.0.4` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`).
+- **Caveman Learn Skill Release Preparation**: Bumped [`.agents/skills/caveman-learn/package.json`](file:///D:/Project/antigravity-agents/.agents/skills/caveman-learn/package.json) to `v1.0.1` and configured `"publishConfig": { "access": "public" }` for public NPM registry release.
+
 ## [5.0.3] - 2026-09-15
 
 ### Added
