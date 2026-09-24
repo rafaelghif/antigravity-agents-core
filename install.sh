@@ -63,14 +63,65 @@ if [ "$(cd "$TARGET_DIR" && pwd -P 2>/dev/null)" = "$(cd "$SOURCE_ROOT" && pwd -
   exit 0
 fi
 
-# 1. Copy .agents directory
+# 1. Safely synchronize .agents/ directory
 echo "📦 Synchronizing .agents/ (rules, skills, hooks, plugins)..."
-cp -r "${SOURCE_ROOT}/.agents" "${TARGET_DIR}/"
+mkdir -p "${TARGET_DIR}/.agents"
+
+# Synchronize subdirectories
+for sub in rules skills hooks plugins; do
+  if [ -d "${SOURCE_ROOT}/.agents/${sub}" ]; then
+    mkdir -p "${TARGET_DIR}/.agents/${sub}"
+    cp -rf "${SOURCE_ROOT}/.agents/${sub}/"* "${TARGET_DIR}/.agents/${sub}/" 2>/dev/null || cp -rf "${SOURCE_ROOT}/.agents/${sub}" "${TARGET_DIR}/.agents/"
+    echo "   ✔ Synchronized .agents/${sub}/"
+  fi
+done
+
+# Synchronize registry files
+for mf in skills.json plugins.json mcp_config.example.json; do
+  if [ -f "${SOURCE_ROOT}/.agents/${mf}" ]; then
+    cp -f "${SOURCE_ROOT}/.agents/${mf}" "${TARGET_DIR}/.agents/${mf}"
+    echo "   ✔ Updated .agents/${mf}"
+  fi
+done
+
+# Smart-merge hooks.json if it exists
+if [ -f "${TARGET_DIR}/.agents/hooks.json" ] && [ -f "${SOURCE_ROOT}/.agents/hooks.json" ]; then
+  if command -v node >/dev/null 2>&1; then
+    node -e '
+      const fs = require("fs");
+      const srcFile = process.argv[1];
+      const dstFile = process.argv[2];
+      try {
+        const src = JSON.parse(fs.readFileSync(srcFile, "utf8"));
+        const dst = JSON.parse(fs.readFileSync(dstFile, "utf8"));
+        const merged = { ...dst };
+        for (const [k, v] of Object.entries(src)) {
+          if (!merged[k]) {
+            merged[k] = v;
+          } else {
+            const userEnabled = merged[k].enabled !== undefined ? merged[k].enabled : v.enabled;
+            merged[k] = { ...v, enabled: userEnabled };
+          }
+        }
+        fs.writeFileSync(dstFile, JSON.stringify(merged, null, 2) + "\n", "utf8");
+      } catch (e) {}
+    ' "${SOURCE_ROOT}/.agents/hooks.json" "${TARGET_DIR}/.agents/hooks.json"
+    echo "   🔄 Smart-merged .agents/hooks.json (retained custom hooks & user toggles)"
+  fi
+elif [ -f "${SOURCE_ROOT}/.agents/hooks.json" ]; then
+  cp -f "${SOURCE_ROOT}/.agents/hooks.json" "${TARGET_DIR}/.agents/hooks.json"
+fi
+
+# Strictly preserve credentials
+if [ -f "${TARGET_DIR}/.agents/mcp_config.json" ]; then
+  echo "   🔒 Preserved workspace secrets: .agents/mcp_config.json"
+fi
 
 # 2. Copy docs directory (ADRs, tracker configs, templates)
 if [ -d "${SOURCE_ROOT}/docs" ]; then
   echo "📚 Synchronizing docs/ (ADRs, agents domain & tracker configs, templates)..."
-  cp -r "${SOURCE_ROOT}/docs" "${TARGET_DIR}/"
+  mkdir -p "${TARGET_DIR}/docs"
+  cp -rf "${SOURCE_ROOT}/docs/"* "${TARGET_DIR}/docs/" 2>/dev/null || cp -rf "${SOURCE_ROOT}/docs" "${TARGET_DIR}/"
 fi
 
 # 3. Copy root context and directives (NEVER copy package.json)

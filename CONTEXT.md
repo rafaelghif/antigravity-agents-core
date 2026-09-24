@@ -20,7 +20,7 @@ Living domain document defining bounded contexts, core terminology, and architec
 ## 2. Bounded Contexts & File Structure
 
 ```
-D:\Project\antigravity-agents\
+<workspace-root>/
 ├── AGENTS.md                  # Root instructions (Highest workspace priority, <12k chars)
 ├── GEMINI.md                  # Pointer to AGENTS.md for compatibility
 ├── CONTEXT.md                 # Domain dictionary & architectural boundaries (this file)
@@ -47,5 +47,5 @@ D:\Project\antigravity-agents\
 
 1. **Caveman Principle**: Fluff-free, zero filler, immediate technical substance.
 2. **Ponytail Ladder**: YAGNI -> Reuse -> Stdlib -> Platform -> Dependency -> One-Liner -> Minimal Diff.
-3. **PowerShell Only**: Windows environment. Command chaining strictly via `;` (never `&&`).
-4. **Clickable Links**: All file paths and symbols formatted as `[Label](file:///D:/Project/...)` with forward slashes.
+3. **Host Platform Awareness**: Standard command chaining (`&&`, `;`) on POSIX bash/zsh; use `;` on Windows PowerShell 5.1 (never `&&`).
+4. **Clickable Links**: All file paths and symbols formatted as `[Label](file:///<workspace>/...)` with forward slashes.

@@ -13,9 +13,9 @@ If `.agents/hooks.json` binds directly to `powershell -File ...`, the execution 
 
 ## Decision
 
-We adopt **Standard Library Node.js Scripts** (`node hooks/<script>.js`) as the single, universal execution driver in `.agents/hooks.json`:
+We adopt **Standard Library Node.js Scripts** (`node hooks/<script>.cjs`) as the single, universal execution driver in `.agents/hooks.json`:
 
-1. **Universal Execution Runtime**: Node.js is universally present in all Antigravity agentic workspaces. Both `cmd /c node ...` and `sh -c node ...` execute identically without shell translation layers.
+1. **Universal Execution Runtime**: Node.js is universally present in all Antigravity agentic workspaces. Both `cmd /c node ...` and `sh -c node ...` execute identically without shell translation layers. Using `.cjs` guarantees reliable CommonJS execution across both ESM (`"type": "module"`) and CommonJS workspaces without package.json syntax conflicts.
 2. **Zero Dependencies**: All hook scripts rely solely on native Node.js standard modules (`node:fs`, `node:child_process`, `node:process`).
 3. **Reference Implementations**: We maintain `.ps1` (PowerShell) and `.sh` (POSIX sh) scripts alongside `.js` in `.agents/hooks/` for developers wanting to test or run hooks manually in their host shells.
 
