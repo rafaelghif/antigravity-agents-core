@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js Runtime
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Run Automated Test Suite
         run: npm test
@@ -32,11 +32,18 @@ jobs:
       - name: Setup Node.js Runtime
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish Package to npm
-        run: npm publish --access public
+        run: |
+          CURRENT_VER=$(node -p "require('./package.json').version")
+          PUBLISHED_VER=$(npm view @rafaelghif/aac-core version 2>/dev/null || echo "")
+          if [ "$CURRENT_VER" = "$PUBLISHED_VER" ]; then
+            echo "Version $CURRENT_VER is already published to npm registry. Skipping."
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.TOKEN }}
 
@@ -54,11 +61,18 @@ jobs:
       - name: Setup Node.js Runtime
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: 'https://npm.pkg.github.com'
           scope: '@rafaelghif'
 
       - name: Publish Package to GitHub Packages
-        run: npm publish --registry=https://npm.pkg.github.com
+        run: |
+          CURRENT_VER=$(node -p "require('./package.json').version")
+          PUBLISHED_VER=$(npm view @rafaelghif/aac-core version --registry=https://npm.pkg.github.com 2>/dev/null || echo "")
+          if [ "$CURRENT_VER" = "$PUBLISHED_VER" ]; then
+            echo "Version $CURRENT_VER is already published to GitHub Packages. Skipping."
+          else
+            npm publish --registry=https://npm.pkg.github.com
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_PAT || github.token }}
