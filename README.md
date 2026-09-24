@@ -8,7 +8,7 @@
 *Engineered for Gemini 3.8 Flash (High) • Native Progressive Disclosure • Lifecycle Hooks • Multi-Agent Workspaces*
 
 <p align="center">
-  <a href="https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v5.0.5"><img src="https://img.shields.io/badge/version-5.0.5-blue.svg?style=for-the-badge&logo=git" alt="Version 5.0.5" /></a>
+  <a href="https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v5.1.0"><img src="https://img.shields.io/badge/version-5.1.0-blue.svg?style=for-the-badge&logo=git" alt="Version 5.1.0" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity_2.0-8A2BE2.svg?style=for-the-badge&logo=google" alt="Platform" /></a>
   <a href="https://antigravity.google/docs/rules-workflows"><img src="https://img.shields.io/badge/optimized_for-Gemini_3.8_Flash-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Gemini 3.8 Flash" /></a>
   <a href="#-autonomous-skills-suite"><img src="https://img.shields.io/badge/skills-64_verified-success.svg?style=for-the-badge" alt="64 Skills" /></a>
@@ -324,6 +324,26 @@ Prevents terminating an agent session if automated tests fail:
 }
 ```
 
+### 3. Session Continuity & Auto-Handoff Guard (`Stop`)
+Ensures cross-session context continuity by automatically synthesizing a structured handoff document into `.scratch/handoff.md` whenever uncommitted code modifications are detected. 
+
+Crucially, **even when an agent hits token limits or step ceilings (`max_steps_exceeded`)** where conversational interaction is no longer possible, this hook executes natively in the host runtime, parsing `git status` and `transcript.jsonl` to persist the session goal, modified files, and next actions before exit.
+
+```json
+{
+  "session-handoff": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node hooks/handoff-reminder.cjs",
+        "timeout": 5
+      }
+    ]
+  }
+}
+```
+
 ---
 
 ## 🔌 Model Context Protocol (MCP)
@@ -380,7 +400,7 @@ npm test
 ✔ SKILL.md closes the longitudinal outcome loop honestly
 ✔ SKILL.md never turns a behavioral finding into an imperative
 ✔ SKILL.md has no placeholders
-✔ CLI --version prints v5.0.5
+✔ CLI --version prints v5.1.0
 ✔ CLI --help prints usage banner
 ✔ CLI list displays skills count
 ✔ CLI doctor performs environment health checks
@@ -390,6 +410,7 @@ npm test
 ✔ lifecycle hook block-dangerous-git.cjs blocks dangerous git commands
 ✔ lifecycle hook verify-on-stop.cjs executes quality gate on model_stop
 ✔ lifecycle hook verify-on-stop.cjs returns continue when tests fail
+✔ lifecycle hook handoff-reminder.cjs guards session continuity on model_stop
 ✔ AGENTS.md remains strictly below 12000 characters limit
 ✔ production-integrity rule exists with trigger: always_on
 ✔ memory-management rule exists with trigger: always_on
@@ -399,7 +420,7 @@ npm test
 ✔ gitignore correctly ignores .scratch contents and preserves .gitkeep
 ✔ session handoff template exists
 ✔ all 64 skills comply with Antigravity operational criteria
-ℹ pass 29, fail 0
+ℹ pass 30, fail 0
 ```
 
 ---

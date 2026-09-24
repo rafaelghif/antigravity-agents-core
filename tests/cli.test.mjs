@@ -8,9 +8,9 @@ import os from 'node:os';
 const rootDir = path.resolve('.');
 const cliPath = path.join(rootDir, 'bin', 'cli.mjs');
 
-test('CLI --version prints v5.0.5', () => {
+test('CLI --version prints v5.1.0', () => {
   const output = execSync(`node "${cliPath}" --version`, { encoding: 'utf-8' });
-  assert.match(output, /@rafaelghif\/aac-core v5\.0\.5/);
+  assert.match(output, /@rafaelghif\/aac-core v5\.1\.0/);
 });
 
 test('CLI --help prints usage banner', () => {
@@ -194,6 +194,62 @@ test('lifecycle hook verify-on-stop.cjs returns continue when tests fail', () =>
     const result = JSON.parse(output);
     assert.equal(result.decision, 'continue', 'Stop hook should return continue to block stop when tests fail');
     assert.match(result.reason, /Quality Gate Failed/, 'Should provide failure reason');
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test('lifecycle hook handoff-reminder.cjs guards session continuity on model_stop', () => {
+  const hookScript = path.join(rootDir, '.agents', 'hooks', 'handoff-reminder.cjs');
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-handoff-test-'));
+  try {
+    const scratchDir = path.join(tempDir, '.scratch');
+    fs.mkdirSync(scratchDir, { recursive: true });
+
+    // 1. In a clean directory with no git changes, it allows stop
+    const payload = JSON.stringify({
+      terminationReason: 'model_stop',
+      workspacePaths: [tempDir]
+    });
+    let output = execSync(`node "${hookScript}"`, { input: payload, encoding: 'utf-8' });
+    let result = JSON.parse(output);
+    assert.equal(result.decision, 'allow', 'Should allow stop when no git changes exist');
+
+    // 2. Initialize a git repo with uncommitted changes
+    execSync('git init', { cwd: tempDir, stdio: 'pipe' });
+    fs.writeFileSync(path.join(tempDir, 'feature.js'), 'console.log("new code");', 'utf-8');
+
+    // Should return continue because handoff.md is missing
+    output = execSync(`node "${hookScript}"`, { input: payload, encoding: 'utf-8' });
+    result = JSON.parse(output);
+    assert.equal(result.decision, 'continue', 'Should prompt to write handoff when uncommitted code changes exist');
+    assert.match(result.reason, /Session Continuity Guard/, 'Should include guard reason');
+
+    // Second immediate stop attempt should allow (loop protection)
+    output = execSync(`node "${hookScript}"`, { input: payload, encoding: 'utf-8' });
+    result = JSON.parse(output);
+    assert.equal(result.decision, 'allow', 'Should allow stop on second consecutive attempt via loop protection');
+
+    // 3. With fresh handoff.md, it should allow stop
+    fs.writeFileSync(path.join(scratchDir, 'handoff.md'), '# Handoff Summary\n', 'utf-8');
+    output = execSync(`node "${hookScript}"`, { input: payload, encoding: 'utf-8' });
+    result = JSON.parse(output);
+    assert.equal(result.decision, 'allow', 'Should allow stop when handoff.md is fresh');
+
+    // 4. Test abnormal termination (token limit / max steps exceeded auto-synthesis)
+    const tokenLimitPayload = JSON.stringify({
+      terminationReason: 'max_steps_exceeded',
+      workspacePaths: [tempDir],
+      conversationId: 'test-conv-123'
+    });
+    fs.rmSync(path.join(scratchDir, 'handoff.md'), { force: true });
+    output = execSync(`node "${hookScript}"`, { input: tokenLimitPayload, encoding: 'utf-8' });
+    result = JSON.parse(output);
+    assert.equal(result.decision, 'allow', 'Should allow stop on max_steps_exceeded');
+    assert.ok(fs.existsSync(path.join(scratchDir, 'handoff.md')), 'Should auto-synthesize handoff.md on max_steps_exceeded without requiring LLM interaction');
+    const handoffText = fs.readFileSync(path.join(scratchDir, 'handoff.md'), 'utf-8');
+    assert.match(handoffText, /max_steps_exceeded/, 'Handoff must record termination reason');
+    assert.match(handoffText, /feature\.js/, 'Handoff must record modified files');
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

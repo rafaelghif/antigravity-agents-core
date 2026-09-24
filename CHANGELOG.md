@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2026-09-24
+
+### Added
+- **Autonomous Session Continuity & Handoff Hook**: Added [`.agents/hooks/handoff-reminder.cjs`](file:///D:/Project/antigravity-agents/.agents/hooks/handoff-reminder.cjs) (and `.js`) as a native Antigravity `Stop` lifecycle hook registered in [`.agents/hooks.json`](file:///D:/Project/antigravity-agents/.agents/hooks.json).
+- **Token Limit Resilience**: When a session is interrupted due to token limits, step ceilings (`max_steps_exceeded`), or abnormal exits where conversational turns are impossible, the hook automatically parses `git status`, diff stat, and `transcript.jsonl` to synthesize `.scratch/handoff.md` without consuming LLM tokens.
+- **Loop Protection**: Built-in 1-turn retry ceiling via `.scratch/.handoff-prompted` guaranteeing zero infinite continuation loops.
+- **Automated Hook Verification Suite**: Added comprehensive test coverage in [`tests/cli.test.mjs`](file:///D:/Project/antigravity-agents/tests/cli.test.mjs) verifying clean stop allowances, uncommitted code modification gating, loop protection, and abnormal termination auto-synthesis.
+
+### Changed
+- **Version Bump**: Bumped version to `5.1.0` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`), strictly following SemVer 2.0.0 for backwards-compatible feature additions.
+
 ## [5.0.5] - 2026-09-24
 
 ### Added

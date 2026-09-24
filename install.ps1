@@ -6,7 +6,7 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $targetDir = Get-Location
 
-Write-Host "`n🚀 Installing AAC (Antigravity Agent Core v5.0.5)..." -ForegroundColor Cyan
+Write-Host "`n🚀 Installing AAC (Antigravity Agent Core v5.1.0)..." -ForegroundColor Cyan
 Write-Host "Target: $targetDir`n" -ForegroundColor Gray
 
 $repoUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"

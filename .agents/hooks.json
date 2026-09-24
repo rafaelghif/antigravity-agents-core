@@ -23,5 +23,15 @@
         "timeout": 15
       }
     ]
+  },
+  "session-handoff": {
+    "enabled": true,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node hooks/handoff-reminder.cjs",
+        "timeout": 5
+      }
+    ]
   }
 }

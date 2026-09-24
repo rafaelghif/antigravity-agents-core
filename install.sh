@@ -7,7 +7,7 @@
 set -e
 
 TARGET_DIR="$(pwd)"
-echo -e "\n🚀 Installing AAC (Antigravity Agent Core v5.0.5)..."
+echo -e "\n🚀 Installing AAC (Antigravity Agent Core v5.1.0)..."
 echo -e "Target: ${TARGET_DIR}\n"
 
 TEMP_ZIP="/tmp/aac-main.zip"
