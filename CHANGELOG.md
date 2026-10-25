@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.0] - 2026-10-25
+
+### Added
+- **Google Antigravity 2.0+ Platform Features & Best Practices ([docs/agents/antigravity-platform.md](docs/agents/antigravity-platform.md))**: Comprehensive master platform reference documenting 10 core Antigravity capabilities: Direct Subagent Messaging (`invoke_subagent`, `send_message`), Explore-Plan-Execute phased protocol, Native Lifecycle Hooks (`PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, `Stop`), Headless Automations, Subagent Git Worktree isolation (`Workspace: "branch"` / `"share"`), Multimodal Office/Zip attachments, Docked Prompts (`ask_question`), 20,000-token rules budget, `/compact` slash command, and `.gemini/config.json` project-level configuration.
+- **Explore -> Plan -> Execute & Subagent Worktree Isolation Guidelines ([.agents/rules/architecture-and-flow.md](.agents/rules/architecture-and-flow.md))**: Added Section 5 establishing formal architectural exploration, structured plan presentation before large diffs, and mandatory Git worktree isolation for concurrent subagent spikes.
+- **Worktree Concurrency & VCS Panel Integration ([.agents/rules/git-workflow.md](.agents/rules/git-workflow.md))**: Added Section 3 mandating isolated git worktrees for parallel agentic development and atomic diff segregation for Antigravity's VCS review panel.
+- **Open-Source Lineage & Acknowledgements ([README.md](README.md))**: Explicit attribution crediting foundational inspirations from Matt Pocock (Engineering skills suite), Julius Brussee (Caveman token compression), and Google Antigravity.
+
+### Changed
+- **Upstream Skill Hardening & Antigravity Compatibility**:
+  - **`diagnosing-bugs` ([.agents/skills/diagnosing-bugs/SKILL.md](.agents/skills/diagnosing-bugs/SKILL.md))**: Added forced mutation diff check to ensure bug reproduction occurs prior to applying behavioral patches.
+  - **`tdd` ([.agents/skills/tdd/SKILL.md](.agents/skills/tdd/SKILL.md))**: Added explicit seam catch/miss trade-off analysis between public interface tests and fine-grained unit mocks.
+  - **`grilling` ([.agents/skills/grilling/SKILL.md](.agents/skills/grilling/SKILL.md))**: Standardized question phrasing to place `(Recommended)` options in the first slot for consistent Antigravity docked prompt UX.
+  - **`implement` ([.agents/skills/implement/SKILL.md](.agents/skills/implement/SKILL.md))**: Added pre-flight ticket fetching and title confirmation step to prevent out-of-sync implementations.
+  - **`wizard` ([.agents/skills/wizard/template.sh](.agents/skills/wizard/template.sh))**: Wrapped wizard execution in `run_wizard` with defensive subshell isolation, ANSI clear fallback for non-TTY terminals, safe `.env` quote decoding, and export of parsed variables into shell scope.
+- **Version Bump**: Bumped version to `5.4.0` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation adhering to SemVer 2.0.0.
+
 ## [5.3.1] - 2026-09-24
 
 ### Fixed
@@ -173,6 +190,7 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Comprehensive Antigravity Settings Sanitizer**: Implemented `sanitize_antigravity_settings` in `scripts/health_check.py`.
 - **Consumer Workspace Validation Scope**: Scoped global CLI settings validation in `scripts/validate.py` to framework development runs only.
 
+[5.4.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.3.1...v5.4.0
 [5.3.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.1.0...v5.2.0
