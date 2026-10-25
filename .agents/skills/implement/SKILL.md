@@ -15,10 +15,11 @@ A rigorous 5-phase engineering protocol for turning specifications and tickets i
 
 Before writing or editing any code, orient to the repository's topology and established patterns:
 
-1. **Manifest Inspection**: Read package manifests (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.) via `view_file` to detect runtime, language version, frameworks, and installed dependencies.
-2. **Topology & Seams**: Follow [architecture-and-flow.md](../../rules/architecture-and-flow.md). Map module boundaries and dependency directions (domain stays pure, dependencies point inward).
-3. **Existing Patterns & Reuse (DRY)**: Search existing utilities, helpers, and schemas (`git grep` or `view_file`). Never re-invent a utility that already exists in the codebase.
-4. **Domain Invariants**: Inspect `CONTEXT.md` (if present) to align terminology, entity names, and architectural decisions (ADRs).
+1. **Ticket & Spec Resolution**: If the user passes a ticket reference (e.g. `#12`, `PROJ-45`), fetch it from the configured issue tracker (via `gh`, `glab`, or issue tracker MCP) and state its title before starting. If the reference is ambiguous, clarify via `ask_question`.
+2. **Manifest Inspection**: Read package manifests (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.) via `view_file` to detect runtime, language version, frameworks, and installed dependencies.
+3. **Topology & Seams**: Follow [architecture-and-flow.md](../../rules/architecture-and-flow.md). Map module boundaries and dependency directions (domain stays pure, dependencies point inward).
+4. **Existing Patterns & Reuse (DRY)**: Search existing utilities, helpers, and schemas (`git grep` or `view_file`). Never re-invent a utility that already exists in the codebase.
+5. **Domain Invariants**: Inspect `CONTEXT.md` (if present) to align terminology, entity names, and architectural decisions (ADRs).
 
 ---
 

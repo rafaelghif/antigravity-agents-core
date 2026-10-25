@@ -595,6 +595,16 @@ npm test
 
 ---
 
+## 🤝 Open-Source Lineage & Acknowledgements
+
+AAC is built upon and adapts pioneering open-source engineering standards, specialized and hardened for the Google Antigravity ecosystem:
+
+- **[Matt Pocock's Skills](https://github.com/mattpocock/skills)**: The canonical 40+ engineering lifecycle skills (TDD, Grilling, Code Review, Diagnosing Bugs, Implement Spec, Wayfinder, Domain Modeling). AAC forks, hardens, and fully adapts these skills from their Claude Code origin into native Google Antigravity primitives (`view_file`, `replace_file_content`, `run_command`, `ask_question`, and `invoke_subagent`).
+- **[Caveman by Julius Brussee](https://github.com/JuliusBrussee/caveman)**: The ultra-compressed, fluff-free Caveman communication protocol and the 7-rung Ponytail minimalist code ladder. Integrated directly as core always-on operational rules (`.agents/rules/caveman.md` and `.agents/rules/ponytail.md`) alongside token optimization and evidence review skills.
+- **[Google Antigravity & DeepMind](https://antigravity.google)**: The native Antigravity Customization Architecture, Gemini 3.8 Flash model tuning, lifecycle hooks, Git worktree isolation, docked prompts, and automations.
+
+---
+
 ## 📜 License
 
 Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.

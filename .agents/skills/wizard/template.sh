@@ -32,7 +32,8 @@ SKIPPED=()        # things we couldn't do (e.g. gh missing)
 # output isn't a terminal, so piped logs stay readable.
 _clear() {
   [[ -t 1 ]] || return 0
-  if command -v tput >/dev/null 2>&1; then tput clear; else printf '\033[2J\033[3J\033[H'; fi
+  if command -v tput >/dev/null 2>&1 && tput clear 2>/dev/null; then return 0; fi
+  printf '\033[2J\033[3J\033[H'
 }
 
 # banner "Title" shows the opening frame: what this wizard does.
@@ -88,11 +89,18 @@ confirm() {
   [[ "$reply" =~ ^[Yy] ]]
 }
 
-# _existing KEY: current value of KEY in ENV_FILE, if any.
+# _existing KEY: current value of KEY in ENV_FILE, if any, with write_env's single
+# quotes or a plain dotenv double-quoted value undone.
 _existing() {
   [[ -f "$ENV_FILE" ]] || return 1
-  local line; line=$(grep -E "^${1}=" "$ENV_FILE" | tail -n1) || return 1
-  printf '%s' "${line#*=}"
+  local line value sq="'\\''"; line=$(grep -E "^${1}=" "$ENV_FILE" | tail -n1) || return 1
+  value="${line#*=}"
+  if [[ "$value" == \'*\' ]]; then value="${value:1:${#value}-2}"; value="${value//"$sq"/\'}"
+  elif [[ "$value" == \"*\" ]]; then
+    value="${value:1:${#value}-2}"
+    [[ "$value" == *[\\\$\"]* ]] && return 1
+  fi
+  printf '%s' "$value"
 }
 
 # ask KEY "Prompt" reads a value into $KEY. Offers the existing .env value as
@@ -126,7 +134,7 @@ ask_secret() {
 }
 
 # write_env KEY VALUE upserts KEY=VALUE into ENV_FILE (creates it; replaces
-# any existing line). Idempotent.
+# any existing line) and sets the shell variable. Idempotent.
 write_env() {
   local key="$1" value="$2" tmp
   touch "$ENV_FILE"
@@ -134,6 +142,7 @@ write_env() {
   grep -vE "^${key}=" "$ENV_FILE" > "$tmp" || true
   printf '%s=%s\n' "$key" "$value" >> "$tmp"
   mv "$tmp" "$ENV_FILE"
+  printf -v "$key" '%s' "$value"
   WRITTEN_ENV+=("$key")
   printf '  %s✓ wrote%s %s → %s\n' "$GREEN" "$RESET" "$key" "$ENV_FILE"
 }
@@ -182,7 +191,11 @@ finish() {
 # ──────────────────────────────────────────────────────────────────────────
 # STAGES: author this section. One stage() per step the human takes.
 # Replace the example below. Set TOTAL_STAGES to match the stages you write.
+# Keep every stage inside run_wizard and the last line as is: bash then parses
+# the whole file before the first prompt, so an edit mid-run can't break it.
 # ──────────────────────────────────────────────────────────────────────────
+
+run_wizard() {
 
 TOTAL_STAGES=1
 
@@ -202,3 +215,6 @@ set_secret STRIPE_SECRET_KEY "$STRIPE_SECRET_KEY"   # CI needs this one
 # ──────────────────────────────────────────────────────────────────────────
 
 finish
+}
+
+run_wizard "$@"; exit
