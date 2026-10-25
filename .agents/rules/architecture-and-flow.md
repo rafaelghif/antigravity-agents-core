@@ -67,3 +67,15 @@ When acting as a **Reviewer** or **Analyzer**, the agent goes beyond static rege
 - **Architectural Seam Compliance**: Ensure changes do not break layer boundaries, bypass ports, or introduce architectural friction.
 - **Flow Cohesion**: Verify that data transformations are predictable, side effects are contained, and error boundaries prevent data corruption.
 - **Production Realism**: Confirm genuine end-to-end integration, real data contracts, and zero dummy/mock placeholders in application files.
+
+---
+
+## 5. Antigravity Phased Execution & Worktree Best Practice
+
+- **Explore -> Plan -> Execute Protocol**:
+  - On non-trivial architectural changes, explore manifests and seams first.
+  - Present a structured implementation plan artifact for verification before executing broad modifications.
+- **Git Worktree Isolation for Subagents**:
+  - When delegating parallel builds or experimental refactors to subagents, isolate execution using Git worktrees (`Workspace: "branch"` or `"share"`) to avoid corrupting the user's primary working tree.
+- **Automated Verification Gate**:
+  - Always execute hermetic test suites (`npm test`, build scripts) before declaring any task complete.

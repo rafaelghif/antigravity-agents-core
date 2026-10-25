@@ -25,3 +25,12 @@ Use standard conventional commit prefixes:
 - Ensure each commit represents a single logical unit of change.
 - Do not mix cosmetic reformatting with functional logic updates in the same commit.
 - Keep the repository in a compilable, testable state across all commits.
+
+---
+
+## 3. Git Worktrees & VCS Panel Integration
+
+- **Worktree Concurrency**:
+  - Prefer Git worktrees when running parallel agentic tasks or background subagent spikes to preserve working tree cleanliness.
+- **VCS Panel Alignment**:
+  - Structure commits so diffs in the Antigravity VCS panel remain atomic, self-explanatory, and segregated between functional logic and tooling.
