@@ -139,3 +139,21 @@ Intercept and enforce guardrails at critical agent execution lifecycle stages vi
    - Keep prompt payloads token-efficient through progressive disclosure (`SKILL.md`).
 4. **Git Worktree Isolation for Parallel Work**:
    - Isolate subagent branches in Git worktrees (`Workspace: "branch"` or `"share"`) to maintain clean and reliable integration.
+
+---
+
+## 12. Gemini 3.8 Flash Optimization & Execution Mechanics
+
+**Gemini 3.8 Flash** (`gemini-3.8-flash`) is the platform's high-efficiency workhorse model optimized for long-horizon agentic loops, code synthesis, and multi-turn tool execution.
+
+### Key Technical Parameters
+- **Context Window**: 1,048,576 tokens (~1M).
+- **Max Output**: 65,536 tokens.
+- **Thinking Levels**: Configured via `thinking_level: "low" | "medium" | "high"` (`minimal` is unsupported).
+- **Sampling Behavior**: `temperature` defaults to `1.0`; custom frequency/presence penalties are unsupported and will return API errors.
+
+### Flash Adherence Strategies (Preventing Rule-Skipping)
+1. **Internal Thinking Steering**: With `thinking_level: "high"`, inject a structured `<thinking_rubric>` into system instructions to mandate blast-radius mapping and invariant checks during internal chain-of-thought tokens before any tool emission.
+2. **Deterministic PreToolUse Hook Backstops**: Rely on Node.js lifecycle hooks (`.agents/hooks.json`) to intercept destructive git actions and production mocks mechanically rather than depending solely on prompt compliance.
+3. **Subagent Workload Offloading**: Use sandboxed custom subagents (`codebase-investigator`, `verification-runner`) to isolate heavy file scans and test outputs, keeping the primary agent context window lean and preventing *Lost-in-the-Middle* degradation.
+4. **Affirmative Operational Guardrails**: State constraints as positive, active operational steps with clear preconditions and fail-fast triggers.
