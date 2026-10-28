@@ -1,74 +1,30 @@
 ---
 name: domain-modeling
-description: Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR.
+description: Sharpens domain terminology in CONTEXT.md and records Architectural Decision Records (ADRs) in docs/adr/. Use when defining domain concepts, resolving vocabulary conflicts, updating CONTEXT.md, or recording architectural decisions.
 ---
 
 # Domain Modeling
 
-Actively build and sharpen the project's domain model as you design. This is the *active* discipline: challenging terms, inventing edge-case scenarios, and writing the glossary and decisions down the moment they crystallise. (Merely *reading* `CONTEXT.md` for vocabulary is not this skill: that's a one-line habit any skill can do. This skill is for when you're changing the model, not just consuming it.)
+Actively build and sharpen the project's domain model by challenging fuzzy terminology, updating `CONTEXT.md` inline, and recording consequential Architectural Decision Records (ADRs).
 
-## File structure
+## Decision tree
 
-Most repos have a single context:
+1. **Did a domain term, entity definition, or bounded context boundary settle or change?**
+   - **Yes** → Update `CONTEXT.md` immediately. Keep `CONTEXT.md` strictly as a pure domain glossary and boundary map (zero implementation details or task lists).
+   - **No** → Proceed to step 2.
+2. **Does an architectural decision qualify for an ADR in `docs/adr/`?**
+   Check the **3 ADR Gates**:
+   - Gate 1: **Hard to reverse** (changing your mind later carries significant migration cost).
+   - Gate 2: **Surprising without context** (a future engineer will ask *"why did they do it this way?"*).
+   - Gate 3: **Result of a real trade-off** (genuine alternatives existed and one was chosen for specific reasons).
+   - **All 3 gates hold** → Write `docs/adr/NNNN-<slug>.md` using [resources/adr-template.md](resources/adr-template.md).
+   - **Any gate is missing** → Skip the ADR.
 
-```
-/
-├── CONTEXT.md
-├── docs/
-│   └── adr/
-│       ├── 0001-event-sourced-orders.md
-│       └── 0002-postgres-for-write-model.md
-└── src/
-```
+## Modeling protocol
 
-If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The map points to where each one lives:
-
-```
-/
-├── CONTEXT-MAP.md
-├── docs/
-│   └── adr/                          ← system-wide decisions
-├── src/
-│   ├── ordering/
-│   │   ├── CONTEXT.md
-│   │   └── docs/adr/                 ← context-specific decisions
-│   └── billing/
-│       ├── CONTEXT.md
-│       └── docs/adr/
-```
-
-Create files lazily: only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
-
-## During the session
-
-### Challenge against the glossary
-
-When the user uses a term that conflicts with the existing language in `CONTEXT.md`, call it out immediately. "Your glossary defines 'cancellation' as X, but you seem to mean Y. Which is it?"
-
-### Sharpen fuzzy language
-
-When the user uses vague or overloaded terms, propose a precise canonical term. "You're saying 'account': do you mean the Customer or the User? Those are different things."
-
-### Discuss concrete scenarios
-
-When domain relationships are being discussed, stress-test them with specific scenarios. Invent scenarios that probe edge cases and force the user to be precise about the boundaries between concepts.
-
-### Cross-reference with code
-
-When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible. Which is right?"
-
-### Update CONTEXT.md inline
-
-When a term is resolved, update `CONTEXT.md` right there. Don't batch these up: capture them as they happen. Use the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
-
-`CONTEXT.md` should be totally devoid of implementation details. Do not treat `CONTEXT.md` as a spec, a scratch pad, or a repository for implementation decisions. It is a glossary and nothing else.
-
-### Offer ADRs sparingly
-
-Only offer to create an ADR when all three are true:
-
-1. **Hard to reverse**: the cost of changing your mind later is meaningful
-2. **Surprising without context**: a future reader will wonder "why did they do it this way?"
-3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
-
-If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
+1. **Challenge against the existing glossary**:
+   - When the user uses a term that conflicts with `CONTEXT.md` or existing code entities, surface the contradiction immediately (`"CONTEXT.md defines X as ..., but you mean Y. Which should be canonical?"`).
+2. **Eliminate overloaded terms**:
+   - Replace vague terms (`account`, `item`, `data`, `record`) with precise domain nouns (`Tenant`, `SubscriptionSeat`, `InvoiceLineItem`).
+3. **Probe boundaries with edge-case scenarios**:
+   - Test relationships between domain concepts using concrete boundary scenarios (e.g., partial refunds, multi-tenant ownership transfers, expired grace periods).

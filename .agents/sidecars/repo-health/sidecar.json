@@ -1,0 +1,12 @@
+{
+  "display_name": "Engineering Repo Health Monitor",
+  "description": "Periodic scheduled check for working-tree drift, stale .scratch/handoff.md items, and test health.",
+  "builtin": "schedule",
+  "restart_policy": "always",
+  "args": [
+    "0 * * * *",
+    "agentapi",
+    "new-conversation",
+    "Check git status and .scratch/handoff.md, and summarize any uncommitted drift or blocked engineering items."
+  ]
+}

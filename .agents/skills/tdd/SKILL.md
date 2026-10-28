@@ -1,40 +1,29 @@
 ---
 name: tdd
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
+description: Drives code changes through the Red-Green-Refactor test-driven development loop at public module seams. Use when building features test-first, writing unit or integration tests, or practicing red-green-refactor.
 ---
 
-# Test-Driven Development
+# Test-Driven Development (TDD)
 
-TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult them before and during the loop, not after.
+Follow the strict **Red → Green → Refactor** loop on every behavioral increment, testing exclusively through public module seams.
 
-When exploring the codebase, read `CONTEXT.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
+## Decision tree
 
-## What a good test is
+1. **Does the test reach into private functions, internal state variables, or internal helper call counts?**
+   - **Yes** → Rewrite the test to invoke only the module's **public seam** and assert on observable outputs or returned errors.
+   - **No** → Proceed to step 2.
+2. **Does the module mix pure domain calculations with external I/O (DB, HTTP, filesystem)?**
+   - **Yes** → Extract the pure calculation so 80%+ of boundary cases run in zero-mock unit tests; test the I/O adapter separately with one focused integration test.
+   - **No** → Run the Red-Green-Refactor cycle below.
 
-Tests verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't. A good test reads like a specification: "user can checkout with valid cart" tells you exactly what capability exists, and it survives refactors because it doesn't care about internal structure.
+## The Red → Green → Refactor cycle
 
-See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking guidelines.
-
-## Seams: where tests go
-
-A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
-
-**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
-
-Ask: "What's the public interface, and which seams should we test?" Give each proposed seam a one-line note on what it catches and what it misses.
-
-When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), inspect "[codebase-design](../codebase-design/SKILL.md)" via `view_file` for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
-
-## Anti-patterns
-
-- **Implementation-coupled**: mocks internal collaborators, tests private methods, or verifies through a side channel (querying the database instead of using the interface). The tell: the test breaks when you refactor but behavior hasn't changed.
-- **Tautological**: the assertion recomputes the expected value the way the code does (`expect(add(a, b)).toBe(a + b)`, a snapshot derived by hand the same way, a constant asserted equal to itself), so it passes by construction and can never disagree with the code. Expected values must come from an independent source of truth: a known-good literal, a worked example, the spec.
-- **Horizontal slicing**: writing all tests first, then all implementation. Bulk tests verify _imagined_ behavior: you test the _shape_ of things rather than user-facing behavior, the tests go insensitive to real changes, and you commit to test structure before understanding the implementation. Work in **vertical slices** instead: one test → one implementation → repeat, each test a **tracer bullet** that responds to what the last cycle taught you.
-
-## Rules of the loop
-
-- **Step 0: Techstack & Test Runner Discovery.** Inspect project manifests (`package.json`, `go.mod`, `Cargo.toml`, `pyproject.toml`, etc.) per [architecture-and-flow.md](../../rules/architecture-and-flow.md) to detect the native test framework (Jest, Vitest, Node test runner, pytest, go test, cargo test, JUnit). Adapt all test syntax and conventions strictly to the detected runner.
-- **Red before green.** Write the failing test first using `write_to_file` or `replace_file_content`, execute the test runner via `run_command`, and verify it fails for the expected reason. Then write only enough clean code to pass it. Don't anticipate future tests or add speculative features.
-- **One slice at a time.** One seam, one test, one minimal implementation per cycle.
-- **World-Class Craftsmanship & DRY.** Write intention-revealing test names, extract shared test setups cleanly, use independent expected values, and keep test fixtures strictly in test directories per [coding-standards.md](../../rules/coding-standards.md) and [production-integrity.md](../../rules/production-integrity.md).
-- **Refactoring is not part of the loop.** It belongs to the review stage (see [code-review](../code-review/SKILL.md) and [safe-refactor](../safe-refactor/SKILL.md)), not the red → green implementation cycle.
+1. **RED (Write one failing test)**:
+   - Write a single test named after the observable capability (`calculates prorated refund when subscription cancels mid-cycle`).
+   - Run the test via `run_command` and verify it **fails for the expected behavioral reason** (not a syntax or import error).
+2. **GREEN (Minimal production code)**:
+   - Write the minimum genuine production code needed to make the failing test pass.
+   - Re-run the test and confirm it turns green.
+3. **REFACTOR (Clean while green)**:
+   - Eliminate duplication, flatten nested conditionals into guard clauses, and sharpen identifier names while keeping all tests green.
+   - Never add new behavior during the Refactor phase.

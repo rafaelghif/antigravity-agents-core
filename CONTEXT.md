@@ -1,51 +1,29 @@
-# Antigravity Agents Domain Context
+# Project Context & Domain Glossary
 
-Living domain document defining bounded contexts, core terminology, and architectural boundaries for the **antigravity-agents** workspace.
-
----
-
-## 1. Domain Glossary
-
-- **Antigravity (AGY)**: Google's agentic AI development platform supporting Antigravity IDE, Antigravity 2.0 desktop app, and Antigravity CLI (`agy`).
-- **Gemini 3.8 Flash (High)**: The primary inference model powering the agent pair-programmer, optimized for speed, precision, and tool-augmented reasoning.
-- **Skill**: On-demand procedural knowledge packaged in `.agents/skills/<name>/SKILL.md`. Leverages progressive disclosure: only name and description are exposed in context until activated via `view_file`.
-- **Rule**: Behavioral constraints and operational policies. Root directives reside in `AGENTS.md`; modular rules reside in `.agents/rules/*.md` with `trigger: always_on` or `trigger: model_decision`.
-- **Lifecycle Hook**: Event interceptors defined in `.agents/hooks.json` running at specific agent events (`PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, `Stop`).
-- **Plugin**: Bundle of related skills, rules, and MCP configurations packaged under `.agents/plugins/<name>/plugin.json`.
-- **Sidecar**: Autonomous diagnostic process declared in `.agents/plugins/**/sidecars/` that runs health checks and reports status without polluting main context.
-- **Model Context Protocol (MCP)**: Tool integration standard providing external APIs (e.g. Gitea stdio, GitHub SSE) to agent context via project `.agents/mcp_config.json`.
+> **Zero Static Template**: Nothing in this file is pre-defined by dogma. Populate and evolve this file dynamically after interviewing the user (`/grill-me` / `/domain-modeling`) or inspecting the existing workspace.
 
 ---
 
-## 2. Bounded Contexts & File Structure
+## 1. System Overview & User-Defined Stack
 
-```
-<workspace-root>/
-├── AGENTS.md                  # Root instructions (Highest workspace priority, <12k chars)
-├── GEMINI.md                  # Pointer to AGENTS.md for compatibility
-├── CONTEXT.md                 # Domain dictionary & architectural boundaries (this file)
-├── .agents/                   # Workspace-scoped Antigravity configuration
-│   ├── rules/                 # Modular always-on rules (caveman, ponytail, git, memory)
-│   ├── skills/                # 64 on-demand progressive disclosure skills
-│   ├── plugins/               # Workspace packaged plugins (workspace-integrations)
-│   ├── hooks.json             # Lifecycle hook declarations (PreToolUse, etc.)
-│   ├── plugins.json           # Explicit plugin manifest
-│   ├── skills.json            # Explicit skill manifest
-│   ├── mcp_config.json        # Project-scoped MCP tool config (gitignored)
-│   └── mcp_config.example.json# Project-scoped MCP template (tracked)
-├── docs/                      # Project documentation
-│   ├── adr/                   # Architectural Decision Records (ADRs)
-│   ├── agents/                # Agent skill configurations (issue tracker, domain, triage)
-│   └── templates/             # Session handoff and reusable templates
-└── .scratch/                  # Ephemeral working directory (gitignored)
-    └── handoff.md             # Inter-session bridge handoff document
-```
+- **Primary Purpose**: _[Defined with user via interview or discovered from repo]_
+- **Runtime, Language & Tooling**: _[Defined by user or discovered dynamically from workspace]_
+- **Architecture & Folder Topology**: _[Defined by user—never force a static template]_
+- **Persistence & Infrastructure**: _[Defined by user or discovered from workspace]_
+- **Verification Command**: _[Exact command to run build, lint, typecheck, and tests]_
 
 ---
 
-## 3. Communication & Code Contracts
+## 2. User-Defined Module Boundaries & Public Seams
 
-1. **Caveman Principle**: Fluff-free, zero filler, immediate technical substance.
-2. **Ponytail Ladder**: YAGNI -> Reuse -> Stdlib -> Platform -> Dependency -> One-Liner -> Minimal Diff.
-3. **Host Platform Awareness**: Standard command chaining (`&&`, `;`) on POSIX bash/zsh; use `;` on Windows PowerShell 5.1 (never `&&`).
-4. **Clickable Links**: All file paths and symbols formatted as `[Label](file:///<workspace>/...)` with forward slashes.
+| Module / Path | Responsibility | Public Seam (Entry Point) | Dependency Constraints |
+| :--- | :--- | :--- | :--- |
+| _[Defined by user]_ | _[Core responsibility]_ | _[Public interface / seam]_ | _[What this module must never import]_ |
+
+---
+
+## 3. Ubiquitous Language & Core Invariants
+
+| Term / Entity | Definition | Enforced Invariants |
+| :--- | :--- | :--- |
+| _[Defined by user]_ | _[Canonical domain meaning]_ | _[State, concurrency, security, or precision invariants]_ |

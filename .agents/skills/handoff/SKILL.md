@@ -1,26 +1,29 @@
 ---
 name: handoff
-description: >-
-  Compacts the current conversation into a handoff document for a subsequent agent session to continue work seamlessly.
-  Use when the user asks to create a handoff, prepare context for a new session, or summarize progress for another agent.
+description: Checkpoints current Scrum Sprint progress, active ticket state, downstream seam notes, and the single immediate next action into .scratch/handoff.md and docs/sprint/SPRINT.md. Use when ending a session, switching context, or handing off work to a fresh agent session.
 ---
 
-# Antigravity Session Handoff
+# Handoff (Multi-Session Scrum & Context Continuity)
 
-Write a handoff document summarizing the current conversation so a fresh agent can continue the work seamlessly, implementing Tier 4 of [memory-management.md](../../rules/memory-management.md). Save it to `.scratch/handoff.md` or the conversation artifact directory.
+Checkpoint the active session state into `.scratch/handoff.md` (and sync `docs/sprint/SPRINT.md` if present) using [resources/handoff-template.md](resources/handoff-template.md) so the next session can resume in seconds with zero context loss.
 
-## Structure & Template
+## Decision tree
 
-Follow the standardized structure defined in [handoff.template.md](../../../docs/templates/handoff.template.md):
-1. **Goal**: High-level goal of the session.
-2. **Current State**: Active Git branch, commit SHA, and working tree status (`git status`).
-3. **Completed Items**: Bulleted list of verified items finished in this session.
-4. **Active Decisions & Blockers**: Unresolved architectural choices, domain model shifts, or external blocks.
-5. **Immediate Next Action**: Exactly ONE concrete, runnable instruction for the next agent to execute first.
-6. **Suggested Skills**: Relevant skills the next agent must inspect via `view_file`.
+1. **Are there uncommitted functional changes in `git status` that already pass tests and satisfy the current ticket's DoD?**
+   - **Yes** → Commit them with an atomic Conventional Commit and update the ticket's `Completion Log` before writing the handoff.
+   - **No (stopping mid-ticket / WIP)** → Explicitly record the completed sub-tasks, remaining sub-tasks, and current failing/passing test state in both the ticket file and `.scratch/handoff.md`.
+2. **Did domain glossary terms or architectural decisions settle during this session?**
+   - **Yes** → Update `CONTEXT.md` (or `docs/adr/`) first so permanent domain knowledge is never trapped in ephemeral handoff notes.
+   - **No** → Proceed to the handoff workflow below.
 
-## Guidelines
+## Handoff workflow
 
-- Do not duplicate content already captured in other artifacts (specs, plans, ADRs, issues, commits, diffs). Reference them by clickable markdown link instead.
-- Redact any sensitive information (API keys, tokens, passwords, PATs).
-- If the user passed arguments, treat them as a description of what the next session will focus on and tailor the document accordingly.
+1. **Inspect Git & Sprint State**:
+   - Run `git status -sb` and `git log -3 --oneline` via `run_command`.
+   - Read `docs/sprint/SPRINT.md` (if present) to verify ticket statuses (`done`, `in-progress`, `ready`, `blocked`) and active Wave progress.
+2. **Write `.scratch/handoff.md`**:
+   - Populate [resources/handoff-template.md](resources/handoff-template.md).
+   - Link directly to `docs/sprint/SPRINT.md`, active ticket files (`docs/sprint/tickets/<NN>-<slug>.md`), and modified code files rather than pasting large file dumps.
+   - Document **Downstream Seam & Contract Notes** (exact exported functions, types, or invariants introduced in this session that the next ticket depends on) and **Falsified Approaches** (dead-ends the next session must not repeat).
+   - Redact any credentials, tokens, or secrets as `<REDACTED>`.
+   - Specify **exactly one** concrete, runnable command or ticket invocation (`/implement docs/sprint/tickets/<NN>-<slug>.md`) under `## 5. Immediate Next Session Action`.

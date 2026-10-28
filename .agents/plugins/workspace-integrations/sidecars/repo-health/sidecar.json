@@ -1,8 +1,0 @@
-{
-  "command": "node",
-  "args": [
-    "health-check.cjs"
-  ],
-  "restart_policy": "on-failure",
-  "description": "Background repository health check and branch hygiene monitor"
-}

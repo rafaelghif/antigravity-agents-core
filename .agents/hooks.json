@@ -1,5 +1,15 @@
 {
-  "git-guardrails": {
+  "lifecycle-session-bootstrap": {
+    "enabled": true,
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "node -e \"const fs=require('fs');const notes=[];if(fs.existsSync('.scratch/handoff.md'))notes.push('.scratch/handoff.md');if(fs.existsSync('docs/sprint/SPRINT.md'))notes.push('docs/sprint/SPRINT.md');if(fs.existsSync('CONTEXT.md'))notes.push('CONTEXT.md');const steps=notes.length?[{systemMessage:{systemMessage:'[AAC V6 SessionStart] Active workspace artifacts detected: '+notes.join(', ')+'. Read .scratch/handoff.md and docs/sprint/SPRINT.md first to resume the active Scrum Sprint wave.'}}]:[];process.stdout.write(JSON.stringify({injectSteps:steps})+'\\n');\"",
+        "timeout": 5
+      }
+    ]
+  },
+  "git-destructive-guard": {
     "enabled": true,
     "PreToolUse": [
       {
@@ -7,90 +17,25 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node hooks/block-dangerous-git.cjs",
+            "command": "node -e \"let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const j=JSON.parse(s||'{}');const c=String(j.toolCall?.args?.CommandLine||j.tool_input?.CommandLine||'');const segs=c.split(/[;&|\\n]+/);const bad=segs.some(seg=>{const t=seg.trim();if(!/^git(\\s|$)/.test(t))return false;if(/^git\\s+push(\\s|$)/.test(t)&&/(\\s(--force|-f|--force-with-lease|--mirror|--delete)(\\s|$)|\\s[+:][A-Za-z0-9_./-]+)/.test(t))return true;if(/^git\\s+reset(\\s|$)/.test(t)&&/\\s--hard(\\s|$)/.test(t))return true;if(/^git\\s+clean(\\s|$)/.test(t)&&/(\\s-[a-zA-Z]*f[a-zA-Z]*|\\s--force)(\\s|$)/.test(t))return true;if(/^git\\s+branch(\\s|$)/.test(t)&&/\\s-D(\\s|$)/.test(t))return true;if(/^git\\s+checkout(\\s|$)/.test(t)&&/(\\s--\\s*\\.|\\s(-f|--force)(\\s|$))/.test(t))return true;if(/^git\\s+restore(\\s|$)/.test(t)&&/\\s\\.(\\s|$)/.test(t))return true;if(/^git\\s+tag(\\s|$)/.test(t)&&/\\s(-d|--delete)(\\s|$)/.test(t))return true;return false;});process.stdout.write(JSON.stringify(bad?{decision:'ask',reason:'Blocked by V6 git-destructive-guard: destructive git command requires explicit user confirmation.'}:{decision:'allow'})+'\\n');}catch{process.stdout.write(JSON.stringify({decision:'allow'})+'\\n');}});\"",
             "timeout": 5
           }
         ]
       }
     ]
   },
-  "security-scanner": {
+  "production-no-mock-guard": {
     "enabled": true,
     "PreToolUse": [
       {
-        "matcher": "run_command|write_to_file|replace_file_content",
+        "matcher": "write_to_file|replace_file_content|multi_replace_file_content|edit_file|write_file",
         "hooks": [
           {
             "type": "command",
-            "command": "node hooks/security-scanner.cjs",
+            "command": "node -e \"let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{const j=JSON.parse(s||'{}');const a=j.toolCall?.args||j.tool_input||{};const f=String(a.TargetFile||a.Path||'');const isTest=/(\\.test\\.|\\.spec\\.|_test\\.|test_|[\\\\/](tests?|__tests__|fixtures|docs|\\.agents|\\.scratch)[\\\\/]|\\.md$|hooks\\.json$|package\\.json$)/i.test(f);const body=[a.CodeContent,a.Replacement,a.Content,JSON.stringify(a.ReplacementChunks||'')].filter(Boolean).join('\\n');const hasFake=/(?:\\b(?:const|let|var)\\s+(?:mock\\w*|fake\\w*)\\s*(?::[^=]+)?=|\\b(?:dummy_id|fake-token|mock-token|dummy-token)\\b|TODO:\\s*implement later)/i.test(body);process.stdout.write(JSON.stringify(!isTest&&hasFake?{decision:'ask',reason:'Blocked by V6 production-no-mock-guard: fake/mock stores, dummy IDs/tokens, and deferred TODO stubs are prohibited in production paths.'}:{decision:'allow'})+'\\n');}catch{process.stdout.write(JSON.stringify({decision:'allow'})+'\\n');}});\"",
             "timeout": 5
           }
         ]
-      }
-    ]
-  },
-  "quality-guard": {
-    "enabled": true,
-    "PreToolUse": [
-      {
-        "matcher": "write_to_file|replace_file_content",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node hooks/quality-guard.cjs",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  },
-  "context-rehydration": {
-    "enabled": true,
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "node hooks/memory-engine.cjs",
-        "timeout": 5
-      }
-    ]
-  },
-  "quality-gate": {
-    "enabled": true,
-    "Stop": [
-      {
-        "type": "command",
-        "command": "node hooks/verify-on-stop.cjs",
-        "timeout": 15
-      }
-    ]
-  },
-  "code-review-gate": {
-    "enabled": true,
-    "Stop": [
-      {
-        "type": "command",
-        "command": "node hooks/code-analyzer.cjs",
-        "timeout": 10
-      }
-    ]
-  },
-  "task-orchestration": {
-    "enabled": true,
-    "Stop": [
-      {
-        "type": "command",
-        "command": "node hooks/task-orchestrator.cjs",
-        "timeout": 5
-      }
-    ]
-  },
-  "session-handoff": {
-    "enabled": true,
-    "Stop": [
-      {
-        "type": "command",
-        "command": "node hooks/handoff-reminder.cjs",
-        "timeout": 5
       }
     ]
   }

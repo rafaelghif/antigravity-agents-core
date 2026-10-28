@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0] - 2026-10-28
+
+### Changed
+- **Architectural Consolidation & Deep Modules**: Consolidated 64 fragmented legacy skills into 13 high-impact deep modules, eliminating redundant multi-variants (Caveman, Ponytail, and Grilling fragments) in favor of deep public seams and John Ousterhout's module depth philosophy.
+- **Savage Gen-Z Principal Engineer Constitution (`AGENTS.md`)**: Established an anti-sycophantic, high-signal engineering pair-programming persona anchored in the 6 Non-Negotiable Engineering Pillars (*Future-Proof, Scalable, Maintainable, Secure, High-Performance, Upgradeable*). Supports `AAC_PERSONA=neutral` for formal enterprise environments.
+- **User-Defined Architecture Protocol**: Removed rigid static folder and layer dogma; replaced with dynamic discovery and an interview-first protocol (`/grill-me`, `ask_question`) recorded in `CONTEXT.md`.
+- **Technical Scrum Waves DAG Engine**: Upgraded `/to-tickets`, `/implement`, and `/handoff` with a committed Sprint Wave Board (`docs/sprint/SPRINT.md`), session-sized vertical tracer-bullet tickets, Definition of Ready (DoR), Definition of Done (DoD), and cross-session handover logs.
+- **Native Sandboxed Subagents**: Introduced 3 specialized custom subagents (`adversarial-reviewer`, `codebase-investigator`, `verification-runner`) with least-privilege tool access and execution isolation (`commandExecutionPolicy: sandbox` / `off`).
+- **Non-Destructive SHA-256 Manifest Installer**: Upgraded `bin/cli.mjs`, `install.sh`, and `install.ps1` to track managed file hashes in `.agents/.aac-manifest.json`, back up user modifications to `.scratch/backups/`, stage upstream changes as `.aac-new`, and support `--dry-run`, `--force`, and `uninstall`.
+- **Cross-Platform Node JSON Lifecycle Hooks**: Converted regex-based shell hooks in `.agents/hooks.json` to cross-platform Node JSON parsers intercepting destructive git commands and production mocks with an interactive `decision: "ask"` policy.
+- **Automated Verification Suite**: Added `tests/aac.test.mjs` verifying installer idempotency, backup integrity, hook safety contracts, subagent policies, and packaging.
+
 ## [5.4.0] - 2026-10-25
 
 ### Added

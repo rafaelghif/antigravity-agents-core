@@ -1,117 +1,39 @@
 ---
 trigger: always_on
+description: "Core coding standards enforcing DRY, KISS, YAGNI, SOLID/SRP, intention-revealing naming, guard clauses, type-driven state invariants, and fail-fast error handling."
 ---
 
-# World-Class Coding Standards & Craftsmanship Protocol
+# Coding Standards (DRY, KISS, YAGNI, SOLID & Clean Code)
 
-Universal software engineering and craftsmanship protocol defining standards for clean code, DRY architecture, human readability, and test-backed production realism.
+## 1. Core Engineering Principles
 
----
+* **KISS (Keep It Simple, Stupid)**: Prefer flat, linear, obvious control flow over clever meta-programming, deep inheritance hierarchies, or nested ternaries. Boring, readable code wins.
+* **DRY (Don't Repeat Yourself — Single Source of Truth)**: Define validation schemas, domain constants, business formulas, and contracts in one canonical place. Apply the **Rule of Three** (or extract when identical domain formulas appear in 2+ substantive call sites); never copy-paste business rules across files.
+* **YAGNI (You Aren't Gonna Need It)**: Implement only what the current specification requires. Ban speculative generics, unused configuration parameters, and unrequested wrapper abstractions.
+* **SOLID & Single Responsibility (SRP)**: Each function and module must have a single reason to change and operate at a uniform level of abstraction (use ~15–40 lines as a cognitive-load guideline, without artificially splitting cohesive deep modules). Prefer composition and small interfaces over class inheritance.
 
-## 1. Human-Readable & Self-Documenting Code
+## 2. Clean Code Mechanics (Tata Cara Penulisan Kode)
 
-Code is read far more often than it is written. Optimize relentlessly for human comprehension, cognitive locality, and maintainability:
+* **Intention-Revealing Naming**:
+  * Variables and types must state *what* they hold and *why* they exist (`activeSessionCount`, `retryAttemptIndex`, `invoiceTotalCents`). Ban cryptic abbreviations (`cnt`, `tmp`, `val`, `obj`, `data2`).
+  * Functions must use verb-noun phrasing revealing behavior or return semantics (`parseWebhookSignature`, `calculateProratedRefund`).
+  * Booleans must read as affirmative predicates (`isAuthorized`, `hasExpired`, `shouldRetry`).
+* **Guard Clauses & Flattened Control Flow**:
+  * Validate preconditions, edge cases, and failure states at the top of the function and return early (Fail Fast).
+  * Keep the primary happy path unindented at the base level. Maximum nesting depth: **2–3 levels**.
+* **Explanatory Variables**:
+  * Extract complex boolean expressions, bitwise checks, or regular expressions into named intermediate variables that explain the business rule.
+* **Why-Only Comments**:
+  * Never write comments describing *what* the code visibly does. Write comments only to explain *why*: non-obvious business invariants, protocol quirks, concurrency ordering, or `// ponytail:` scaling ceilings and upgrade paths.
 
-- **Intention-Revealing Naming**:
-  - Variable, function, class, and type names must explicitly state *why* they exist and *what* they represent.
-  - Ban cryptic abbreviations, acronym soup, and single-letter identifiers (e.g., use `activeUserSession` instead of `aus`, `invoiceItemCount` instead of `cnt`, `retryAttemptIndex` instead of `i`).
-  - Functions must be verb-noun pairs revealing side effects and return values (`validateCheckoutPayload`, `calculateNetPrice`, `isUserAuthorized`).
-  - Booleans must read like questions (`isEnabled`, `hasExpired`, `shouldRetry`).
-- **Guard Clauses & Flattened Control Flow**:
-  - Check failure conditions, edge cases, and invalid inputs early at the top of the function and return immediately (Fail Fast).
-  - Keep the primary "happy path" unindented at the base function level.
-  - Ban deep nested control structures (maximum nesting depth: 2 to 3 levels).
-- **Explanatory Variables over Dense Expressions**:
-  - Break complex conditional expressions, regex evaluations, or mathematical calculations into named boolean variables that explain the business logic:
-    ```javascript
-    // Good: Intent is crystal clear
-    const isEligibleForFreeShipping = cart.totalPrice >= 50 && user.hasActiveMembership;
-    const isDeliveryAddressDomestic = order.destinationCountry === store.originCountry;
-    if (isEligibleForFreeShipping && isDeliveryAddressDomestic) {
-      applyFreeShipping(order);
-    }
-    ```
-- **Focused Scope & Cognitive Locality (SRP)**:
-  - Every function must perform one single logical task at a consistent level of abstraction.
-  - Keep functions concise (typically 20–40 lines). If a function requires scrolling or mental juggling of multiple invariants, decompose it into private pure helpers.
-- **Documentation Rationale**:
-  - Do not write comments stating *what* the code visibly does.
-  - Write targeted comments explaining *why*: non-obvious business invariants, architectural constraints, protocol quirks, or performance trade-offs.
+## 3. Type-Driven State, Precision & Error Handling
 
----
-
-## 2. Strict DRY (Don't Repeat Yourself) & Reuse First
-
-Duplication creates multiple vectors for synchronization bugs and maintenance friction:
-
-- **Single Source of Truth**:
-  - Validation schemas, domain constants, calculation algorithms, and API payload definitions must be defined exactly once and shared.
-  - Never copy-paste business logic between files or services.
-- **Reuse Hierarchy (Ponytail Principle)**:
-  1. Inspect existing codebase utilities and patterns before writing new code (`git grep`, search existing modules).
-  2. Leverage the standard library before adding custom utility functions.
-  3. Extract pure, stateless helpers when identical logic shape appears in 2 or more call sites.
-- **Centralize Magic Values**:
-  - Magic strings, timeout thresholds, HTTP status codes, and configuration constants must be placed in typed enumerations or shared constant modules.
-
----
-
-## 3. Mandatory Automated Testing & Verification Discipline
-
-Unverified code is considered incomplete and broken by default. Every non-trivial change must leave behind automated regression proof:
-
-- **Behavior-Driven Public Seam Testing**:
-  - Test behavior through public interfaces and contracts, never by asserting private implementation details or mocking internal helpers.
-  - Tests must read like executable specifications: describe the scenario and expected outcome clearly (`should calculate tiered discount when order exceeds threshold`).
-- **Table-Driven & Edge-Case Coverage**:
-  - Always verify boundary conditions:
-    - Empty collections, null/undefined/nil inputs, zero values.
-    - Out-of-bounds inputs, negative numbers, overflow boundaries.
-    - Network timeout, external service rejection, invalid payload shapes.
-- **Hermetic & Deterministic Tests**:
-  - Unit tests must be fast, completely independent, and free of side effects.
-  - Never depend on execution order or shared mutable global state.
-  - Segregate test doubles, fixtures, and synthetic data exclusively to dedicated test files (`*.test.*`, `*.spec.*`, `tests/fixtures/`). Never allow test mocks in production code.
-- **Red-Green Verification Loop**:
-  - Execute automated tests via `run_command` and confirm passes before declaring work complete. Never assume a change works without automated test proof.
-
----
-
-## 4. Fail-Fast Boundaries & Graceful Error Handling
-
-- **Boundary Validation**:
-  - Validate all external inputs at the trust boundary (HTTP payloads, CLI arguments, database reads, environment variables).
-  - Parse and validate into strong domain types immediately before passing to internal application layers.
-- **Explicit Error Propagation**:
-  - Never swallow exceptions silently with empty `catch` blocks or unlogged ignores.
-  - Return descriptive, actionable errors indicating root cause and remediation.
-  - Preserve error causal chains (error wrapping in Go `fmt.Errorf("...: %w", err)`, Java/TS error causes `new Error("...", { cause: err })`).
-
----
-
-## 5. Architectural Depth & Minimal Surface
-
-- **Deep Modules**:
-  - Design modules with substantial internal implementation leverage behind a minimal, simple public interface.
-  - Eliminate shallow pass-through classes and wrappers that do nothing except delegate calls.
-- **Strict Dependency Direction**:
-  - Core domain logic and business entities must remain 100% pure and independent of database schemas, HTTP frameworks, or cloud SDKs.
-
----
-
-## 6. Robust Business Logic & State Invariant Engineering
-
-World-class engineering requires bulletproof domain logic, exhaustive boundary coverage, and defensive state management:
-
-- **Type-Driven Design (Make Illegal States Unrepresentable)**:
-  - Model domain states with Discriminated Unions / Sum Types rather than optional fields across one giant bag of state.
-  - Ban boolean flag clusters (`isPending`, `isProcessing`, `isCompleted` where impossible states can coexist).
-  - Encapsulate invariants in value objects or entity factory constructors. If state is invalid, fail at instantiation.
-- **Idempotency & Concurrency Safety**:
-  - Every mutating operation (payment processing, inventory decrement, state transitions) must support idempotency keys to guarantee safe client retries.
-  - Guard against race conditions using atomic operations (`UPDATE ... WHERE version = :expected`), optimistic concurrency tokens, or serializable locks.
-- **Exhaustive Boundary & Temporal Precision**:
-  - Verify boundary conditions: zero values, empty collections, negative quantities, boundary offsets.
-  - Temporal invariants: Always store and compute timestamps in UTC / ISO-8601; apply timezone conversions only at presentation seams.
-  - Monetary precision: Never use IEEE-754 binary floats for currency calculations; use integer minor units (cents) or arbitrary-precision decimal representations.
-
+* **Make Illegal States Unrepresentable**:
+  * Model mutually exclusive lifecycles with Discriminated Unions / Sum Types (`type OrderState = { status: 'draft' } | { status: 'paid'; paidAt: Date; txId: string }`) instead of nullable field bags or boolean flag clusters (`isPending`, `isPaid`, `isFailed`).
+  * Enforce invariants inside constructors or boundary parsers ("Parse, don't validate").
+* **Temporal & Monetary Precision**:
+  * Store and compute all timestamps in UTC (`ISO-8601` / UTC epoch); convert timezones only at presentation boundaries.
+  * Represent currency in integer minor units (`BigInt` / `int64` cents in memory/DB, serialized as integer/string at JSON API boundaries) or fixed-point `Decimal`—never IEEE-754 floats.
+* **Explicit Error Propagation & Resource Cleanup**:
+  * Never swallow errors with empty `catch {}` blocks or ignored returns (`_ = err`). Wrap errors with operational context while preserving the causal chain (`%w` or `{ cause: err }`).
+  * Bound all external I/O with explicit timeouts and guarantee resource cleanup (`defer`, `try/finally`, `using`, RAII).

@@ -1,7 +1,7 @@
 {
   "name": "@rafaelghif/aac-core",
-  "version": "5.4.0",
-  "description": "Autonomous engineering framework for Google Antigravity",
+  "version": "6.0.0",
+  "description": "Savage Gen-Z Principal Software Engineering & Technical Scrum Agent for Google Antigravity",
   "publishConfig": {
     "access": "public"
   },
@@ -11,12 +11,11 @@
     "antigravity",
     "antigravity-agents-core",
     "google-antigravity",
-    "agentic-ai",
-    "gemini",
-    "gemini-flash",
-    "pair-programming",
-    "mcp",
-    "skills"
+    "software-engineering",
+    "scrum",
+    "skills",
+    "subagents",
+    "hooks"
   ],
   "author": "Muhammad Rafael Ghifari <business.rafaelghifari@gmail.com>",
   "license": "MIT",
@@ -25,6 +24,9 @@
     "type": "git",
     "url": "git+https://github.com/rafaelghif/antigravity-agents-core.git"
   },
+  "bugs": {
+    "url": "https://github.com/rafaelghif/antigravity-agents-core/issues"
+  },
   "type": "module",
   "main": "bin/cli.mjs",
   "bin": {
@@ -32,43 +34,24 @@
     "aac": "bin/cli.mjs"
   },
   "scripts": {
-    "test": "node --test tests/memory-system.test.mjs tests/cli.test.mjs tests/lifecycle-guardrails-and-engines.test.mjs .agents/skills/caveman-explore/tests/skill-file.test.mjs .agents/skills/caveman-learn/tests/skill-file.test.mjs",
-    "audit": "node bin/cli.mjs audit",
-    "doctor": "node bin/cli.mjs doctor",
-    "skills": "node bin/cli.mjs list",
-    "scan": "node bin/cli.mjs scan",
-    "quality": "node bin/cli.mjs quality",
-    "review": "node bin/cli.mjs review",
-    "analyze": "node bin/cli.mjs analyze",
-    "tasks": "node bin/cli.mjs tasks",
-    "memory": "node bin/cli.mjs memory"
+    "test": "node --test tests/aac.test.mjs",
+    "pack:check": "npm pack --dry-run"
   },
   "files": [
     "bin/",
     ".agents/",
     "!.agents/mcp_config.json",
-    "!.agents/**/mcp_config.json",
-    "!.agents/brain/**",
-    "!.agents/inbox/**",
-    "!.agents/harness/**",
-    "!.agents/state/**",
-    "!.agents/*settings*.json",
-    "!**/*.pyc",
-    "!**/__pycache__/**",
-    "docs/",
     "AGENTS.md",
-    "GEMINI.md",
-    "CLAUDE.md",
     "CONTEXT.md",
-    "skills-lock.json",
-    ".env.example",
-    "install.ps1",
     "install.sh",
+    "install.ps1",
     "README.md",
-    "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "SECURITY.md",
+    "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=18.0.0"
-  }
+    "node": ">=22.0.0"
+  },
+  "packageManager": "npm@10.9.0"
 }

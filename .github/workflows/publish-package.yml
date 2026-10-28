@@ -1,65 +1,93 @@
-name: Publish Packages
+name: Verify & Publish Packages
 
 on:
+  push:
+    branches: [main]
+  pull_request:
   release:
     types: [published]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  test:
-    name: Run Automated Test Suite
-    runs-on: ubuntu-latest
+  verify:
+    name: Verify Installer, Hooks & Frontmatter (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Node.js Runtime
-        uses: actions/setup-node@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
 
       - name: Run Automated Test Suite
         run: npm test
 
+      - name: Verify Package Contents
+        run: npm run pack:check
+
   publish-npm:
     name: Publish to npm Registry
-    needs: test
+    needs: verify
+    if: github.event_name == 'release' && github.event.release.prerelease == false
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Node.js Runtime
-        uses: actions/setup-node@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Publish Package to npm
+      - name: Verify Tag Matches package.json Version & Publish
         run: |
           CURRENT_VER=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${CURRENT_VER}" ]; then
+            echo "Release tag ${GITHUB_REF_NAME} does not match v${CURRENT_VER}" >&2
+            exit 1
+          fi
           PUBLISHED_VER=$(npm view @rafaelghif/aac-core version 2>/dev/null || echo "")
           if [ "$CURRENT_VER" = "$PUBLISHED_VER" ]; then
             echo "Version $CURRENT_VER is already published to npm registry. Skipping."
           else
-            npm publish --access public
+            npm publish --provenance --access public
           fi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-gpr:
     name: Publish to GitHub Packages Registry
-    needs: test
+    needs: verify
+    if: github.event_name == 'release' && github.event.release.prerelease == false
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       packages: write
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Node.js Runtime
-        uses: actions/setup-node@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           registry-url: 'https://npm.pkg.github.com'

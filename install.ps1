@@ -1,164 +1,120 @@
-# AAC (Antigravity Agent Core) Installer for Windows PowerShell
+# AAC (Antigravity Agent Core V6) — Windows PowerShell Installer
 # Usage:
-#   Local:  powershell -ExecutionPolicy Bypass -File install.ps1
-#   Remote: irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
+#   Remote Install: irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
+#   Remote Upgrade: $env:AAC_UPGRADE="1"; irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
+#   Local Install:  powershell -File .\install.ps1 [-TargetDir <path>] [-Upgrade] [-Force] [-DryRun] [-WithSidecar] [-ProjectId <id>]
 
 param(
-    [switch]$Upgrade
+    [string]$TargetDir = (Get-Location).Path,
+    [switch]$Upgrade = ($env:AAC_UPGRADE -eq "1"),
+    [switch]$Force = ($env:AAC_FORCE -eq "1"),
+    [switch]$DryRun = ($env:AAC_DRY_RUN -eq "1"),
+    [switch]$WithSidecar = ($env:AAC_SIDECAR -eq "1"),
+    [string]$ProjectId = $env:AAC_PROJECT_ID
 )
 
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$targetDir = Get-Location
-
-$actionText = if ($Upgrade) { "Upgrading" } else { "Installing" }
-Write-Host "`n🚀 $actionText AAC (Antigravity Agent Core v5.4.0)..." -ForegroundColor Cyan
-Write-Host "Target: $targetDir`n" -ForegroundColor Gray
-
-$repoUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"
-$tempZip = Join-Path ([System.IO.Path]::GetTempPath()) "aac-main.zip"
-$tempExtract = Join-Path ([System.IO.Path]::GetTempPath()) "aac-temp"
+$ErrorActionPreference = "Stop"
+$runId = [guid]::NewGuid().ToString("N")
+$tempZip = Join-Path ([System.IO.Path]::GetTempPath()) "aac-$runId.zip"
+$tempExtract = Join-Path ([System.IO.Path]::GetTempPath()) "aac-$runId-extract"
 
 try {
-    $sourceRoot = $null
-    if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot ".agents"))) {
-        $sourceRoot = $PSScriptRoot
-        Write-Host "📦 Using local framework source: $sourceRoot" -ForegroundColor Yellow
+    if ($WithSidecar -and [string]::IsNullOrWhiteSpace($ProjectId)) {
+        throw "--WithSidecar requires -ProjectId <id> (or `$env:AAC_PROJECT_ID)."
+    }
+
+    $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { "" }
+    if ($scriptDir -and (Test-Path (Join-Path $scriptDir ".agents"))) {
+        $sourceRoot = $scriptDir
     } else {
-        Write-Host "📥 Downloading framework archive from GitHub..." -ForegroundColor Yellow
-        Invoke-WebRequest -Uri $repoUrl -OutFile $tempZip -UseBasicParsing
-
-        if (Test-Path $tempExtract) {
-            Remove-Item -Recurse -Force $tempExtract
+        Write-Host "Downloading AAC v6.0.0..." -ForegroundColor Cyan
+        $tagUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/tags/v6.0.0.zip"
+        $mainUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"
+        try {
+            Invoke-WebRequest -Uri $tagUrl -OutFile $tempZip -UseBasicParsing
+        } catch {
+            Invoke-WebRequest -Uri $mainUrl -OutFile $tempZip -UseBasicParsing
         }
-
         Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
-        $sourceRoot = (Get-ChildItem -Directory -Path $tempExtract | Select-Object -First 1).FullName
+        $sourceRoot = (Get-ChildItem -Path $tempExtract -Directory | Select-Object -First 1).FullName
     }
 
-    if (-not $sourceRoot -or -not (Test-Path $sourceRoot)) {
-        Write-Host "❌ Error: Framework source directory could not be resolved." -ForegroundColor Red
+    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+    $cliScript = Join-Path $sourceRoot "bin\cli.mjs"
+    if ($nodeCmd -and (Test-Path $cliScript)) {
+        $cliVerb = if ($Upgrade) { "upgrade" } else { "init" }
+        $cliArgs = @($cliScript, $cliVerb, "--target", $TargetDir)
+        if ($Force) { $cliArgs += "--force" }
+        if ($DryRun) { $cliArgs += "--dry-run" }
+        if ($WithSidecar) { $cliArgs += @("--with-sidecar", "--project-id", $ProjectId) }
+        & node @cliArgs
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         return
     }
 
-    if ((Resolve-Path $targetDir).Path -eq (Resolve-Path $sourceRoot).Path) {
-        Write-Host "ℹ️ Target directory is the framework source repository itself (nothing to scaffold)." -ForegroundColor Cyan
-        return
+    if (-not $DryRun) {
+        New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
     }
 
-    # Backup existing hooks.json before .agents/ copy if upgrading
-    $existingHooks = $null
-    $targetHooksPath = Join-Path $targetDir ".agents\hooks.json"
-    if (Test-Path $targetHooksPath) {
-        try {
-            $existingHooks = Get-Content $targetHooksPath -Raw | ConvertFrom-Json
-        } catch { }
-    }
+    if ((Resolve-Path $TargetDir).Path -ne (Resolve-Path $sourceRoot).Path) {
+        if ($DryRun) {
+            Write-Host "[dry-run] Would install AAC v6.0.0 in: $TargetDir" -ForegroundColor Cyan
+            return
+        }
 
-    # 1. Copy .agents directory
-    Write-Host "📦 Synchronizing .agents/ (rules, skills, hooks, plugins)..." -ForegroundColor Yellow
-    Copy-Item -Path (Join-Path $sourceRoot ".agents") -Destination $targetDir -Recurse -Force
+        foreach ($sub in @("rules", "skills", "agents", "sidecars")) {
+            $srcSub = Join-Path $sourceRoot ".agents\$sub"
+            $dstSub = Join-Path $TargetDir ".agents\$sub"
+            if (Test-Path $srcSub) {
+                New-Item -ItemType Directory -Path $dstSub -Force | Out-Null
+                Copy-Item -Path "$srcSub\*" -Destination $dstSub -Recurse -Force
+            }
+        }
 
-    # Smart-merge hooks.json if it existed
-    if ($existingHooks -and (Test-Path $targetHooksPath)) {
-        try {
-            $newHooks = Get-Content $targetHooksPath -Raw | ConvertFrom-Json
-            foreach ($prop in $newHooks.PSObject.Properties) {
-                if (-not $existingHooks.PSObject.Properties[$prop.Name]) {
-                    $existingHooks | Add-Member -MemberType NoteProperty -Name $prop.Name -Value $prop.Value
-                } else {
-                    $userEnabled = $existingHooks.($prop.Name).enabled
-                    $val = $prop.Value
-                    if ($null -ne $userEnabled) {
-                        $val.enabled = $userEnabled
-                    }
-                    $existingHooks.($prop.Name) = $val
+        $srcHooks = Join-Path $sourceRoot ".agents\hooks.json"
+        $dstHooks = Join-Path $TargetDir ".agents\hooks.json"
+        if (Test-Path $dstHooks) {
+            $srcObj = Get-Content $srcHooks -Raw | ConvertFrom-Json
+            $dstObj = Get-Content $dstHooks -Raw | ConvertFrom-Json
+            foreach ($prop in $srcObj.PSObject.Properties) {
+                $existing = $dstObj.PSObject.Properties[$prop.Name]
+                if ($existing -and ($null -ne $existing.Value.enabled)) {
+                    $prop.Value.enabled = $existing.Value.enabled
                 }
+                $dstObj | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value -Force
             }
-            $existingHooks | ConvertTo-Json -Depth 10 | Set-Content -Path $targetHooksPath -Encoding UTF8
-            Write-Host "🔄 Smart-merged .agents/hooks.json (retained custom hooks & user toggles)" -ForegroundColor Green
-        } catch { }
-    }
-
-    # 2. Copy docs directory (ADRs, tracker configs, templates)
-    $sourceDocs = Join-Path $sourceRoot "docs"
-    if (Test-Path $sourceDocs) {
-        Write-Host "📚 Synchronizing docs/ (ADRs, agents domain & tracker configs, templates)..." -ForegroundColor Yellow
-        Copy-Item -Path $sourceDocs -Destination $targetDir -Recurse -Force
-    }
-
-    # 3. Copy root context and directives (NEVER COPY package.json)
-    $rootFiles = @("AGENTS.md", "GEMINI.md", "CLAUDE.md", "skills-lock.json", ".env.example")
-    foreach ($file in $rootFiles) {
-        $src = Join-Path $sourceRoot $file
-        $dst = Join-Path $targetDir $file
-        if (Test-Path $src) {
-            if (-not (Test-Path $dst) -or $Upgrade) {
-                Copy-Item -Path $src -Destination $dst -Force
-                Write-Host "📄 Synchronized $file" -ForegroundColor Green
-            } else {
-                Write-Host "⏩ Skipped $file (already exists)" -ForegroundColor Gray
-            }
-        }
-    }
-
-    # 4. Strictly protect user-owned CONTEXT.md
-    $srcContext = Join-Path $sourceRoot "CONTEXT.md"
-    $dstContext = Join-Path $targetDir "CONTEXT.md"
-    if (Test-Path $srcContext) {
-        if (-not (Test-Path $dstContext)) {
-            Copy-Item -Path $srcContext -Destination $dstContext -Force
-            Write-Host "📄 Created CONTEXT.md" -ForegroundColor Green
+            $dstObj | ConvertTo-Json -Depth 10 | Set-Content -Path $dstHooks -Encoding UTF8
         } else {
-            Write-Host "🔒 Preserved user domain context: CONTEXT.md (never overwritten)" -ForegroundColor Cyan
+            Copy-Item -Path $srcHooks -Destination $dstHooks -Force
         }
-    }
 
-    # 4. Create .scratch directory
-    $scratchDir = Join-Path $targetDir ".scratch"
-    if (-not (Test-Path $scratchDir)) {
+        $dstAgentsMd = Join-Path $TargetDir "AGENTS.md"
+        if (-not (Test-Path $dstAgentsMd) -or $Force) {
+            Copy-Item -Path (Join-Path $sourceRoot "AGENTS.md") -Destination $dstAgentsMd -Force
+        } else {
+            Copy-Item -Path (Join-Path $sourceRoot "AGENTS.md") -Destination "$dstAgentsMd.aac-new" -Force
+        }
+
+        $dstContextMd = Join-Path $TargetDir "CONTEXT.md"
+        if (-not (Test-Path $dstContextMd)) {
+            Copy-Item -Path (Join-Path $sourceRoot "CONTEXT.md") -Destination $dstContextMd -Force
+        }
+
+        $scratchDir = Join-Path $TargetDir ".scratch"
         New-Item -ItemType Directory -Path $scratchDir -Force | Out-Null
-        Set-Content -Path (Join-Path $scratchDir ".gitkeep") -Value "# Ephemeral scratchpad directory" -Force
-        Write-Host "📁 Created .scratch/ directory" -ForegroundColor Green
-    }
-
-    # 5. Update .gitignore (never overwrite existing)
-    $gitignorePath = Join-Path $targetDir ".gitignore"
-    $rulesToAppend = @"
-
-# Antigravity Runtime & Ephemeral State
-.gemini/
-*.log
-*.tmp
-.scratch/*
-!.scratch/.gitkeep
-handoff.md
-
-# Credentials & MCP Secrets
-.agents/mcp_config.json
-!.agents/mcp_config.example.json
-.agents/plugins/**/mcp_config.json
-!.agents/plugins/**/mcp_config.example.json
-.env
-.env.*
-!.env.example
-"@
-
-    if (Test-Path $gitignorePath) {
-        $existing = Get-Content $gitignorePath -Raw
-        if ($existing -notmatch "\.scratch/\*") {
-            Add-Content -Path $gitignorePath -Value $rulesToAppend
-            Write-Host "🛡️ Appended Antigravity guardrails to .gitignore" -ForegroundColor Green
+        $gitkeep = Join-Path $scratchDir ".gitkeep"
+        if (-not (Test-Path $gitkeep)) {
+            Set-Content -Path $gitkeep -Value "# Ephemeral scratchpad" -Force
         }
-    } else {
-        Set-Content -Path $gitignorePath -Value $rulesToAppend.Trim() -Force
-        Write-Host "🛡️ Created .gitignore with Antigravity guardrails" -ForegroundColor Green
+
+        $gitignore = Join-Path $TargetDir ".gitignore"
+        $ignoreRules = "`n# Antigravity Ephemeral State & Secrets`n.scratch/*`n!.scratch/.gitkeep`n.agents/mcp_config.json`n"
+        if (-not (Test-Path $gitignore) -or ((Get-Content $gitignore -Raw) -notmatch "\.scratch/\*")) {
+            Add-Content -Path $gitignore -Value $ignoreRules
+        }
+
+        Write-Host "✅ AAC v6.0.0 ready." -ForegroundColor Green
     }
-
-    Write-Host "`n✅ Installation successful! (Zero package.json pollution)" -ForegroundColor Green
-    Write-Host "👉 Open this repository in Antigravity IDE or Antigravity 2.0 to begin.`n" -ForegroundColor Cyan
-
-} catch {
-    Write-Host "❌ Installation failed: $_" -ForegroundColor Red
 } finally {
     if (Test-Path $tempZip) { Remove-Item -Force $tempZip -ErrorAction SilentlyContinue }
     if (Test-Path $tempExtract) { Remove-Item -Recurse -Force $tempExtract -ErrorAction SilentlyContinue }

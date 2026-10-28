@@ -2,611 +2,197 @@
 
 <img src="assets/banner.png" alt="AAC (Antigravity Agent Core) Banner" width="100%" />
 
-# AAC (Antigravity Agent Core)
+# Antigravity Engineering Agent (V6)
 
-**Minimalist autonomous engineering framework for Google Antigravity.**  
-*Engineered for Gemini 3.8 Flash (High) • Native Progressive Disclosure • Lifecycle Hooks • Multi-Agent Workspaces*
+**Plug-and-play Principal Software Engineering & Technical Scrum constitution, progressive-disclosure rules, focused deep-module skills, native subagents, cross-platform Node lifecycle hooks, and scheduled sidecars for Google Antigravity.**
 
 <p align="center">
-  <a href="https://github.com/rafaelghif/antigravity-agents-core/releases/tag/v5.4.0"><img src="https://img.shields.io/badge/version-5.4.0-blue.svg?style=for-the-badge&logo=git" alt="Version 5.4.0" /></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.0.0-blue.svg?style=for-the-badge&logo=git" alt="Version 6.0.0" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity_2.0-8A2BE2.svg?style=for-the-badge&logo=google" alt="Platform" /></a>
   <a href="https://antigravity.google/docs/rules-workflows"><img src="https://img.shields.io/badge/optimized_for-Gemini_3.8_Flash-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Gemini 3.8 Flash" /></a>
-  <a href="#-autonomous-skills-suite"><img src="https://img.shields.io/badge/skills-64_verified-success.svg?style=for-the-badge" alt="64 Skills" /></a>
+  <a href="#v5--v6-evolution--consolidation-matrix"><img src="https://img.shields.io/badge/architecture-deep_modules-success.svg?style=for-the-badge" alt="Deep Modules" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge" alt="License: MIT" /></a>
-</p>
-
-<p align="center">
-  <a href="#-quick-start-multi-platform">Quick Start</a> •
-  <a href="#-architecture-overview">Architecture</a> •
-  <a href="#-always-on-operational-rules">Always-On Rules</a> •
-  <a href="#-repository-layout">Repository Layout</a> •
-  <a href="#-autonomous-skills-suite">Skill Catalog</a> •
-  <a href="#-5-tier-memory-management">Memory System</a> •
-  <a href="#-lifecycle-hooks--security">Lifecycle Hooks</a> •
-  <a href="#-model-context-protocol-mcp">MCP Setup</a>
 </p>
 
 </div>
 
 ---
 
-## ⚡ Overview
+## Core Design Principles (V6 Enterprise Architecture)
 
-**AAC (Antigravity Agent Core)** is a minimalist autonomous engineering framework built for the **Google Antigravity Customization Architecture**. It provides focused pair programming, autonomous multi-agent task execution, and progressive context disclosure without token waste or hallucinated tooling.
-
-<table>
-  <tr>
-    <td width="33%" align="center">
-      <h3>🚀 Native Tool Calling</h3>
-      <p>Seamless execution with Google Antigravity primitives: <code>run_command</code>, <code>replace_file_content</code>, <code>view_file</code>, and <code>invoke_subagent</code>.</p>
-    </td>
-    <td width="33%" align="center">
-      <h3>🧠 Minimalist & Terse</h3>
-      <p>Tailored for Gemini 3.8 Flash (High) via <b>Caveman Protocol</b> (fluff-free precision) and the 7-rung <b>Ponytail Ladder</b> (YAGNI to one-liners).</p>
-    </td>
-    <td width="33%" align="center">
-      <h3>🔒 Zero Global Pollution</h3>
-      <p>Strictly workspace-scoped within <code>.agents/</code>. Zero machine-global pollution (<code>~/.gemini/config/</code>) and zero <code>package.json</code> pollution.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" align="center">
-      <h3>🛡️ Production Realism</h3>
-      <p>Strict anti-dummy/mock standard via <b>Production Integrity</b>. Zero unverified assumptions, real schemas, and genuine error boundaries.</p>
-    </td>
-    <td width="33%" align="center">
-      <h3>⚡ Lifecycle Hooks</h3>
-      <p>PreToolUse interception blocking dangerous git commands and quality-gate Stop hooks enforcing test passage before session termination.</p>
-    </td>
-    <td width="33%" align="center">
-      <h3>🧩 5-Tier Memory Hierarchy</h3>
-      <p>Clean context partitioning: intra-session, workspace directives, living domain models, cross-session handoff, and task graphs.</p>
-    </td>
-  </tr>
-</table>
+1. **Savage Gen-Z Principal Engineer Persona ("Strictly Not a Yes-Man")**: Fun, unfiltered, blak-blakan (allowed to roast bad ideas, spaghetti code, or YAGNI over-engineering), zero corporate sycophancy (`[Roast & Premise Flaw] -> [Production Failure Mode] -> [Superior Engineering Alternative]`). Supports `AAC_PERSONA=neutral` for teams wanting formal enterprise tone.
+2. **User-Defined Architecture (Interview First, Zero Static Dogma)**: Never imposes a static folder hierarchy, rigid layer dogma, or assumed manifest stack. Discovers existing repo structure dynamically and **interviews the user first** (`ask_question` / `/grill-me`) whenever architecture, stack, or module topology are open.
+3. **The 6 Non-Negotiable Engineering Pillars**: Defined once in `AGENTS.md` §3—every design and diff is stress-tested to be **Future-Proof, Scalable, Maintainable, Secure, High-Performance, and Upgradeable**.
+4. **Expert Technical Scrum & Multi-Session Continuity**:
+   - `/to-tickets` generates a committed **Scrum Sprint Wave Board (`docs/sprint/SPRINT.md`)** and session-sized vertical tracer-bullet tickets (`docs/sprint/tickets/<NN>-<slug>.md`) with **Definition of Ready (DoR)**, **Execution Waves (DAG)**, and **Definition of Done (DoD)**.
+   - `/implement` executes 1 unblocked ticket test-first, commits atomically, updates the ticket's `Session Handover & Completion Log`, and promotes newly unblocked tickets in `docs/sprint/SPRINT.md`.
+   - `/handoff` checkpoints sprint progress, downstream seam notes, and the exact next command into `.scratch/handoff.md`.
+5. **Cross-Platform Tested Hooks & Contained Subagents**:
+   - `.agents/hooks.json` uses cross-platform `node -e` JSON parsers (`SessionStart` cold-start sprint/handoff detector, `PreToolUse` git destructive guard & production no-mock guard with `decision: "ask"`).
+   - `.agents/agents/*.md` subagents run with `commandExecutionPolicy: sandbox` (or `off` for `codebase-investigator`).
+6. **Non-Destructive SHA-256 Manifest Installer**:
+   - Tracks managed files in `.agents/.aac-manifest.json`.
+   - `upgrade` preserves `CONTEXT.md` and never overwrites user-modified `AGENTS.md`, rules, skills, or agents unless `--force` is passed (backs up to `.scratch/backups/<timestamp>/` and writes incoming updates to `<file>.aac-new`).
 
 ---
 
-## ⚡ Quick Start (Multi-Platform)
+## V5 → V6 Evolution & Consolidation Matrix
 
-Install AAC into **any existing project** (Python, Go, Rust, Node, Java, PHP, C++) with a single command:
+AAC V6 consolidates 64 legacy fragmented skills into a cohesive, deep-module architecture, eliminating cognitive noise, redundant variants, and token bloat while upgrading core engineering workflows:
 
-### Option 1: Universal NPX (Any OS with Node.js)
+| Legacy V5 Area (64 Skills Bloat) | V6 Consolidated Architecture | Primary Seams & Purpose |
+| :--- | :--- | :--- |
+| **Caveman Suite** (14 fragmented skills: `caveman-discover`, `caveman-learn`, `caveman-manage`, etc.) | **Progressive Rule (`caveman.md`)** | Zero-fluff, high-signal communication & token-efficient Gen-Z engineering protocol without prompt bloat. |
+| **Ponytail Suite** (6 fragmented skills: `ponytail-debt`, `ponytail-gain`, `ponytail-audit`, etc.) | **Progressive Rule (`ponytail.md`)** | 7-Rung Minimalist Ladder, root-cause caller mapping, and surgical in-place edits. |
+| **Grilling Variants** (3 skills: `grill-me`, `grilling`, `grill-with-docs`) | **Unified `/grill-me` Skill** | Interactive one-question-at-a-time interview with `(Recommended)` first slot to define architecture & stress-test designs. |
+| **Scattered Implementation** (`implement`, `implement-spec`, `lean-build`, `prototype`) | **Technical Scrum Wave Engine (`/to-tickets`, `/implement`, `/handoff`)** | Vertical tracer-bullet tickets with Execution Waves DAG (`docs/sprint/SPRINT.md`), DoR, DoD, and cross-session handover. |
+| **Review & Verification Scripts** (`code-analyzer`, `quality-guard`, `security-scanner`) | **3 Native Subagents & Automated Suite** | Sandboxed `adversarial-reviewer`, `codebase-investigator`, `verification-runner`, plus `tests/aac.test.mjs`. |
+| **Fragile Bash/PS1 Overwriters** | **SHA-256 Manifest CLI (`bin/cli.mjs`)** | Non-destructive tracking in `.agents/.aac-manifest.json`, conflict backup (`.scratch/backups/`), `.aac-new`, `--dry-run`, and `uninstall`. |
+
+---
+
+## End-to-End Engineering & Scrum Workflow
+
+```mermaid
+flowchart LR
+    G["/grill-me\n(One Question at a Time)"] --> F{"Decision Tree\nSettled?"}
+    F -->|"New Domain Terms /\n3-Gate Trade-off"| DM["/domain-modeling\n(CONTEXT.md + ADR)"]
+    F -->|"Module Boundary /\nSeam Design"| CD["/codebase-design\n(Design It Twice)"]
+    F -->|"Multi-Session Feature"| Spec["/to-spec\n(specs/<slug>.md)"]
+    F -->|"Scrum Wave Planning"| Tickets["/to-tickets\n(docs/sprint/SPRINT.md)"]
+    F -->|"Small Single Slice"| Impl["/implement\n(DoR -> TDD -> DoD)"]
+    F -->|"End Session"| Handoff["/handoff\n(.scratch/handoff.md)"]
+    DM --> Spec
+    CD --> Spec
+    Spec --> Tickets
+    Tickets -->|"Wave 1..N"| Impl
+    Impl <-->|"Next Session"| Handoff
+    Impl --> Review["/code-review\n(Spec + 6 Pillars)"]
+    Review --> PR["/pr\n(Summary + Door + Evidence)"]
+```
+
+---
+
+## Repository Structure
+
+```text
+antigravity-agent/
+├── AGENTS.md                                  # Always-on Savage Gen-Z Principal Engineer & 6-Pillar Rules
+├── CONTEXT.md                                 # User-Defined Architecture, Stack & Domain Glossary
+├── package.json                               # NPX & GitHub Packages distributor (@rafaelghif/aac-core v6.0.0)
+├── bin/cli.mjs                                # Non-destructive SHA-256 manifest CLI (init / upgrade / uninstall)
+├── install.sh                                 # Linux / macOS installer (delegates to bin/cli.mjs when Node is present)
+├── install.ps1                                # Windows PowerShell installer (delegates to bin/cli.mjs when Node is present)
+├── tests/aac.test.mjs                         # Automated test suite (CLI, hooks bypass corpus, frontmatter, packaging)
+├── LICENSE                                    # MIT License
+├── SECURITY.md                                # Threat model & vulnerability disclosure policy
+├── CHANGELOG.md                               # Release history
+├── .github/workflows/publish-package.yml      # Matrix CI verification + provenance publishing
+├── assets/
+│   └── banner.png                             # Official repository banner
+├── docs/
+│   ├── adr/                                   # Architecture Decision Records
+│   └── agents/                                # Antigravity platform reference & domain specs
+└── .agents/
+    ├── hooks.json                             # Cross-platform Node JSON lifecycle hooks (SessionStart, PreToolUse)
+    ├── sidecars/repo-health/sidecar.json      # Antigravity App scheduled sidecar template
+    ├── rules/                                 # 9 Modular Rules (flat directory)
+    │   ├── coding-standards.md                # DRY, KISS, YAGNI, SOLID/SRP, Clean Code (always_on)
+    │   ├── architecture-and-flow.md           # User-Defined Architecture, Deep Modules, E2E Flow (always_on)
+    │   ├── ponytail.md                        # 7-Rung Minimalist Ladder, Root Cause & Surgical Edits (always_on)
+    │   ├── caveman.md                         # Savage Gen-Z high-signal style & persona switch (always_on)
+    │   ├── database-migrations.md             # Expand-contract, CONCURRENTLY outside tx, SQL safety (model_decision)
+    │   ├── security-and-auth.md               # BOLA/IDOR, idempotency, atomic locks, full SSRF defense (model_decision)
+    │   ├── git-and-context.md                 # Conventional atomic commits, CONTEXT.md, Sprint Board (model_decision)
+    │   ├── testing.md                         # Public-seam assertions, hermeticity, boundary coverage (glob)
+    │   └── release-audit.md                   # Pre-release production readiness rubric (manual @mention)
+    ├── skills/                                # 13 Focused Single-Responsibility Skills
+    │   ├── grill-me/SKILL.md                  # One-question-at-a-time interview & 6-Pillar stress-test
+    │   ├── domain-modeling/                   # Sharpens CONTEXT.md glossary & records 3-Gate ADRs
+    │   │   ├── SKILL.md
+    │   │   └── resources/adr-template.md
+    │   ├── codebase-design/SKILL.md           # Deep modules & public test seams (Design It Twice)
+    │   ├── to-spec/                           # Turns settled decisions into a technical specification
+    │   │   ├── SKILL.md
+    │   │   └── resources/spec-template.md
+    │   ├── to-tickets/                        # Scrum Sprint Wave Board (SPRINT.md) & vertical tickets
+    │   │   ├── SKILL.md
+    │   │   ├── resources/sprint-board-template.md
+    │   │   └── resources/ticket-template.md
+    │   ├── implement/SKILL.md                 # Builds 1 Sprint ticket end-to-end (DoR -> TDD -> DoD -> Sync)
+    │   ├── tdd/SKILL.md                       # Red -> Green -> Refactor test-driven development loop
+    │   ├── diagnosing-bugs/SKILL.md           # Tight reproduction loop & scoped hypothesis falsification
+    │   ├── safe-refactor/SKILL.md             # Behavior-preserving atomic code refactoring
+    │   ├── database-migration/SKILL.md        # Zero-downtime Expand -> Migrate -> Contract migrations
+    │   ├── code-review/SKILL.md               # Two-axis diff review (Spec fidelity + Engineering standards)
+    │   ├── pr/                                # Writes PR description (Visual Summary, Door Type, Evidence)
+    │   │   ├── SKILL.md
+    │   │   └── resources/pr-template.md
+    │   └── handoff/                           # Multi-session Scrum handover (.scratch/handoff.md + SPRINT.md)
+    │       ├── SKILL.md
+    │       └── resources/handoff-template.md
+    └── agents/                                # 3 Native Custom Subagents (commandExecutionPolicy: sandbox / off)
+        ├── codebase-investigator.md           # Fast read-only recon & blast-radius tracer (model: flash, policy: off)
+        ├── adversarial-reviewer.md            # Independent Savage Red-Team diff & 6-Pillar critic (policy: sandbox)
+        └── verification-runner.md             # Isolated build, lint, typecheck & test runner (policy: sandbox)
+```
+
+---
+
+## Quick Start (Multi-Platform Installation, Upgrade & Uninstall)
+
+Install or upgrade into **any project** without touching the target project's `package.json`:
+
+### Option 1: Universal NPX (npm Registry, GitHub Packages, or Direct GitHub)
 ```bash
-# Via npm registry:
+# Install via npm Registry:
+npx @rafaelghif/aac-core init
+
+# Or via GitHub Packages (after configuring @rafaelghif:registry=https://npm.pkg.github.com):
 npx @rafaelghif/aac-core init
 
 # Or directly from GitHub:
 npx github:rafaelghif/antigravity-agents-core init
-```
 
-### Option 2: Standalone Windows PowerShell (Zero Node.js Prerequisite)
-```powershell
-irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
-```
+# Preview planned changes without writing files:
+npx @rafaelghif/aac-core upgrade --dry-run
 
-### Option 3: Standalone Linux / macOS (Zero Node.js Prerequisite)
-```bash
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash
-```
-
-### Upgrading an Existing Workspace
-If you are already running an earlier version of AAC (e.g. `v5.0.3` or `v5.1.0`), safely update core rules, skills, plugins, and lifecycle hooks with zero risk to your custom domain work:
-
-```bash
-# Universal NPX (recommended):
+# Non-destructive upgrade (preserves CONTEXT.md, custom hooks, and user-modified files; writes conflicts to *.aac-new):
 npx @rafaelghif/aac-core upgrade
 
-# Windows PowerShell:
-powershell -ExecutionPolicy Bypass -File install.ps1 -Upgrade
+# Force overwrite modified managed files (backs up previous files to .scratch/backups/<timestamp>/):
+npx @rafaelghif/aac-core upgrade --force
 
-# Linux / macOS:
-bash install.sh --upgrade
+# Uninstall unmodified managed files (preserves CONTEXT.md and user modifications):
+npx @rafaelghif/aac-core uninstall
 ```
 
-> [!TIP]
-> **Strict Upgrade Protections**:
-> - 🔒 **Domain Glossary & Architecture**: Existing [`CONTEXT.md`](CONTEXT.md) is strictly preserved and never overwritten.
-> - 🔒 **Workspace Secrets**: Existing [`.agents/mcp_config.json`](.agents/mcp_config.json) API tokens and MCP settings remain untouched.
-> - 🔄 **Smart Hooks Merging**: Updates framework lifecycle hooks while preserving all user-added custom hooks and toggle states (`enabled: false/true`).
-> - 📁 **Scratchpad Continuity**: Existing [`.scratch/`](.scratch) session handoffs are fully preserved.
-> - 🛡️ **Zero Pollution**: Guaranteed never to create or mutate `package.json` in your project.
-
-> [!IMPORTANT]
-> **Zero Package.json Pollution Guarantee**: The installer will **NEVER** create, overwrite, or mutate `package.json` in your target repository. It cleanly scaffolds `.agents/`, `AGENTS.md`, and `CONTEXT.md`, and appends ignore rules to your `.gitignore`.
-
----
-
-## 🏗️ Architecture Overview
-
-The framework coordinates context precedence, lifecycle hooks, autonomous subagent graphs, and memory tiers:
-
-```mermaid
-flowchart TD
-    User(["👤 User Request / Slash Command"]) --> Antigravity["Google Antigravity Engine (CLI / 2.0 / IDE)"]
-
-    subgraph ContextHierarchy ["🧠 Context Precedence (AGENTS.md)"]
-        AGENTS["1. AGENTS.md (Root Guidelines, ≤12k chars)"]
-        Rules["2. .agents/rules/*.md (trigger: always_on)"]
-        Hooks["3. .agents/hooks.json (PreToolUse, PostToolUse, Stop)"]
-        Plugins["4. .agents/plugins/ (Packaged MCP & Sidecars)"]
-        MCP["5. .agents/mcp_config.json (GitHub & Gitea Tools)"]
-        Skills["6. .agents/skills/ (Progressive Disclosure)"]
-    end
-
-    Antigravity --> ContextHierarchy
-
-    subgraph LifecycleEngine ["⚡ Lifecycle Event Hooks Engine"]
-        PreTool["PreToolUse Hook (git-guardrails: blocks push / reset / clean)"]
-        PostTool["PostToolUse Hook (automated linting & validation)"]
-        StopHook["Stop Quality Gate (blocks exit on failing tests)"]
-    end
-
-    Antigravity --> LifecycleEngine
-
-    subgraph SubagentsGraph ["🤖 Autonomous Subagents (invoke_subagent)"]
-        Investigator["cavecrew-investigator (TypeName: research, Model: flash)"]
-        Builder["cavecrew-builder (TypeName: self, Workspace: branch)"]
-        Reviewer["cavecrew-reviewer / code-review (Two-Axis Reviewers)"]
-    end
-
-    Antigravity --> SubagentsGraph
-
-    subgraph SidecarsEngine ["⚙️ Background Sidecars & Scheduled Tasks"]
-        Sidecars["repo-health (Periodic git & branch hygiene monitor)"]
-        CronSchedule["schedule tool (One-shot and recurring timers)"]
-    end
-
-    Antigravity --> SidecarsEngine
-```
-
----
-
-## 📜 Always-On Operational Rules
-
-AAC enforces deterministic engineering quality, communication brevity, and security through modular rules loaded into Antigravity context on every turn (`trigger: always_on`):
-
-| Rule | Protocol / Philosophy | Core Directives | Primary File |
-| :--- | :--- | :--- | :--- |
-| `architecture-and-flow` | **Techstack, Topology & Flow Protocol** | Mandatory discovery of workspace manifests, Clean/Hexagonal boundaries, deep module seams, zero cyclic imports, and end-to-end data/execution flow tracing. | [architecture-and-flow.md](.agents/rules/architecture-and-flow.md) |
-| `production-integrity` | **Zero Assumptions & Anti-Mock Standard** | Strict ban on dummy/fake/mock data in production code (`src/`, `lib/`, `app/`). Zero speculation; mandatory clarification via `/grill-me` or `ask_question`; test fixture isolation. | [production-integrity.md](.agents/rules/production-integrity.md) |
-| `ponytail` | **7-Rung Minimalist Code Ladder** | Laziest senior dev mode: YAGNI &rarr; Existing Helpers &rarr; Standard Library &rarr; Platform Native &rarr; Installed Dep &rarr; One-Liner &rarr; Minimal Diff. Fix root causes, not symptoms. | [ponytail.md](.agents/rules/ponytail.md) |
-| `caveman` | **Ultra-Compressed Communication** | Eliminates conversational fluff, polite filler, and tool narration. Delivers 100% technical substance, exact code, commands, and file links. | [caveman.md](.agents/rules/caveman.md) |
-| `coding-standards` | **Production Code Quality & SRP** | Single Responsibility Principle, fail-fast boundary validation, explicit error handling, and targeted single-block file modifications. | [coding-standards.md](.agents/rules/coding-standards.md) |
-| `git-workflow` | **Conventional Commits & Atomic History** | Enforces conventional commit prefixes (`feat:`, `fix:`, `chore:`, etc.) and single-unit atomic changes without mixing cosmetic and functional diffs. | [git-workflow.md](.agents/rules/git-workflow.md) |
-| `memory-management` | **5-Tier Context Isolation** | Manages working context across 5 tiers: intra-session, workspace directives, domain models, cross-session handoff (`.scratch/handoff.md`), and issue task graphs. | [memory-management.md](.agents/rules/memory-management.md) |
-
----
-
-## 📂 Repository Layout
-
-```text
-antigravity-agents/
-├── assets/                            # Framework visual assets & documentation banners
-│   └── banner.png                     # Vector branding banner
-├── .agents/                           # Workspace configuration (Strictly isolated)
-│   ├── hooks.json                     # Antigravity lifecycle hooks (PreToolUse, Stop)
-│   ├── hooks/                         # Cross-platform hooks (block-dangerous-git.cjs, verify-on-stop.cjs)
-│   ├── plugins.json                   # Explicit workspace plugin registration
-│   ├── skills.json                    # Explicit workspace skills registration (64 skills)
-│   ├── mcp_config.example.json        # Sanitized template for Git, GitHub, Gitea, and Database MCPs
-│   ├── plugins/                       # Workspace plugins packaging tools & sidecars
-│   │   └── workspace-integrations/    # Workspace integrations bundle
-│   ├── rules/                         # Workspace-level rules with 'trigger: always_on'
-│   │   ├── architecture-and-flow.md   # Dynamic techstack discovery, topology & flow protocol
-│   │   ├── caveman.md                 # Ultra-compressed token communication protocol
-│   │   ├── coding-standards.md        # SRP, fail-fast, and targeted replacement rules
-│   │   ├── git-workflow.md            # Conventional Commits and atomic changes
-│   │   ├── memory-management.md       # 5-tier memory hierarchy & cross-session protocol
-│   │   ├── ponytail.md                # 7-rung minimalist code ladder (YAGNI to one-liners)
-│   │   └── production-integrity.md    # Zero assumptions, anti-dummy policy & production realism
-│   └── skills/                        # 64 On-demand skills (Progressive disclosure)
-├── bin/                               # Universal CLI executable
-│   └── cli.mjs                        # Multi-platform installer (init, audit, doctor, list)
-├── docs/                              # Framework documentation & decision records
-│   ├── adr/                           # Architectural Decision Records (0001-memory, 0002-node-hooks)
-│   ├── agents/                        # Master skill directory, issue tracker, domain layout
-│   │   ├── skill-directory.md         # Canonical 64-skill routing directory & quality manifesto
-│   │   ├── domain.md                  # Domain docs layout and consumption rules
-│   │   ├── issue-tracker.md           # Issue tracker configuration standards
-│   │   └── triage-labels.md           # Canonical 5-role triage label definitions
-│   ├── templates/                     # Standardized session handoff template
-│   └── audit-checklist-64-skills.md   # Persistent 8-dimension audit checklist for all 64 skills
-├── tests/                             # Automated verification suites (node --test)
-│   ├── memory-system.test.mjs         # Verified 64-skill criteria and memory architecture
-│   ├── cli.test.mjs                   # CLI tests (including zero-package.json pollution test)
-│   └── lifecycle-guardrails-and-engines.test.mjs # Universal hook and engine test suite
-├── install.ps1                        # Standalone Windows PowerShell 1-liner installer (Zero Node)
-├── install.sh                         # Standalone Linux/macOS curl 1-liner installer (Zero Node)
-├── package.json                       # Framework manifest for npm/npx distribution
-├── .scratch/                          # Local session scratchpad & handoff staging (gitignored)
-├── AGENTS.md                          # Root instructions unconditionally loaded per turn (<12k chars)
-├── GEMINI.md                          # Pointer alias to AGENTS.md
-└── CONTEXT.md                         # Living domain glossary & architectural boundaries
-```
-
----
-
-## 🎯 Autonomous Skills Suite (64 Verified Skills)
-
-Skills extend agent capabilities via **progressive disclosure**: only names and descriptions are exposed in the initial context. When a user intent or slash command matches, the agent reads the target `SKILL.md` directly via `view_file`.
-
-For full operational procedures, decision trees, and quality invariants, see [skill-directory.md](docs/agents/skill-directory.md).
-
-<details>
-<summary><b>1. Specification, PRD & Planning (9 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `ask-matt` | Master workflow router recommending skills and flows | [SKILL.md](.agents/skills/ask-matt/SKILL.md) |
-| `grill-me` | Relentless interactive interview to stress-test plans before code (stateless) | [SKILL.md](.agents/skills/grill-me/SKILL.md) |
-| `grill-with-docs` | Stateful interview recording ADRs and domain glossary in CONTEXT.md | [SKILL.md](.agents/skills/grill-with-docs/SKILL.md) |
-| `grilling` | Decision-tree interview primitive resolving open prerequisite frontiers | [SKILL.md](.agents/skills/grilling/SKILL.md) |
-| `to-spec` | Synthesizes conversations into 10-point production PRDs and specifications | [SKILL.md](.agents/skills/to-spec/SKILL.md) |
-| `to-tickets` | Decomposes specs into vertical tracer-bullet tickets with dependency edges | [SKILL.md](.agents/skills/to-tickets/SKILL.md) |
-| `wayfinder` | Maps large multi-session initiatives into decision graphs on the issue tracker | [SKILL.md](.agents/skills/wayfinder/SKILL.md) |
-| `to-questionnaire` | Formats unresolved questions into structured questionnaires for external teams | [SKILL.md](.agents/skills/to-questionnaire/SKILL.md) |
-| `prototype` | Builds throwaway prototypes to sanity check state models and UX | [SKILL.md](.agents/skills/prototype/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>2. Architecture & Deep Modules (4 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `domain-modeling` | Sharpens domain terminology, bounded contexts, and records ADRs | [SKILL.md](.agents/skills/domain-modeling/SKILL.md) |
-| `codebase-design` | Deep-module design patterns, minimal interfaces, and public seams | [SKILL.md](.agents/skills/codebase-design/SKILL.md) |
-| `improve-codebase-architecture` | Scans codebase for deepening opportunities and architectural debt | [SKILL.md](.agents/skills/improve-codebase-architecture/SKILL.md) |
-| `setup-ts-deep-modules` | Configures dependency-cruiser to enforce deep module boundaries | [SKILL.md](.agents/skills/setup-ts-deep-modules/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>3. Quality-First Implementation & Refactoring (10 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `implement` | Rigorous 5-phase feature implementation driving TDD and quality gates | [SKILL.md](.agents/skills/implement/SKILL.md) |
-| `implement-spec` | Implements an entire spec using autonomous subagent task graphs | [SKILL.md](.agents/skills/implement-spec/SKILL.md) |
-| `tdd` | Test-driven development (Red → Green → Refactor) at agreed public seams | [SKILL.md](.agents/skills/tdd/SKILL.md) |
-| `safe-refactor` | Restructures code preserving external behavior with bracketed verification | [SKILL.md](.agents/skills/safe-refactor/SKILL.md) |
-| `surgical-patch` | Surgical bug fixes at the narrowest responsible layer without scope creep | [SKILL.md](.agents/skills/surgical-patch/SKILL.md) |
-| `lean-build` | Builds narrow feature slices with high overbuilding risk, maximizing reuse | [SKILL.md](.agents/skills/lean-build/SKILL.md) |
-| `migration` | Reversible, compatibility-safe schema and API migrations | [SKILL.md](.agents/skills/migration/SKILL.md) |
-| `migrate-to-shoehorn` | Replaces unsafe TypeScript `as` casts in test suites with shoehorn | [SKILL.md](.agents/skills/migrate-to-shoehorn/SKILL.md) |
-| `scaffold-exercises` | Scaffolds exercise structures with problems, solutions, and explainers | [SKILL.md](.agents/skills/scaffold-exercises/SKILL.md) |
-| `starter-skill` | Standard workflow template for introducing new procedures | [SKILL.md](.agents/skills/starter-skill/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>4. Code Review, Auditing & Verification (7 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `code-review` | Two-axis parallel review checking Standards (Fowler smells) and Spec fidelity | [SKILL.md](.agents/skills/code-review/SKILL.md) |
-| `verify-and-stop` | Proves existing work meets acceptance conditions without expanding scope | [SKILL.md](.agents/skills/verify-and-stop/SKILL.md) |
-| `ponytail-review` | Code review focused exclusively on eliminating over-engineering | [SKILL.md](.agents/skills/ponytail-review/SKILL.md) |
-| `ponytail-audit` | Whole-repo audit scanning for bloat, unnecessary abstractions, and dead code | [SKILL.md](.agents/skills/ponytail-audit/SKILL.md) |
-| `ponytail-debt` | Harvests `ponytail:` comments into an actionable technical debt ledger | [SKILL.md](.agents/skills/ponytail-debt/SKILL.md) |
-| `caveman-review` | Ultra-compressed code review delivering one-line findings with exact fixes | [SKILL.md](.agents/skills/caveman-review/SKILL.md) |
-| `triage` | Triages incoming issues and PRs through canonical 5-role lifecycle | [SKILL.md](.agents/skills/triage/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>5. Investigation & Diagnostics (3 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `diagnosing-bugs` | Scientific hypothesis testing loop for intermittent bugs and regressions | [SKILL.md](.agents/skills/diagnosing-bugs/SKILL.md) |
-| `investigate-first` | Diagnoses ambiguous failures and builds evidence-ranked hypotheses | [SKILL.md](.agents/skills/investigate-first/SKILL.md) |
-| `research` | Investigates questions against primary documentation into cited markdown | [SKILL.md](.agents/skills/research/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>6. Environment, Git & Safety Guardrails (5 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `git-guardrails` | Sets up PreToolUse hooks to intercept and block destructive git commands | [SKILL.md](.agents/skills/git-guardrails/SKILL.md) |
-| `setup-pre-commit` | Sets up Husky pre-commit hooks with lint-staged and automated tests | [SKILL.md](.agents/skills/setup-pre-commit/SKILL.md) |
-| `setup-matt-pocock-skills` | Configures issue tracker, triage labels, and domain doc layouts | [SKILL.md](.agents/skills/setup-matt-pocock-skills/SKILL.md) |
-| `resolving-merge-conflicts` | Resolves in-progress git merge/rebase conflicts by intent | [SKILL.md](.agents/skills/resolving-merge-conflicts/SKILL.md) |
-| `wizard` | Generates interactive wizards for human-in-the-loop setup and secrets | [SKILL.md](.agents/skills/wizard/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>7. Session Continuity & Delegation (4 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `handoff` | Checkpoints current conversation into `.scratch/handoff.md` for resumption | [SKILL.md](.agents/skills/handoff/SKILL.md) |
-| `subagent-handoff` | Hands off conversation state to an autonomous background worker | [SKILL.md](.agents/skills/subagent-handoff/SKILL.md) |
-| `cavecrew` | Subagent delegation protocol with compressed output contracts | [SKILL.md](.agents/skills/cavecrew/SKILL.md) |
-| `retro` | Post-session retrospective identifying environment and skill improvements | [SKILL.md](.agents/skills/retro/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>8. Ponytail Minimalist Ladder (3 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `ponytail` | Enforces the 7-rung minimalist code ladder (YAGNI to one-liners) | [SKILL.md](.agents/skills/ponytail/SKILL.md) |
-| `ponytail-gain` | Compact scoreboard displaying measured code and token savings | [SKILL.md](.agents/skills/ponytail-gain/SKILL.md) |
-| `ponytail-help` | Quick-reference card for all ponytail modes, skills, and commands | [SKILL.md](.agents/skills/ponytail-help/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>9. Caveman & Token Observability (11 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `caveman` | Ultra-compressed token communication protocol preserving 100% precision | [SKILL.md](.agents/skills/caveman/SKILL.md) |
-| `caveman-commit` | Writes concise Conventional Commits messages compressed to intent | [SKILL.md](.agents/skills/caveman-commit/SKILL.md) |
-| `caveman-compress` | Compresses markdown memory files saving ~46% context tokens | [SKILL.md](.agents/skills/caveman-compress/SKILL.md) |
-| `caveman-discover` | Discovers and labels LLM workflows across the codebase | [SKILL.md](.agents/skills/caveman-discover/SKILL.md) |
-| `caveman-evidence-review` | Read-only inspection of LLM traces, latency, error rates, and token cost | [SKILL.md](.agents/skills/caveman-evidence-review/SKILL.md) |
-| `caveman-explore` | Read-only repository explorer returning compact path:line citations | [SKILL.md](.agents/skills/caveman-explore/SKILL.md) |
-| `caveman-help` | Quick-reference card for caveman modes, triggers, and configuration | [SKILL.md](.agents/skills/caveman-help/SKILL.md) |
-| `caveman-learn` | Acts on token cost reports and trims heavy rules or memory files | [SKILL.md](.agents/skills/caveman-learn/SKILL.md) |
-| `caveman-manage` | Inspects and manages lifecycle of Caveman experiments | [SKILL.md](.agents/skills/caveman-manage/SKILL.md) |
-| `caveman-optimize` | Evaluates optimization candidates against baseline evaluations | [SKILL.md](.agents/skills/caveman-optimize/SKILL.md) |
-| `caveman-setup` | Configures repository through Caveman Cloud observability gateway | [SKILL.md](.agents/skills/caveman-setup/SKILL.md) |
-| `caveman-stats` | Calculates real session token usage, turn count, and token savings | [SKILL.md](.agents/skills/caveman-stats/SKILL.md) |
-
-</details>
-
-<details>
-<summary><b>10. Education & Authoring (7 skills - Click to expand)</b></summary>
-
-| Skill | Description | Primary File |
-| :--- | :--- | :--- |
-| `teach` | Multi-session technical curriculum and guided learning workspace | [SKILL.md](.agents/skills/teach/SKILL.md) |
-| `wait-what` | Re-explains concepts in plain English using ASD-STE100 Simplified Technical English | [SKILL.md](.agents/skills/wait-what/SKILL.md) |
-| `loop-me` | Specifies workflows and recurring automation loops | [SKILL.md](.agents/skills/loop-me/SKILL.md) |
-| `writing-for-agents` | Reference standard for authoring skills, rules, and agent instructions | [SKILL.md](.agents/skills/writing-for-agents/SKILL.md) |
-| `writing-beats` | Structures raw technical notes into grounded conceptual beats | [SKILL.md](.agents/skills/writing-beats/SKILL.md) |
-| `writing-fragments` | Brainstorms content and mines atomic fragments without premature structure | [SKILL.md](.agents/skills/writing-fragments/SKILL.md) |
-| `writing-shape` | Shapes unstructured notes into polished, cohesive narrative articles | [SKILL.md](.agents/skills/writing-shape/SKILL.md) |
-
-</details>
-
----
-
-## 🧠 5-Tier Memory Management
-
-To maintain crisp context without attention degradation or token bloat, AAC partitions memory across five distinct tiers:
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Tier 1: Ephemeral Working Context (Intra-Session)           │ -> Context window & transcript.jsonl
-├─────────────────────────────────────────────────────────────┤
-│ Tier 2: Workspace Directives (Cross-Session Deterministic)  │ -> AGENTS.md (<12k chars), .agents/rules/*.md
-├─────────────────────────────────────────────────────────────┤
-│ Tier 3: Domain & Architectural Knowledge (Living Docs)      │ -> CONTEXT.md, docs/adr/*.md
-├─────────────────────────────────────────────────────────────┤
-│ Tier 4: Session Bridge Handoff (Inter-Session State)        │ -> .scratch/handoff.md via handoff skill
-├─────────────────────────────────────────────────────────────┤
-│ Tier 5: External Task Graph (Durable Frontier)              │ -> GitHub / Gitea Issues (to-tickets)
-└─────────────────────────────────────────────────────────────┘
-```
-
-1. **Intra-Session (Tier 1)**: Ephemeral working context managed via progressive disclosure.
-2. **Workspace Directives (Tier 2)**: Core guidelines in `AGENTS.md` and modular rules in `.agents/rules/` (`architecture-and-flow.md`, `production-integrity.md`, `ponytail.md`, `caveman.md`, `coding-standards.md`, `git-workflow.md`, `memory-management.md`) with `trigger: always_on`.
-3. **Domain Knowledge (Tier 3)**: Living domain glossary in `CONTEXT.md` and immutable decisions in `docs/adr/`.
-4. **Session Bridge (Tier 4)**: Cold-start checkpoint saved to `.scratch/handoff.md` before exit. Rehydrated in new sessions via `@handoff.md`.
-5. **Durable Task Graph (Tier 5)**: External source of truth for work items managed via GitHub or Gitea issues.
-
----
-
-## 🛡️ Lifecycle Hooks & Security Guardrails
-
-AAC integrates with the native Antigravity lifecycle hook engine configured in `.agents/hooks.json` across `PreInvocation`, `PreToolUse`, and `Stop` events:
-
-### 1. Git Command Guardrail (`PreToolUse`)
-Intercepts `run_command` to block destructive git operations (`git push`, `git reset --hard`, `git clean -f`, `git branch -D`, `git checkout .`) before terminal execution using cross-platform Node.js (`hooks/block-dangerous-git.cjs`).
-
-### 2. Security & Secret Scanner (`PreToolUse`)
-Intercepts `run_command`, `write_to_file`, and `replace_file_content`. Blocks destructive commands and scans content for exposed credentials (API tokens, AWS keys, private keys, high-entropy secrets).
-
-### 3. Quality Code & Production Integrity Guard (`PreToolUse`)
-Intercepts `write_to_file` and `replace_file_content` to enforce `production-integrity.md`. Blocks fake tokens, dummy IDs, `throw new Error("stub")`, placeholder API URLs, and incomplete TODO stubs in production files, while permitting fixtures in test folders (`tests/`, `*.test.*`).
-
-### 4. Context Rehydration & Memory Engine (`PreInvocation`)
-Fires before model invocation returning `{ injectSteps: [{ ephemeralMessage: "..." }] }` to rehydrate cold-start context from `.scratch/handoff.md` and track active session frontiers.
-
-### 5. Universal Quality Gate (`Stop`)
-Dynamically detects the host workspace's native test runner (`npm test`, `pytest`, `go test ./...`, `cargo test`, `make test`) and executes verification before session termination. If tests fail, returns `{"decision": "continue"}` to prevent concluding turns with regressions.
-
-### 6. Automated Code Reviewer & Complexity Analyzer (`Stop`)
-Evaluates `git diff` against coding standards, Fowler smells, and deep module ratios. Flags shallow wrappers and high-complexity functions before termination.
-
-### 7. Task Orchestration & Wave Planner (`Stop`)
-Calculates independent parallel execution waves for DAG tasks defined in `.scratch/tasks.json` using topological sorting, alerting if tasks remain incomplete at model stop.
-
-### 8. Session Continuity & Auto-Handoff Guard (`Stop`)
-Guards cross-session context continuity by automatically synthesizing a structured handoff document into `.scratch/handoff.md` whenever uncommitted code modifications are detected upon termination or step limits (`max_steps_exceeded`).
-
----
-
-## 🛠️ CLI Subcommands & Tooling
-
-AAC includes a complete command-line toolkit for local development and CI/CD automation:
-
+### Option 2: Linux / macOS Shell (`install.sh`)
 ```bash
-# Security & secret scanning
-npx @rafaelghif/aac-core scan [dir]
+# Remote install:
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash
 
-# Production realism & anti-dummy check
-npx @rafaelghif/aac-core quality [dir]
+# Remote non-destructive upgrade:
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash -s -- --upgrade
 
-# Multi-axis diff review (Standards, Security, Ponytail)
-npx @rafaelghif/aac-core review
-
-# Codebase metrics & deep module analyzer
-npx @rafaelghif/aac-core analyze [dir]
-
-# Task graph & wave planner (.scratch/tasks.json)
-npx @rafaelghif/aac-core tasks summary
-npx @rafaelghif/aac-core tasks waves
-npx @rafaelghif/aac-core tasks next
-npx @rafaelghif/aac-core tasks add <id> <title> [dep1,dep2]
-npx @rafaelghif/aac-core tasks update <id> <status> [notes]
-
-# 5-tier memory status, snapshot, and rehydration
-npx @rafaelghif/aac-core memory status
-npx @rafaelghif/aac-core memory snapshot
-npx @rafaelghif/aac-core memory rehydrate
-
-# Diagnostics & compliance audits
-npx @rafaelghif/aac-core doctor
-npx @rafaelghif/aac-core audit
-npx @rafaelghif/aac-core list
+# Local install / dry-run / upgrade:
+bash /path/to/antigravity-agent/install.sh /path/to/your-project [--upgrade] [--force] [--dry-run]
 ```
 
----
+### Option 3: Windows PowerShell (`install.ps1`)
+```powershell
+# Remote install:
+irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
 
-## 🔌 Model Context Protocol (MCP)
+# Remote non-destructive upgrade:
+$env:AAC_UPGRADE="1"; irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
 
-AAC natively supports workspace-scoped MCP servers with credential sandboxing.
+# Local install:
+powershell -File .\install.ps1 -TargetDir "C:\path\to\your-project" [-Upgrade] [-Force] [-DryRun]
+```
 
-Copy `.agents/mcp_config.example.json` to `.agents/mcp_config.json` (gitignored):
-
+### Optional: Antigravity App Scheduled Sidecar (`--with-sidecar`)
+> **Note**: Sidecars are supported on **Antigravity App only**, require an explicit `--project-id <id>`, and consume AI credits when hourly scheduled conversations run.
 ```bash
-cp .agents/mcp_config.example.json .agents/mcp_config.json
+npx @rafaelghif/aac-core init --with-sidecar --project-id "<your-antigravity-project-id>"
 ```
-
-Configure Git, GitHub, Gitea, and database MCP connections:
-
-```json
-{
-  "mcpServers": {
-    "git": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-git"]
-    },
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
-      }
-    },
-    "gitea": {
-      "command": "docker",
-      "args": ["run", "-i", "--rm", "gitea/gitea-mcp:v0.1.0"],
-      "env": {
-        "GITEA_HOST": "${GITEA_HOST}",
-        "GITEA_ACCESS_TOKEN": "${GITEA_TOKEN}"
-      }
-    },
-    "postgres": {
-      "command": "bash",
-      "args": [
-        "-c",
-        "npx -y @modelcontextprotocol/server-postgres postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_PG}/${DB_NAME}"
-      ]
-    },
-    "mysql": {
-      "command": "bash",
-      "args": [
-        "-c",
-        "npx -y mcp-server-mysql mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT_MYSQL}/${DB_NAME}"
-      ]
-    },
-    "mssql": {
-      "command": "bash",
-      "args": [
-        "-c",
-        "npx -y @microsoft/mcp-sql-server \"Server=${DB_HOST},${DB_PORT_MSSQL};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};Encrypt=True;TrustServerCertificate=True;\""
-      ]
-    }
-  }
-}
-```
-
----
-
-## 🧪 Verification & Testing
-
-Every commit and installer is validated against a comprehensive automated test suite:
-
-```bash
-npm test
-```
-
-```text
-✔ frontmatter has valid Antigravity name and description
-✔ description specifies what it does and when to invoke
-✔ body specifies Antigravity research subagent and native tools
-✔ artifact carries no placeholder markers
-✔ SKILL.md has valid frontmatter
-✔ SKILL.md states the binding honesty rules
-✔ SKILL.md covers the cavemem_offload move
-✔ SKILL.md closes the longitudinal outcome loop honestly
-✔ SKILL.md never turns a behavioral finding into an imperative
-✔ SKILL.md has no placeholders
-✔ CLI --version prints v5.4.0
-✔ CLI --help prints usage banner
-✔ CLI list displays skills count
-✔ CLI doctor performs environment health checks
-✔ CLI init never creates or overwrites package.json in target directory
-﹣ install.ps1 scaffolds workspace with zero package.json pollution
-✔ install.sh scaffolds workspace with zero package.json pollution
-✔ lifecycle hook block-dangerous-git.cjs blocks dangerous git commands
-✔ lifecycle hook verify-on-stop.cjs executes quality gate on model_stop
-✔ lifecycle hook verify-on-stop.cjs returns continue when tests fail
-✔ lifecycle hook handoff-reminder.cjs guards session continuity on model_stop
-✔ CLI upgrade updates framework rules and directives while strictly preserving user CONTEXT.md and secrets
-﹣ install.ps1 -Upgrade updates framework files while preserving CONTEXT.md
-✔ install.sh --upgrade updates framework files while preserving CONTEXT.md
-✔ distribution package contains zero hardcoded local machine paths
-✔ security-scanner hook blocks dangerous commands and leaked secrets
-✔ quality-guard hook enforces anti-dummy/mock policy on production files
-✔ task-orchestrator computes DAG topological waves and handles dependencies
-✔ code-analyzer accurately computes cyclomatic complexity and deep module ratio
-✔ memory-engine tracks 5 tiers and creates snapshots
-✔ CLI exposes new subcommands: scan, quality, review, analyze, tasks, memory
-✔ code-analyzer detectTechStack detects workspace manifests, frameworks, and architecture
-✔ quality-guard catches multi-language stubs in Python, Rust, and Go
-✔ all local markdown links across repository resolve to existing files
-✔ AGENTS.md, rules, and skills cross-references are synchronized
-✔ AGENTS.md remains strictly below 12000 characters limit
-✔ production-integrity rule exists with trigger: always_on
-✔ memory-management rule exists with trigger: always_on
-✔ architecture-and-flow rule exists with trigger: always_on
-✔ CONTEXT.md living domain document exists at root
-✔ ADR 0001 records 5-tier memory decision
-✔ docs/agents configuration files exist and are populated
-✔ gitignore correctly ignores .scratch contents and preserves .gitkeep
-✔ session handoff template exists
-✔ all 64 skills comply with Antigravity operational criteria
-ℹ tests 45
-ℹ pass 43
-ℹ fail 0
-ℹ skipped 2
-```
-
----
-
-## 🤝 Open-Source Lineage & Acknowledgements
-
-AAC is built upon and adapts pioneering open-source engineering standards, specialized and hardened for the Google Antigravity ecosystem:
-
-- **[Matt Pocock's Skills](https://github.com/mattpocock/skills)**: The canonical 40+ engineering lifecycle skills (TDD, Grilling, Code Review, Diagnosing Bugs, Implement Spec, Wayfinder, Domain Modeling). AAC forks, hardens, and fully adapts these skills from their Claude Code origin into native Google Antigravity primitives (`view_file`, `replace_file_content`, `run_command`, `ask_question`, and `invoke_subagent`).
-- **[Caveman by Julius Brussee](https://github.com/JuliusBrussee/caveman)**: The ultra-compressed, fluff-free Caveman communication protocol and the 7-rung Ponytail minimalist code ladder. Integrated directly as core always-on operational rules (`.agents/rules/caveman.md` and `.agents/rules/ponytail.md`) alongside token optimization and evidence review skills.
-- **[Google Antigravity & DeepMind](https://antigravity.google)**: The native Antigravity Customization Architecture, Gemini 3.8 Flash model tuning, lifecycle hooks, Git worktree isolation, docked prompts, and automations.
-
----
-
-## 📜 License
-
-Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.
-
-Developed by **Muhammad Rafael Ghifari** ([@rafaelghif](https://github.com/rafaelghif)) for the [Google Antigravity Ecosystem](https://antigravity.google).
