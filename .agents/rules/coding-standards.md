@@ -3,37 +3,41 @@ trigger: model_decision
 description: "Core coding standards enforcing DRY, KISS, YAGNI, SOLID/SRP, intention-revealing naming, guard clauses, type-driven state invariants, and fail-fast error handling when authoring or reviewing code."
 ---
 
-# Coding Standards (DRY, KISS, YAGNI, SOLID & Clean Code)
+# Coding Standards (World-Class Engineering & Mechanical Sympathy)
 
-## 1. Core Engineering Principles
+## 1. Architectural Foundations (KISS, DRY, YAGNI, SOLID)
 
-* **KISS (Keep It Simple, Stupid)**: Prefer flat, linear, obvious control flow over clever meta-programming, deep inheritance hierarchies, or nested ternaries. Boring, readable code wins.
-* **DRY (Don't Repeat Yourself — Single Source of Truth)**: Define validation schemas, domain constants, business formulas, and contracts in one canonical place. Apply the **Rule of Three** (or extract when identical domain formulas appear in 2+ substantive call sites); never copy-paste business rules across files.
-* **YAGNI (You Aren't Gonna Need It)**: Implement only what the current specification requires. Ban speculative generics, unused configuration parameters, and unrequested wrapper abstractions.
-* **SOLID & Single Responsibility (SRP)**: Each function and module must have a single reason to change and operate at a uniform level of abstraction (use ~15–40 lines as a cognitive-load guideline, without artificially splitting cohesive deep modules). Prefer composition and small interfaces over class inheritance.
+* **KISS (Keep It Simple, Stupid)**: Favor flat, linear, obvious control flow over meta-programming, deep class hierarchies, or convoluted abstraction layers. Boring, readable code wins every time in production.
+* **DRY (Single Canonical Source of Truth)**: Consolidate domain calculations, validation schemas, and entity invariants in one place. Apply the Rule of Three; never copy-paste business logic across modules.
+* **YAGNI (You Aren't Gonna Need It)**: Implement only what current requirements mandate. Reject speculative generic abstractions, unused hook configurations, and premature extension frameworks.
+* **SOLID & Deep Modules**: Functions and modules must operate at a uniform level of abstraction with a single reason to change. Design **Deep Modules**—a simple, compact public interface encapsulating rich, robust internal implementation. Eliminate shallow pass-through classes that add cognitive noise without adding leverage.
 
-## 2. Clean Code Mechanics (Tata Cara Penulisan Kode)
+## 2. Mechanical Sympathy & High-Performance Low-Allocation Patterns
 
-* **Intention-Revealing Naming**:
-  * Variables and types must state *what* they hold and *why* they exist (`activeSessionCount`, `retryAttemptIndex`, `invoiceTotalCents`). Ban cryptic abbreviations (`cnt`, `tmp`, `val`, `obj`, `data2`).
-  * Functions must use verb-noun phrasing revealing behavior or return semantics (`parseWebhookSignature`, `calculateProratedRefund`).
-  * Booleans must read as affirmative predicates (`isAuthorized`, `hasExpired`, `shouldRetry`).
-* **Guard Clauses & Flattened Control Flow**:
-  * Validate preconditions, edge cases, and failure states at the top of the function and return early (Fail Fast).
-  * Keep the primary happy path unindented at the base level. Maximum nesting depth: **2–3 levels**.
-* **Explanatory Variables**:
-  * Extract complex boolean expressions, bitwise checks, or regular expressions into named intermediate variables that explain the business rule.
-* **Why-Only Comments**:
-  * Never write comments describing *what* the code visibly does. Write comments only to explain *why*: non-obvious business invariants, protocol quirks, concurrency ordering, or `// ponytail:` scaling ceilings and upgrade paths.
+* **Allocation Awareness in Hot Paths**:
+  * Avoid allocating temporary objects, closures, or intermediate arrays inside hot processing loops. Reuse buffers and pre-allocate fixed-size structures where throughput is critical.
+* **Streaming & Backpressure Control**:
+  * Process large files, bulk API exports, or continuous network streams using streaming pipelines with explicit backpressure management (`pipe`, `highWaterMark`). Never buffer unbounded data in memory to prevent Out-Of-Memory (OOM) crashes.
+* **Temporal & Currency Precision**:
+  * Store, compute, and serialize all timestamps in UTC (`ISO-8601` or epoch timestamps). Convert timezones exclusively at the final presentation boundary.
+  * Model currency strictly in integer minor units (e.g., cents using `BigInt` or `int64`) or fixed-point `Decimal`. The use of IEEE-754 floating-point numbers for money calculations is strictly prohibited.
 
-## 3. Type-Driven State, Precision & Error Handling
+## 3. Clean Code Mechanics & State Modeling
 
 * **Make Illegal States Unrepresentable**:
-  * Model mutually exclusive lifecycles with Discriminated Unions / Sum Types (`type OrderState = { status: 'draft' } | { status: 'paid'; paidAt: Date; txId: string }`) instead of nullable field bags or boolean flag clusters (`isPending`, `isPaid`, `isFailed`).
-  * Enforce invariants inside constructors or boundary parsers ("Parse, don't validate").
-* **Temporal & Monetary Precision**:
-  * Store and compute all timestamps in UTC (`ISO-8601` / UTC epoch); convert timezones only at presentation boundaries.
-  * Represent currency in integer minor units (`BigInt` / `int64` cents in memory/DB, serialized as integer/string at JSON API boundaries) or fixed-point `Decimal`—never IEEE-754 floats.
-* **Explicit Error Propagation & Resource Cleanup**:
-  * Never swallow errors with empty `catch {}` blocks or ignored returns (`_ = err`). Wrap errors with operational context while preserving the causal chain (`%w` or `{ cause: err }`).
-  * Bound all external I/O with explicit timeouts and guarantee resource cleanup (`defer`, `try/finally`, `using`, RAII).
+  * Model state machines using Discriminated Unions / Sum Types rather than clusters of optional boolean flags or nullable fields. Validate and parse invariants strictly at system boundaries ("Parse, don't validate").
+* **Intention-Revealing Naming**:
+  * Identifiers must reveal *why* they exist and *what* they represent (`activeSessionCount`, `calculateProratedRefundCents`, `isAuthorizedTenant`). Ban ambiguous abbreviations (`cnt`, `tmp`, `val`, `data2`).
+* **Guard Clauses & Flattened Control Flow**:
+  * Enforce preconditions, input bounds, and error states at the top of the function and return early. Maintain the primary happy path at the unindented base level (maximum nesting depth: 2–3 levels).
+* **Why-Only Comments**:
+  * Never write comments that explain *what* the code does. Reserve comments exclusively for *why*: subtle protocol nuances, hardware quirks, concurrency invariants, or explicit `// ponytail: <ceiling and upgrade path>` limits.
+
+## 4. Production Resilience & Observability
+
+* **Structured Logging & Trace Context**:
+  * Emit structured JSON logs containing contextual metadata and distributed trace identifiers (`traceId`, `spanId` adhering to W3C Trace Context).
+* **Explicit Error Wrapping**:
+  * Never swallow errors with empty `catch {}` blocks or ignored returns. Wrap errors with high-signal operational context while preserving the underlying cause chain (`{ cause: err }` in JS/TS, `%w` in Go).
+* **Graceful Lifecycle Shutdown**:
+  * Implement clean termination handlers on `SIGTERM` and `SIGINT`: reject incoming requests, drain active in-flight operations within a bounded timeout (e.g., 10–30s), close database connection pools and sockets cleanly, then exit.
