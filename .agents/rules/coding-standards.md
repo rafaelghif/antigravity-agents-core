@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: "Core coding standards enforcing DRY, KISS, YAGNI, SOLID/SRP, intention-revealing naming, guard clauses, type-driven state invariants, and fail-fast error handling."
+trigger: model_decision
+description: "Core coding standards enforcing DRY, KISS, YAGNI, SOLID/SRP, intention-revealing naming, guard clauses, type-driven state invariants, and fail-fast error handling when authoring or reviewing code."
 ---
 
 # Coding Standards (DRY, KISS, YAGNI, SOLID & Clean Code)

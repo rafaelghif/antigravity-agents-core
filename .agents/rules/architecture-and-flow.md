@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: "User-defined dynamic architecture (interview-first), deep modules, narrow boundary seams, and end-to-end blast-radius mapping."
+trigger: model_decision
+description: "User-defined dynamic architecture (interview-first), deep modules, narrow boundary seams, and end-to-end blast-radius mapping when designing or modifying system topology."
 ---
 
 # Dynamic Architecture & End-to-End Flow Mapping

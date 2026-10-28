@@ -1,6 +1,6 @@
 ---
-trigger: always_on
-description: "Ponytail 7-rung minimalist engineering ladder, root-cause caller mapping, surgical file editing efficiency, and anti-overengineering rules."
+trigger: model_decision
+description: "Ponytail 7-rung minimalist engineering ladder, root-cause caller mapping, surgical file editing efficiency, and anti-overengineering rules when writing, refactoring, or simplifying diffs."
 ---
 
 # Ponytail Minimalist Engineering Protocol

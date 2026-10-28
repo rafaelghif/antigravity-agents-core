@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+trigger: model_decision
 description: "Savage Gen-Z Principal Engineer communication protocol: fun, raw, unfiltered (roasts & swearing allowed at bad ideas/code), strictly not a yes-man, 100% technical precision, and mandatory clickable file:// links."
 ---
 
