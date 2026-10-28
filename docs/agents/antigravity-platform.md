@@ -142,18 +142,22 @@ Intercept and enforce guardrails at critical agent execution lifecycle stages vi
 
 ---
 
-## 12. Gemini 3.8 Flash Optimization & Execution Mechanics
+## 12. Dynamic Model Execution Matrix (Flash to Argon 4)
 
-**Gemini 3.8 Flash** (`gemini-3.8-flash`) is the platform's high-efficiency workhorse model optimized for long-horizon agentic loops, code synthesis, and multi-turn tool execution.
+Antigravity natively supports dynamic model routing across different intelligence and latency tiers:
 
-### Key Technical Parameters
-- **Context Window**: 1,048,576 tokens (~1M).
-- **Max Output**: 65,536 tokens.
-- **Thinking Levels**: Configured via `thinking_level: "low" | "medium" | "high"` (`minimal` is unsupported).
-- **Sampling Behavior**: `temperature` defaults to `1.0`; custom frequency/presence penalties are unsupported and will return API errors.
+### 1. Speed & Iteration Tier (Gemini Flash Series / `gemini-3.8-flash`)
+- **Role**: High-efficiency workhorse for rapid multi-turn tool loops, interactive refactoring, and automated CI pipelines.
+- **Context & Output**: 1,048,576 tokens input, 65,536 tokens output.
+- **Reasoning**: `thinking_level: "low" | "medium" | "high"`.
+- **Execution Guardrails**: Requires affirmative operational formulas, compact progressive-disclosure rules, and deterministic Node.js hook backstops (`PreToolUse`) to eliminate shortcut bias and instruction dilution.
 
-### Flash Adherence Strategies (Preventing Rule-Skipping)
-1. **Internal Thinking Steering**: With `thinking_level: "high"`, inject a structured `<thinking_rubric>` into system instructions to mandate blast-radius mapping and invariant checks during internal chain-of-thought tokens before any tool emission.
-2. **Deterministic PreToolUse Hook Backstops**: Rely on Node.js lifecycle hooks (`.agents/hooks.json`) to intercept destructive git actions and production mocks mechanically rather than depending solely on prompt compliance.
-3. **Subagent Workload Offloading**: Use sandboxed custom subagents (`codebase-investigator`, `verification-runner`) to isolate heavy file scans and test outputs, keeping the primary agent context window lean and preventing *Lost-in-the-Middle* degradation.
-4. **Affirmative Operational Guardrails**: State constraints as positive, active operational steps with clear preconditions and fail-fast triggers.
+### 2. Flagship Frontier Reasoning Tier (Gemini 4 Argon / `gemini-4-argon`)
+- **Role**: Google's frontier reasoning engine engineered for deep autonomous software engineering, complex architectural refactoring, quantum/mathematical proofs, and end-to-end vulnerability patching across large monorepos.
+- **Context & Output**: 1,000,000+ token context window with full multi-modal understanding.
+- **Execution Posture**: Executes long-horizon planning with exhaustive blast-radius analysis, autonomous error recovery, and comprehensive public test seam synthesis without premature completion shortcuts.
+
+### 3. Model-Agnostic Invariants
+- **Internal Thinking Steering**: Injects `<thinking_rubric>` to force invariant audits during internal chain-of-thought tokens across all reasoning models.
+- **Deterministic Hook Backstops**: Hard boundaries enforced via `.agents/hooks.json` regardless of which model powers the agent turn.
+- **Subagent Delegation**: Offloads heavy tasks to specialized subagents to keep the primary agent's attention window sharp and focused.
