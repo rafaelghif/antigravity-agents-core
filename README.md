@@ -9,7 +9,7 @@
 <p align="center">
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.0.0-blue.svg?style=for-the-badge&logo=git" alt="Version 6.0.0" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity_2.0-8A2BE2.svg?style=for-the-badge&logo=google" alt="Platform" /></a>
-  <a href="https://antigravity.google/docs/rules-workflows"><img src="https://img.shields.io/badge/adaptive_for-Gemini_Flash_%E2%80%A2_Argon_4-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Gemini Flash & Argon 4" /></a>
+  <a href="https://antigravity.google/docs/rules-workflows"><img src="https://img.shields.io/badge/engine-Dynamic_High_Reasoning-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Dynamic High Reasoning" /></a>
   <a href="#v5--v6-evolution--consolidation-matrix"><img src="https://img.shields.io/badge/architecture-deep_modules-success.svg?style=for-the-badge" alt="Deep Modules" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge" alt="License: MIT" /></a>
 </p>

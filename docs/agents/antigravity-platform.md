@@ -142,22 +142,26 @@ Intercept and enforce guardrails at critical agent execution lifecycle stages vi
 
 ---
 
-## 12. Dynamic Model Execution Matrix (Flash to Argon 4)
+## 12. Dynamic Model Tier Architecture & Execution Matrix
 
-Antigravity natively supports dynamic model routing across different intelligence and latency tiers:
+Antigravity natively routes tasks across dynamic model capability tiers. Instead of coupling workflows to transient model version strings, the execution harness adapts based on runtime tier characteristics:
 
-### 1. Speed & Iteration Tier (Gemini Flash Series / `gemini-3.8-flash`)
-- **Role**: High-efficiency workhorse for rapid multi-turn tool loops, interactive refactoring, and automated CI pipelines.
-- **Context & Output**: 1,048,576 tokens input, 65,536 tokens output.
-- **Reasoning**: `thinking_level: "low" | "medium" | "high"`.
-- **Execution Guardrails**: Requires affirmative operational formulas, compact progressive-disclosure rules, and deterministic Node.js hook backstops (`PreToolUse`) to eliminate shortcut bias and instruction dilution.
+### 1. High-Speed / Distilled Iteration Tiers
+- **Characteristics**: Low-latency, high-throughput, multi-turn tool loops, and automated continuous integration.
+- **Vulnerability**: Vulnerable to instruction dilution, lost-in-the-middle degradation, and premature completion shortcuts.
+- **Methodological Safeguards**:
+  - Enforce affirmative operational formulas ("Inspect X, wire real Y, fail fast on Z") over passive prohibitions.
+  - Employ progressive disclosure (`model_decision` / `glob`) to keep static prompt payloads strictly bounded.
+  - Rely on deterministic Node.js lifecycle hooks (`PreToolUse`) to mechanically intercept destructive or invalid actions.
 
-### 2. Flagship Frontier Reasoning Tier (Gemini 4 Argon / `gemini-4-argon`)
-- **Role**: Google's frontier reasoning engine engineered for deep autonomous software engineering, complex architectural refactoring, quantum/mathematical proofs, and end-to-end vulnerability patching across large monorepos.
-- **Context & Output**: 1,000,000+ token context window with full multi-modal understanding.
-- **Execution Posture**: Executes long-horizon planning with exhaustive blast-radius analysis, autonomous error recovery, and comprehensive public test seam synthesis without premature completion shortcuts.
+### 2. Frontier Reasoning Tiers
+- **Characteristics**: Large-scale internal test-time compute (extended chain-of-thought tokens), deep logic deliberation, and long-horizon autonomy.
+- **Strengths**: Excels at holistic codebase refactoring, complex state-machine synchronization, and end-to-end vulnerability patching.
+- **Methodological Posture**:
+  - Leverages `<thinking_rubric>` to systematically audit caller blast radiuses, edge cases, and architectural seams inside the reasoning phase.
+  - Formulates multi-step execution plans and hermetic public test seams before modifying shared interfaces.
 
 ### 3. Model-Agnostic Invariants
-- **Internal Thinking Steering**: Injects `<thinking_rubric>` to force invariant audits during internal chain-of-thought tokens across all reasoning models.
-- **Deterministic Hook Backstops**: Hard boundaries enforced via `.agents/hooks.json` regardless of which model powers the agent turn.
-- **Subagent Delegation**: Offloads heavy tasks to specialized subagents to keep the primary agent's attention window sharp and focused.
+- **Thinking Steering**: Mandatory evaluation of the 4 check-gates (Blast Radius, 6 Pillars, Ponytail Ladder, Verification Command) during internal reasoning.
+- **Zero Mocks**: Real drivers reading from environment variables; mocks strictly isolated to test directories.
+- **Execution Evidence**: Tasks require terminal verification (`exit code: 0`) before completion can be reported.
