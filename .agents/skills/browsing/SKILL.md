@@ -40,6 +40,7 @@ Execute reliable browser automation, live UI verification, and end-to-end user j
 - **Backend API testing**: Never click UI buttons to test backend JSON validation when a curl command or integration test can verify it directly.
 - **Arbitrary sleep delays**: Never introduce `sleep 3` or `waitForTimeout`. Always use event-driven auto-waiting (`waitForURL`, `waitForSelector`).
 - **Brittle CSS/XPath selectors**: Never select elements via generated hashes or positional paths (`div > div:nth-child(2)`). Always use user-facing accessible locators (see [references/locators-and-patterns.md](./references/locators-and-patterns.md)).
+- **Temporal regression in search**: Never replace user-specified years, dates, or version constraints with training cutoff defaults (e.g., querying 2024 when 2026 was explicitly mandated). Search queries must preserve exact temporal parameters.
 
 ---
 

@@ -15,6 +15,7 @@ Execution adapts dynamically across foundation model capabilities—from high-sp
    - **Daemon & Zero-Friction Precondition**: Does this diff or configuration assume external background services (Docker daemon, named pipes, virtualization) when standard runtime stdio or native tools solve it natively? Default to zero-daemon primitives.
    - **Cross-Platform Mechanical Check**: Did I verify shell quoting, named pipes, and paths against Windows (`cmd.exe`/PowerShell) and POSIX? Never guess shell escaping mechanics.
    - **Ponytail Ladder**: Did I choose the simplest, most boring working diff using standard library and existing codebase helpers before creating new files or dependencies?
+   - **Temporal & Literal Prompt Fidelity**: Have I preserved the exact dates, years, terms, and versions explicitly specified in the user prompt and session metadata? Never regress or rewrite user-specified years (e.g. substituting 2026 with 2024) back to stale training cutoff defaults.
    - **Verification Command**: What exact terminal test or build command (`run_command`) will verify this change with exit code 0 before concluding?
 2. **Model-Tier Adaptation**:
    - **Fast / smaller-context models**: Rely on affirmative operational formulas, compact progressive-disclosure rules, and deterministic hook backstops to prevent shortcutting and lost-in-the-middle degradation.
@@ -33,6 +34,7 @@ Execution adapts dynamically across foundation model capabilities—from high-sp
 ## 2. Dynamic Discovery & Empirical Grounding (Zero Parametric Hubris)
 
 * **Parametric Memory Is an Unverified Hypothesis**: Internal model weights are stale by definition. Never assume external APIs, library versions, platform capabilities, CLI flags, or framework conventions have remained unchanged.
+* **Zero Temporal Regressive Bias (Strict Literal Grounding)**: Never substitute user-specified years, dates, or version numbers with stale training cutoff years (e.g., unconsciously regressing '2026' back to '2024'). Always anchor active research (`search_web`, `/browser`) and technical analysis strictly in the explicit temporal timeframe and exact terms specified by the user and current session metadata (`<ADDITIONAL_METADATA>`).
 * **Mandatory Active Research (Anti-Laziness Invariant)**: Whenever referencing or using third-party libraries, modern framework APIs, or platform features (e.g. Antigravity platform, Next.js, Playwright, Node): **STOP and RESEARCH FIRST**. Run `search_web`, read installed manifests (`package.json`, lockfiles), inspect types in `node_modules`, or browse live docs (`read_url_content` / `/browser`) before writing code or assertions. Guessing without empirical proof is a critical failure.
 
 * **Zero Static Dogma**: Never impose rigid folder hierarchies or assumed layer dogma. Architecture, stack, and module layout are **defined by the user**.

@@ -405,6 +405,9 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
     assert.equal(fs.existsSync(path.join(rulesDir, match[1])), true, `AGENTS.md references missing rule ${match[1]}`);
   }
 
+  // Temporal fidelity: ensure AGENTS.md strictly forbids regressing years to training cutoff defaults.
+  assert.match(agentsContent, /Zero Temporal Regressive Bias/i, 'AGENTS.md must mandate zero temporal regressive bias');
+
   // Security-rule regression: never document a non-existent constant-time API.
   const securityRule = fs.readFileSync(path.join(rulesDir, 'security-and-auth.md'), 'utf8');
   assert.doesNotMatch(securityRule, /subtle\.timingSafeEqual/, 'security-and-auth.md must not cite the non-existent crypto.subtle.timingSafeEqual');
