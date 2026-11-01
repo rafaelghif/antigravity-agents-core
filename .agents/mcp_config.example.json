@@ -1,27 +1,14 @@
 {
   "mcpServers": {
-    "git": {
+    "github": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-git",
-        "--repository",
-        "."
+        "@modelcontextprotocol/server-github"
       ],
-      "cwd": ".",
-      "timeoutSeconds": 120
-    },
-    "gitea": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--env-file",
-        ".agents/mcp.env",
-        "gitea/gitea-mcp:v0.1.0"
-      ],
-      "cwd": ".",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
       "timeoutSeconds": 180
     }
   }

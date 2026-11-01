@@ -46,7 +46,7 @@ function atomicWrite(filePath, content) {
 }
 
 const MANAGED_PREFIXES = ['.agents/rules/', '.agents/skills/', '.agents/agents/', '.agents/sidecars/'];
-const MANAGED_FILES = new Set(['AGENTS.md', '.agents/mcp_config.example.json', '.agents/mcp.env.example']);
+const MANAGED_FILES = new Set(['AGENTS.md', '.agents/mcp_config.example.json', '.agents/mcp.env.example', '.agents/git-guard.cjs']);
 
 // The manifest is user-writable and therefore untrusted: only AAC-managed paths inside the target
 // repository may be deleted. Anything else (absolute paths, `..` escapes, repo source files) is skipped.

@@ -11,7 +11,9 @@ Execution adapts dynamically across foundation model capabilities—from high-sp
    During internal reasoning before generating any response or tool call, explicitly evaluate:
    - **Blast Radius**: Have I mapped all callers across the codebase via `grep_search` before altering this contract?
    - **The 6 Pillars**: Does this diff introduce N+1 query loops, floating-point currency math, unvalidated boundary payloads, race conditions, or production mocks?
-   - **Zero-Duplicate Check**: Did I search existing components and utilities via `grep_search` before creating a new file? Reuse, compose, and extend existing codebase patterns; never build parallel boilerplate.
+   - **Zero-Duplicate Check**: Did I search existing components and utilities via `grep_search` before creating a new file? Reuse, compose, and extend existing codebase patterns; never build parallel boilerplate or dump multiple competing configurations into one file.
+   - **Daemon & Zero-Friction Precondition**: Does this diff or configuration assume external background services (Docker daemon, named pipes, virtualization) when standard runtime stdio or native tools solve it natively? Default to zero-daemon primitives.
+   - **Cross-Platform Mechanical Check**: Did I verify shell quoting, named pipes, and paths against Windows (`cmd.exe`/PowerShell) and POSIX? Never guess shell escaping mechanics.
    - **Ponytail Ladder**: Did I choose the simplest, most boring working diff using standard library and existing codebase helpers before creating new files or dependencies?
    - **Verification Command**: What exact terminal test or build command (`run_command`) will verify this change with exit code 0 before concluding?
 2. **Model-Tier Adaptation**:
@@ -34,6 +36,7 @@ Execution adapts dynamically across foundation model capabilities—from high-sp
 * **Mandatory Active Research (Anti-Laziness Invariant)**: Whenever referencing or using third-party libraries, modern framework APIs, or platform features (e.g. Antigravity platform, Next.js, Playwright, Node): **STOP and RESEARCH FIRST**. Run `search_web`, read installed manifests (`package.json`, lockfiles), inspect types in `node_modules`, or browse live docs (`read_url_content` / `/browser`) before writing code or assertions. Guessing without empirical proof is a critical failure.
 
 * **Zero Static Dogma**: Never impose rigid folder hierarchies or assumed layer dogma. Architecture, stack, and module layout are **defined by the user**.
+* **Zero Heavy Infrastructure Assumptions**: Never assume Docker or container virtualization daemons are active on the host machine. Local development configurations, agent toolings, and plugins must default to zero-daemon, platform-native stdio runtimes (Node.js, Go binaries, standard CLI) unless containerization is explicitly requested.
 * **Discovery Before Creation (Zero Duplicate Boilerplate)**: Inspect existing repository files, component/utility directories, `@CONTEXT.md`, and `docs/sprint/SPRINT.md` first. Never create new UI components, hooks, utilities, or templates in isolation without searching the codebase (`grep_search`). If a component or helper already exists, **REUSE OR EXTEND IT**—parallel implementations and bespoke duplicate boilerplate violate DRY/KISS/YAGNI and cause catastrophic maintainability drift.
 * **Interview Before Building**: When architecture, stack, database, or boundaries are undecided, interview the user first via `ask_question` (putting `(Recommended)` first) or `/grill-me`. Never silently guess.
 

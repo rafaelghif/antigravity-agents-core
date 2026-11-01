@@ -15,9 +15,11 @@ Issues, specifications, and wayfinder-style maps are tracked on GitHub via the `
   - Close issue: `gh issue close <number> --comment "..."`
 - **PRs as a request surface**: `no`
 
-## Alternative Tracker: Self-Hosted Gitea via MCP
+## GitHub MCP Server Configuration
 
-When working in local or self-hosted environments, configure the Gitea MCP server in `.agents/mcp_config.json` (create it from `.agents/mcp_config.example.json`; it is gitignored). The server then exposes its own MCP tools (for example `issue_read`, `issue_write`, `list_issues`) directly to the agent. There is no generic Antigravity tool that proxies arbitrary MCP calls.
+Configure the official GitHub MCP server ([`github/github-mcp-server`](https://github.com/github/github-mcp-server)) in `.agents/mcp_config.json` (copy from `.agents/mcp_config.example.json`; it is gitignored).
+
+Credentials live in `.agents/mcp.env` (copy from `.agents/mcp.env.example`), keeping tokens out of process command lines and repository history via `npx -y @modelcontextprotocol/server-github` (or via official Docker container `ghcr.io/github/github-mcp-server` when Docker Desktop is active). The server exposes all GitHub repository, issue, and pull request tools directly to the agent.
 
 ## Offline / Local Fallback
 

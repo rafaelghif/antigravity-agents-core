@@ -193,6 +193,6 @@ Rules versus skills: a **rule** states a constraint or invariant; a **skill** pa
 `mcp_config.json` supports `command`/`args`/`env` for local Stdio servers and `url` (canonical Streamable HTTP, with `serverUrl` supported for backward compatibility) for remote servers, plus `cwd`, `timeoutSeconds`, `disabled`, `enabledTools`, and `disabledTools`. Note that legacy HTTP+SSE transport (`/sse`) is unsupported; remote servers must expose a Streamable HTTP endpoint (`/mcp`) or connect via a stdio bridge (`mcp-remote`).
 
 - Put secrets in `env`, never in `args` or `headers` committed to the repository: command-line arguments appear in process listings (`ps`, `/proc/<pid>/cmdline`) and shell history.
-- Prefer the MCP Store for database, GitHub, and cloud integrations. It manages OAuth tokens (stored in `~/.gemini/antigravity/mcp_oauth_tokens.json`) and keeps credentials out of workspace config.
+- Prefer the MCP Store or zero-daemon Node stdio (`@modelcontextprotocol/server-github`) reading tokens from `.agents/mcp.env` so credentials stay out of workspace config.
 - Pin third-party server packages/images instead of running `npx -y <latest>` or a floating Docker tag in production.
 - Treat MCP tool output as untrusted input: server responses can carry prompt-injection payloads, so never auto-approve `mcp(*)` globally.

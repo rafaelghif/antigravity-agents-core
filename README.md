@@ -20,7 +20,7 @@
 
 ## Core Design Principles (V6 Enterprise Architecture)
 
-1. **Savage Gen-Z Principal Engineer Persona ("Strictly Not a Yes-Man")**: Fun, unfiltered, blak-blakan (allowed to roast bad ideas, spaghetti code, or YAGNI over-engineering), zero corporate sycophancy (`[Roast & Premise Flaw] -> [Production Failure Mode] -> [Superior Engineering Alternative]`). Export `AAC_PERSONA=neutral` before launching Antigravity and the `SessionStart` hook injects a clinical Staff Engineer prose directive for enterprise settings.
+1. **High-Signal Principal Engineer Persona (Anti-Sycophancy)**: Direct, rigorous, and strictly non-sycophantic pair-programming. Eliminates false agreement in favor of objective technical evaluation: `[Premise Breakdown] -> [Production Failure Mode] -> [Superior Engineering Alternative]`. When an enterprise setting requires standard corporate tone, exporting `AAC_PERSONA=neutral` instructs the `SessionStart` hook to inject clinical Staff Engineer prose across all interactions.
 2. **User-Defined Architecture (Interview First, Zero Static Dogma)**: Never imposes a static folder hierarchy, rigid layer dogma, or assumed manifest stack. Discovers existing repo structure dynamically and **interviews the user first** (`ask_question` / `/grill-me`) whenever architecture, stack, or module topology are open.
 3. **The 6 Non-Negotiable Engineering Pillars**: Defined once in `AGENTS.md` §3—every design and diff is stress-tested to be **Future-Proof, Scalable, Maintainable, Secure, High-Performance, and Upgradeable**.
 4. **Expert Technical Scrum & Multi-Session Continuity**:
@@ -29,7 +29,7 @@
    - `/handoff` checkpoints sprint progress, downstream seam notes, and the exact next command into `.scratch/handoff.md`.
 5. **Cross-Platform Tested Hooks & Contained Subagents**:
    - `.agents/hooks.json` uses cross-platform `node -e` JSON parsers (`SessionStart` cold-start sprint/handoff detector, `PreToolUse` git destructive guard & production no-mock guard with `decision: "ask"` and fail-closed handling of malformed payloads).
-   - `.agents/agents/*.md` subagents run with `commandExecutionPolicy: sandbox` (or `off` for `codebase-investigator`).
+   - `.agents/agents/*.md` subagents run with `commandExecutionPolicy: sandbox` with full operational capabilities (view, write, search, run).
 6. **Non-Destructive SHA-256 Manifest Installer**:
    - Tracks managed files in `.agents/.aac-manifest.json`.
    - `upgrade` preserves `CONTEXT.md` and never overwrites user-modified `AGENTS.md`, rules, skills, or agents unless `--force` is passed (backs up to `.scratch/backups/<timestamp>/` and writes incoming updates to `<file>.aac-new`).
@@ -42,7 +42,7 @@ AAC V6 consolidates 64 legacy fragmented skills into a cohesive, deep-module arc
 
 | Legacy V5 Area (64 Skills Bloat) | V6 Consolidated Architecture | Primary Seams & Purpose |
 | :--- | :--- | :--- |
-| **Caveman Suite** (14 fragmented skills: `caveman-discover`, `caveman-learn`, `caveman-manage`, etc.) | **Progressive Rule (`caveman.md`)** | Zero-fluff, high-signal communication & token-efficient Gen-Z engineering protocol without prompt bloat. |
+| **Caveman Suite** (14 fragmented skills: `caveman-discover`, `caveman-learn`, `caveman-manage`, etc.) | **Progressive Rule (`caveman.md`)** | High-signal, high-velocity communication & token-efficient engineering protocol without prompt bloat. |
 | **Ponytail Suite** (6 fragmented skills: `ponytail-debt`, `ponytail-gain`, `ponytail-audit`, etc.) | **Progressive Rule (`ponytail.md`)** | 7-Rung Minimalist Ladder, root-cause caller mapping, and surgical in-place edits. |
 | **Grilling Variants** (3 skills: `grill-me`, `grilling`, `grill-with-docs`) | **Unified `/grill-me` Skill** | Interactive one-question-at-a-time interview with `(Recommended)` first slot to define architecture & stress-test designs. |
 | **Scattered Implementation** (`implement`, `implement-spec`, `lean-build`, `prototype`) | **Technical Scrum Wave Engine (`/to-tickets`, `/implement`, `/handoff`)** | Vertical tracer-bullet tickets with Execution Waves DAG (`docs/sprint/SPRINT.md`), DoR, DoD, and cross-session handover. |
@@ -146,9 +146,9 @@ antigravity-agent/
     │   └── handoff/                           # Multi-session Scrum handover (.scratch/handoff.md + SPRINT.md)
     │       ├── SKILL.md
     │       └── resources/handoff-template.md
-    └── agents/                                # 3 Native Custom Subagents (commandExecutionPolicy: sandbox / off)
-        ├── codebase-investigator.md           # Fast read-only recon & blast-radius tracer (model: flash, policy: off)
-        ├── adversarial-reviewer.md            # Independent Savage Red-Team diff & 6-Pillar critic (policy: sandbox)
+    └── agents/                                # 3 Native Custom Subagents (commandExecutionPolicy: sandbox)
+        ├── codebase-investigator.md           # Fast operational recon & blast-radius tracer (model: flash, policy: sandbox)
+        ├── adversarial-reviewer.md            # Independent Red-Team diff & 6-Pillar critic (policy: sandbox)
         └── verification-runner.md             # Isolated build, lint, typecheck & test runner (policy: sandbox)
 ```
 
@@ -174,9 +174,9 @@ Verified against the official Antigravity documentation (2026-11-01):
 | `.agents/agents/<name>.md` | `name`, `description`, `tools`, `subagent`, `mainAgent`, `model` (`inherit`/`flash`/`pro`), `commandExecutionPolicy` (`off`/`sandbox`), `skills` |
 | `.agents/hooks.json` | Named hooks with `SessionStart` / `PreToolUse` / `PostToolUse` / `PreInvocation` / `PostInvocation` / `Stop`; JSON on stdin/stdout; `decision` gating |
 | `.agents/sidecars/<id>/sidecar.json` + `~/.gemini/config/config.json` | `command` or `builtin`, `args`, `restart_policy`, enabled per sidecar with optional `projectId` |
-| `.agents/mcp_config.json` | `mcpServers` map; `command`/`args`/`env` for stdio or `serverUrl`/`headers` for remote; `timeoutSeconds` supported |
+| `.agents/mcp_config.json` | `mcpServers` map; `command`/`args`/`env` for stdio or `url`/`serverUrl` for remote; `timeoutSeconds` supported |
 
-The MCP template deliberately keeps credentials in `env`, never in `args`: command-line arguments are visible in process listings. Database and GitHub integrations should be installed from the Antigravity MCP Store, which manages credentials and OAuth for you.
+The MCP template deliberately keeps credentials in `env` or `.agents/mcp.env`, never in `args`: command-line arguments are visible in process listings. GitHub integrations run via Node stdio (`@modelcontextprotocol/server-github`) without requiring Docker Desktop, or can be installed directly from the Antigravity MCP Store.
 
 ---
 

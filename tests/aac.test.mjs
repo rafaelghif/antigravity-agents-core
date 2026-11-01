@@ -76,7 +76,11 @@ test('P0-1 & P2-7: CLI init, idempotency, non-destructive upgrade, conflict back
     const mcpEnvExamplePath = path.join(tmpDir, '.agents', 'mcp.env.example');
     assert.equal(fs.existsSync(mcpExamplePath), true, 'init must install .agents/mcp_config.example.json (documented copy source)');
     assert.equal(fs.existsSync(mcpEnvExamplePath), true, 'init must install .agents/mcp.env.example');
+    assert.equal(fs.existsSync(path.join(tmpDir, '.agents', 'git-guard.cjs')), true, 'init must install .agents/git-guard.cjs');
     assert.doesNotMatch(fs.readFileSync(mcpExamplePath, 'utf8'), /"(?:token|password|secret|apiKey)"\s*:\s*"[^"$]/, 'MCP template must not embed literal credentials');
+    assert.doesNotMatch(fs.readFileSync(mcpExamplePath, 'utf8'), /"command"\s*:\s*"docker"/, 'MCP template must default to daemon-free stdio (Node/npx) to avoid Docker Desktop named pipe crashes on Windows');
+    const mcpJson = JSON.parse(fs.readFileSync(mcpExamplePath, 'utf8'));
+    assert.equal(Object.keys(mcpJson.mcpServers).length, 1, 'MCP template must follow DRY and define exactly one canonical server entry');
 
     // 3. Modify AGENTS.md, a rule, CONTEXT.md, and add a custom hook + toggle enabled: false
     const agentsPath = path.join(tmpDir, 'AGENTS.md');
@@ -137,6 +141,7 @@ test('P0-1 & P2-7: CLI init, idempotency, non-destructive upgrade, conflict back
     assert.equal(fs.existsSync(path.join(tmpDir, '.agents', 'rules', 'coding-standards.md')), false);
     assert.equal(fs.existsSync(mcpExamplePath), false, 'unmodified MCP templates are managed files and must be removed on uninstall');
     assert.equal(fs.existsSync(mcpEnvExamplePath), false, 'unmodified MCP env template must be removed on uninstall');
+    assert.equal(fs.existsSync(path.join(tmpDir, '.agents', 'git-guard.cjs')), false, 'unmodified git-guard.cjs must be removed on uninstall');
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }

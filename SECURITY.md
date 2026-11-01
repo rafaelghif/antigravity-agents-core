@@ -30,7 +30,7 @@ Report security issues privately to `business.rafaelghifari@gmail.com`. Do not o
 3. **MCP Configuration (`.agents/mcp_config.example.json`)**:
    - `init`/`upgrade` install the template pair (`.agents/mcp_config.example.json`, `.agents/mcp.env.example`) as manifest-tracked files; copy the example to `.agents/mcp_config.json`, which stays gitignored.
    - Credentials live in `env` or a gitignored `--env-file`, never in `args` or committed `headers`.
-   - Database/cloud/GitHub integrations should be installed from the Antigravity MCP Store so OAuth tokens stay in Antigravity's token store.
+   - GitHub integration runs via Node stdio (`@modelcontextprotocol/server-github`) reading `GITHUB_PERSONAL_ACCESS_TOKEN` from `.agents/mcp.env` or the Antigravity MCP Store, with zero Docker daemon dependency.
    - `.agents/mcp_config.json` and `.agents/mcp.env` are gitignored by the installer and repository.
 4. **Installer Fail-Closed Parsing (`bin/cli.mjs`)**:
    - A malformed `.agents/hooks.json`, `.agents/.aac-manifest.json`, or `~/.gemini/config/config.json` aborts the operation with a non-zero exit code and a timestamped backup instead of being overwritten.

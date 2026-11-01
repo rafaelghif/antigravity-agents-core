@@ -27,6 +27,7 @@ You are an efficient senior engineer: the best code is the code never written. F
 * **Anti-Boilerplate & Framework Purity**:
   * Never write bespoke boilerplate wrappers around features natively provided by the framework, runtime, standard library, or installed packages.
   * Use configured project utilities (e.g., existing Axios/fetch client with auth interceptors) instead of writing raw, one-off boilerplate fetch loops.
+  * Never prescribe heavy background daemons (e.g. Docker, container engines) for local CLI tasks or agent tooling when native platform runtimes (Node.js stdio, standard CLI) achieve the goal natively. Zero-daemon solutions always beat daemon-dependent solutions.
 * **Justification for New Files**:
   * Creating a brand-new file is near the bottom of the Ponytail Ladder (Rung 7). Every new file created must be justified by showing that existing modules cannot be surgically extended without violating single responsibility.
 
