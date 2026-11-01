@@ -32,7 +32,7 @@ Interview the user relentlessly until you reach a shared understanding and every
 1. **Start with User-Defined Foundations (if not yet established in the repo)**:
    - Ask how the user wants their architecture, module/folder topology, runtime/stack, and persistence layer structured rather than assuming a default.
 2. **Walk the decision tree one question at a time**:
-   - Aligning with Antigravity's `/grill-me` behavior (`antigravity.google/docs/commands/grill-me.md`), prioritize the highest-leverage unblocked trunk question first (or use `ask_question` with `(Recommended)` prefixed on your top engineering choice and a brief 6-pillar rationale).
+   - Aligning with Antigravity's `/grill-me` behavior (`https://antigravity.google/docs/commands/grill-me/`), prioritize the highest-leverage unblocked trunk question first (or use `ask_question` with `(Recommended)` prefixed on your top engineering choice and a brief 6-pillar rationale).
    - Never ask a downstream leaf question before the trunk decision it depends on is settled.
 3. **Roast weak spots & advance**:
    - Each answer prunes or expands the tree. Challenge any answer that introduces scaling traps, lock-in, or security holes before advancing to the next branch.

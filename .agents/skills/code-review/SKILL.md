@@ -26,8 +26,9 @@ Review the diff between `HEAD` and a base reference along two axes: **Specificat
    - Flag any unagreed public seams, missing boundary checks, dummy/mock data stores, or deferred `// TODO` stubs.
 3. **Audit Axis 2 — Standards, Security & Minimalism**:
    - **Security & Concurrency**: Check for injection risks, missing BOLA/IDOR tenant checks, TOCTOU race conditions, non-idempotent mutations, and network calls inside DB transactions.
+   - **Secrets & Supply Chain**: Flag hardcoded credentials, committed `.env` files, unsafe secret comparison, unpinned or typosquatted new dependencies, and CI steps that pipe remote scripts into a shell.
    - **Architecture & Quality**: Flag shallow pass-through wrappers, inward dependency violations, float currency math, boolean flag clusters, and Fowler smells.
    - **Ponytail Minimalism**: Flag unnecessary dependencies, speculative abstractions, or multi-file boilerplate replaceable by stdlib.
 4. **Report prioritized findings**:
-   - Group findings by `🔴 Blocking`, `🟡 Structural`, and `🟢 Nit` with clickable `[file.ext](file:///abs/path/file.ext#L10-L20)` links (`[Location] -> [Concrete Problem] -> [Exact Fix]`).
+   - Group findings by `🔴 Blocking`, `🟡 Structural`, and `🟢 Nit` with clickable `[file.ext](file:///abs/path/file.ext#L10-L20)` links using the **real** line numbers from the diff (never invent ranges) (`[Location] -> [Concrete Problem] -> [Exact Fix]`).
    - Conclude with **`APPROVE`**, **`APPROVE WITH NITS`**, or **`REQUEST CHANGES`**.

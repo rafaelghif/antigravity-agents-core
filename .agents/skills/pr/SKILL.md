@@ -24,3 +24,5 @@ Generate a high-signal Pull Request description starting directly at the `## Sum
    - Include a compact `mermaid` flowchart or sequence diagram showing what changed so a reviewer understands the PR before opening the diff.
 3. **Provide concrete before/after evidence**:
    - Populate [resources/pr-template.md](resources/pr-template.md) with actual test/CLI output or before/after behavior proof.
+4. **State the security and data impact**:
+   - Fill `## Security & Data Impact` honestly: auth/authz changes, secrets touched, migrations or backfills, and every new dependency with its pinned version. Write `none` rather than leaving a blank section.

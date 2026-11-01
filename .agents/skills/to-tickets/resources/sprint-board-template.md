@@ -22,7 +22,7 @@
 ## 2. Definition of Ready (DoR) & Definition of Done (DoD)
 
 - **DoR (Before starting a ticket)**: All `Blocked By` tickets are `done`; public seam, scope boundary, and verification command are defined; sized for ≤1 session (`S`/`M`).
-- **DoD (Before marking `done`)**: All ticket acceptance criteria checked (`[x]`); full test/typecheck/lint suite passes; atomic Conventional Commit landed; ticket `## 6. Session Handover & Completion Log` and this Sprint Board table updated.
+- **DoD (Before marking `done`)**: All ticket acceptance criteria checked (`[x]`); full test/typecheck/lint suite passes; atomic Conventional Commit landed (or explicitly deferred with user consent); ticket `## 6. Session Handover & Completion Log` and this Sprint Board table updated.
 
 ---
 

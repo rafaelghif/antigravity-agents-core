@@ -10,4 +10,4 @@ Mapping canonical triage roles to the actual issue tracker label strings used in
 | `ready-for-human`  | `ready-for-human` | Requires human implementation/decision    |
 | `wontfix`          | `wontfix`         | Out of scope, rejected, or duplicate      |
 
-When skills (such as `triage`, `to-tickets`, `wayfinder`) apply labels, use the exact label strings from this table.
+When the agent triages issues (see [issue-tracker.md](issue-tracker.md)), apply the exact label strings from this table. Labels are defined here once; skills reference this file instead of hard-coding label variants.

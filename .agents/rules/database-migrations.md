@@ -8,16 +8,16 @@ description: "Apply these guidelines whenever writing or reviewing database migr
 1. **Lock Timeout Defense (Anti-Starvation)**:
    - Every production DDL migration must explicitly configure defensive lock and statement timeouts (e.g., `SET lock_timeout = '2s'; SET statement_timeout = '30s';`). This prevents queued DDL locks (`ACCESS EXCLUSIVE`) from blocking live OLTP read/write traffic and causing cascading pool exhaustion.
 2. **Zero-Downtime Index Operations**:
-   - Always create and drop indexes concurrently on live tables (e.g., `CREATE INDEX CONCURRENTLY` in PostgreSQL), and ensure the migration executes **outside of an active transaction block** (`disable_ddl_transaction`).
+   - Always create and drop indexes concurrently on live tables (e.g., `CREATE INDEX CONCURRENTLY` in PostgreSQL), and ensure the migration executes **outside of an active transaction block** (Rails/ActiveRecord: `disable_ddl_transaction!`; plain SQL: run the statement outside `BEGIN`).
 3. **Non-Blocking Foreign Key Validation**:
    - Never add a foreign key constraint to a large table in a single blocking command. Add the constraint as `NOT VALID` first (takes a momentary lock), then run `VALIDATE CONSTRAINT` in a subsequent step (validates without holding an exclusive table lock).
 4. **Expand-Migrate-Contract Pattern**:
    - Never drop, rename, or tighten a column type in a single deployment.
-   - **Expand**: Add the new column as nullable or with a non-locking default (`DEFAULT ...` without table rewrite in modern engines).
+   - **Expand**: Add the new column as nullable or with a non-locking constant default. PostgreSQL 11+ stores a constant `DEFAULT` in the catalog without rewriting the table, but a volatile default (e.g., `now()`, `random()`) still rewrites it — add such values in a separate backfill instead.
    - **Migrate**: Enable application dual-writing, backfill existing rows in bounded, cursor-based batches (`WHERE id > $last_id ORDER BY id ASC LIMIT 1000`) with pause intervals to avoid replication lag, and switch readers.
    - **Contract**: Remove legacy columns only after all deployed instances consume the new schema.
 5. **No I/O Inside Database Transactions**:
-   - Never perform external HTTP calls, third-party API invocations, email dispatches, or slow synchronous operations inside an open database transaction. Keep transactions sub-millisecond to maximize connection pool concurrency and minimize row lock contention.
+   - Never perform external HTTP calls, third-party API invocations, email dispatches, or slow synchronous operations inside an open database transaction. Keep transactions short and bounded — no unbounded scans, no user interaction, no network round-trips — so connection-pool slots and row locks are released quickly; long-running work such as backfills and DDL belongs outside the request transaction.
 6. **Index Architecture & Leftmost Prefix Rule**:
    - Design composite indexes matching query filter semantics: equality predicates first, followed by range predicates or sort keys (`WHERE tenant_id = $1 AND created_at > $2` → Index `(tenant_id, created_at)`). Leverage covering indexes (`INCLUDE (col)`) on hot read queries to eliminate table heap fetches.
 7. **Strict Parameterization & Tenant Isolation**:

@@ -1,7 +1,9 @@
 # 3. Automated Lifecycle Guardrails and Task & Memory Engine Architecture
 
 Date: 2026-09-24
-Status: Accepted
+Status: Withdrawn (never implemented)
+
+> **Withdrawn (2026-11-01)**: The `.agents/hooks/` engine described below (`security-scanner.cjs`, `quality-guard.cjs`, `task-orchestrator.cjs`, `code-analyzer.cjs`, `memory-engine.cjs`, and the `aac scan|quality|review|analyze|tasks|memory` CLI) does not exist in this repository and was never shipped. The guardrails that actually exist are three inline Node lifecycle hooks plus the file-based Sprint Board and handoff protocol. See [ADR 0004](0004-inline-node-lifecycle-hooks.md).
 
 ## Context
 
@@ -21,7 +23,7 @@ We implement a unified, zero-dependency autonomous guardrail architecture powere
    - Detects leaked API keys, tokens, and private keys before tool execution.
 
 2. **Quality Code Guard (`quality-guard.cjs`)**:
-   - `PreToolUse` hook strictly enforcing production realism and the anti-dummy/mock policy ([production-integrity.md](../../.agents/rules/production-integrity.md)).
+   - `PreToolUse` hook strictly enforcing production realism and the anti-dummy/mock policy described in `AGENTS.md` §4.
    - Enforces genuine types and concrete implementations in production code while permitting fixtures in test folders (`tests/`, `*.test.*`).
 
 3. **Task Orchestrator & Wave Planner (`task-orchestrator.cjs`)**:

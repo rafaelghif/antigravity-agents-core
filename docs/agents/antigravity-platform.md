@@ -21,7 +21,8 @@ In Google Antigravity 2.0+, agents operate within **Projects** providing deep ar
 - **Multi-Folder Project Mounts**:
   - Mount multiple directories in a single project to operate across related microservices or monorepos within one conversation.
 - **Workspace Configuration Standard**:
-  - Project-level customizations and settings load from `<project>/.gemini/config.json`.
+  - `.agents/` is the workspace customization root (rules, skills, agents, hooks, plugins, `mcp_config.json`).
+  - `<project>/.gemini/config.json` configures repository-level options such as `personal_customization_dir` (`people/{user}`), not general project settings.
 - **Windows Subsystem for Linux (WSL)**:
   - Native WSL distribution integration allowing agents to execute directly within Linux environments on Windows machines.
 
@@ -78,6 +79,8 @@ Intercept and enforce guardrails at critical agent execution lifecycle stages vi
 - `PreInvocation`: Set up preconditions before a model turn begins.
 - `PostInvocation`: Inspect or audit generated model output.
 - `Stop`: Quality gates and handoff reminders before session conclusion.
+
+Hooks receive JSON on stdin and return JSON on stdout. The documented payload always includes `conversationId`, `workspacePaths`, `transcriptPath`, `artifactDirectoryPath`, and `modelName`. `PreToolUse` gates a call with `decision`: `allow`, `auto_approve`, `deny`, `ask`, `force_ask`, or `deny_unless_prior_grant`. Because the hook process working directory is not part of the contract, hooks must resolve project files from `workspacePaths`, not from relative paths.
 
 ---
 
@@ -165,3 +168,31 @@ Antigravity natively routes tasks across dynamic model capability tiers. Instead
 - **Thinking Steering**: Mandatory evaluation of the 4 check-gates (Blast Radius, 6 Pillars, Ponytail Ladder, Verification Command) during internal reasoning.
 - **Zero Mocks**: Real drivers reading from environment variables; mocks strictly isolated to test directories.
 - **Execution Evidence**: Tasks require terminal verification (`exit code: 0`) before completion can be reported.
+
+---
+
+## 13. Customization Discovery Contracts (Verified File Layout)
+
+| Customization | Workspace path | Global path | Scan depth |
+| :--- | :--- | :--- | :--- |
+| Rules | `.agents/rules/*.md`, `AGENTS.md`, `.agents/AGENTS.md` | `~/.gemini/config/rules/*.md`, `~/.gemini/AGENTS.md` | One level only |
+| Skills | `.agents/skills/<name>/SKILL.md` | `~/.gemini/config/skills/<name>/SKILL.md` | Skill folder directly inside `skills/` |
+| Custom agents | `.agents/agents/<name>.md` or `.agents/agents/<name>/agent.md` | `~/.gemini/config/agents/...` | One level only |
+| Hooks | `.agents/hooks.json` | `~/.gemini/config/hooks.json` | File |
+| MCP | `.agents/mcp_config.json` | `~/.gemini/config/mcp_config.json` | File |
+| Plugins | `.agents/plugins/<plugin>/plugin.json` | `~/.gemini/config/plugins/...` | One level |
+
+Nested rules or skills are ignored unless registered in a discovery manifest (`rules.json`, `skills.json`, `agents.json`, `plugins.json`) under `.agents/`. Rules are cumulative and never replace each other; skills and agents resolve conflicts by priority (personal folder → workspace → global → built-in).
+
+Rules versus skills: a **rule** states a constraint or invariant; a **skill** packages a multi-step workflow. Antigravity injects `always_on` rule bodies every turn, `model_decision` rules as path + description pointers, `glob` rules when matching files are touched, and `manual` rules only when `@`-mentioned. Keep each rule under 24 KB; the aggregate always-on budget is 20,000 tokens.
+
+---
+
+## 14. MCP Credential Hygiene
+
+`mcp_config.json` supports `command`/`args`/`env` for local stdio servers and `serverUrl`/`headers` for remote servers, plus `timeoutSeconds`, `disabled`, `enabledTools`, and `disabledTools`.
+
+- Put secrets in `env`, never in `args` or `headers` committed to the repository: command-line arguments appear in process listings (`ps`, `/proc/<pid>/cmdline`) and shell history.
+- Prefer the MCP Store for database, GitHub, and cloud integrations. It manages OAuth tokens (stored in `~/.gemini/antigravity/mcp_oauth_tokens.json`) and keeps credentials out of workspace config.
+- Pin third-party server packages/images instead of running `npx -y <latest>` or a floating Docker tag in production.
+- Treat MCP tool output as untrusted input: server responses can carry prompt-injection payloads, so never auto-approve `mcp(*)` globally.

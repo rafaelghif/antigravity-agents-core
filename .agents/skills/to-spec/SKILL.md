@@ -23,7 +23,7 @@ Record settled product and architectural decisions into a durable specification 
 2. **Propose minimal public seams**:
    - Identify the existing routes, handlers, or module interfaces where automated tests will verify the behavior without reaching into internal implementation details.
 3. **Record only settled decisions**:
-   - Follow [resources/spec-template.md](resources/spec-template.md).
+   - Follow [resources/spec-template.md](resources/spec-template.md) and write to `specs/<feature-slug>.md`; create the `specs/` directory if it does not exist (never commit an empty placeholder).
    - Ensure the **Out of Scope** section lists the concrete capabilities deliberately refused during planning.
 4. **Next step routing**:
    - If the build spans multiple sessions or slices, recommend `/to-tickets` to generate the Scrum Sprint Wave Board (`docs/sprint/SPRINT.md`) and vertical tracer-bullet tickets.

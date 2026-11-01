@@ -10,7 +10,7 @@ Checkpoint the active session state into `.scratch/handoff.md` (and sync `docs/s
 ## Decision tree
 
 1. **Are there uncommitted functional changes in `git status` that already pass tests and satisfy the current ticket's DoD?**
-   - **Yes** → Commit them with an atomic Conventional Commit and update the ticket's `Completion Log` before writing the handoff.
+   - **Yes** → If the user authorized commits in this session, commit them with an atomic Conventional Commit and update the ticket's `Completion Log` before writing the handoff. If not, record the ready-to-commit file list and proposed message in both places instead of committing.
    - **No (stopping mid-ticket / WIP)** → Explicitly record the completed sub-tasks, remaining sub-tasks, and current failing/passing test state in both the ticket file and `.scratch/handoff.md`.
 2. **Did domain glossary terms or architectural decisions settle during this session?**
    - **Yes** → Update `CONTEXT.md` (or `docs/adr/`) first so permanent domain knowledge is never trapped in ephemeral handoff notes.

@@ -1,6 +1,6 @@
 ---
 trigger: glob
-globs: "*.test.*, *.spec.*, **/*.test.*, **/*.spec.*, **/*_test.go, **/*_test.py, **/test_*.py, **/tests/**"
+globs: "*.test.*, *.spec.*, **/*.test.*, **/*.spec.*, **/*_test.go, **/*_test.py, **/test_*.py, **/tests/**, **/__tests__/**, **/fixtures/**, **/mocks/**"
 description: "Public-seam testing, hermetic execution, and boundary coverage rules."
 ---
 

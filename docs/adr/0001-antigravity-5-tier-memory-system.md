@@ -12,12 +12,16 @@ Google Antigravity enforces strict context isolation per session. Relying on raw
 We adopt a **5-Tier Memory Architecture** within the repository:
 
 1. **Tier 1 (Ephemeral Working Context)**: Managed via Antigravity's progressive disclosure. Only skill names/descriptions load initially; detailed procedures load on-demand via `view_file`.
-2. **Tier 2 (Unconditional Directives)**: [AGENTS.md](../../AGENTS.md) (<12k chars) and [.agents/rules/](../../.agents/rules) with `trigger: always_on`.
+2. **Tier 2 (Unconditional Directives)**: [AGENTS.md](../../AGENTS.md) (~6 KB, loaded as an always-on rule) plus the modular catalog in [.agents/rules/](../../.agents/rules). Rules use `trigger: model_decision` (path + description injected up front, body read on demand) except `testing.md` (`trigger: glob`) and `release-audit.md` (`trigger: manual`).
 3. **Tier 3 (Domain & Architectural Knowledge)**: Living [CONTEXT.md](../../CONTEXT.md) and immutable ADRs under `docs/adr/`.
-4. **Tier 4 (Session Bridge Handoff)**: Compact `.scratch/handoff.md` written by the exiting agent via [handoff](../../.agents/skills/handoff/SKILL.md) and rehydrated via `@handoff.md` or `conversation://<id>`.
+4. **Tier 4 (Session Bridge Handoff)**: Compact `.scratch/handoff.md` written by the exiting agent via [handoff](../../.agents/skills/handoff/SKILL.md) and rehydrated by reading that file (or `@`-mentioning it) in the next session.
 5. **Tier 5 (External Task Graph)**: Issue trackers (Gitea / GitHub) via MCP as the durable source of truth.
 
 ## Consequences
 
 - **Positive**: Eliminates cross-session context bloat; enables immediate cold-start onboarding for fresh agent sessions; persists domain decisions cleanly.
 - **Trade-off**: Requires discipline to generate a handoff document (`/handoff`) prior to ending long sessions or switching tasks.
+
+## Amendment (2026-11-01)
+
+The original Tier 2 wording described every modular rule as `trigger: always_on`. The shipped catalog uses `model_decision` for domain rules (path and description injected up front, body loaded on demand), `glob` for testing, and `manual` for the release audit. Only `AGENTS.md` is unconditionally injected. The rest of the tier model is unchanged.

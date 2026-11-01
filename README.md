@@ -9,7 +9,7 @@
 <p align="center">
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.0.0-blue.svg?style=for-the-badge&logo=git" alt="Version 6.0.0" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity_2.0-8A2BE2.svg?style=for-the-badge&logo=google" alt="Platform" /></a>
-  <a href="https://antigravity.google/docs/rules-workflows"><img src="https://img.shields.io/badge/engine-Dynamic_High_Reasoning-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Dynamic High Reasoning" /></a>
+  <a href="https://antigravity.google/docs/rules"><img src="https://img.shields.io/badge/engine-Dynamic_High_Reasoning-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Dynamic High Reasoning" /></a>
   <a href="#v5--v6-evolution--consolidation-matrix"><img src="https://img.shields.io/badge/architecture-deep_modules-success.svg?style=for-the-badge" alt="Deep Modules" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge" alt="License: MIT" /></a>
 </p>
@@ -20,15 +20,15 @@
 
 ## Core Design Principles (V6 Enterprise Architecture)
 
-1. **Savage Gen-Z Principal Engineer Persona ("Strictly Not a Yes-Man")**: Fun, unfiltered, blak-blakan (allowed to roast bad ideas, spaghetti code, or YAGNI over-engineering), zero corporate sycophancy (`[Roast & Premise Flaw] -> [Production Failure Mode] -> [Superior Engineering Alternative]`). Supports `AAC_PERSONA=neutral` for teams wanting formal enterprise tone.
+1. **Savage Gen-Z Principal Engineer Persona ("Strictly Not a Yes-Man")**: Fun, unfiltered, blak-blakan (allowed to roast bad ideas, spaghetti code, or YAGNI over-engineering), zero corporate sycophancy (`[Roast & Premise Flaw] -> [Production Failure Mode] -> [Superior Engineering Alternative]`). Export `AAC_PERSONA=neutral` before launching Antigravity and the `SessionStart` hook injects a clinical Staff Engineer prose directive for enterprise settings.
 2. **User-Defined Architecture (Interview First, Zero Static Dogma)**: Never imposes a static folder hierarchy, rigid layer dogma, or assumed manifest stack. Discovers existing repo structure dynamically and **interviews the user first** (`ask_question` / `/grill-me`) whenever architecture, stack, or module topology are open.
 3. **The 6 Non-Negotiable Engineering Pillars**: Defined once in `AGENTS.md` §3—every design and diff is stress-tested to be **Future-Proof, Scalable, Maintainable, Secure, High-Performance, and Upgradeable**.
 4. **Expert Technical Scrum & Multi-Session Continuity**:
    - `/to-tickets` generates a committed **Scrum Sprint Wave Board (`docs/sprint/SPRINT.md`)** and session-sized vertical tracer-bullet tickets (`docs/sprint/tickets/<NN>-<slug>.md`) with **Definition of Ready (DoR)**, **Execution Waves (DAG)**, and **Definition of Done (DoD)**.
-   - `/implement` executes 1 unblocked ticket test-first, commits atomically, updates the ticket's `Session Handover & Completion Log`, and promotes newly unblocked tickets in `docs/sprint/SPRINT.md`.
+   - `/implement` executes 1 unblocked ticket test-first, commits atomically when the user authorizes commits, updates the ticket's `Session Handover & Completion Log`, and promotes newly unblocked tickets in `docs/sprint/SPRINT.md`.
    - `/handoff` checkpoints sprint progress, downstream seam notes, and the exact next command into `.scratch/handoff.md`.
 5. **Cross-Platform Tested Hooks & Contained Subagents**:
-   - `.agents/hooks.json` uses cross-platform `node -e` JSON parsers (`SessionStart` cold-start sprint/handoff detector, `PreToolUse` git destructive guard & production no-mock guard with `decision: "ask"`).
+   - `.agents/hooks.json` uses cross-platform `node -e` JSON parsers (`SessionStart` cold-start sprint/handoff detector, `PreToolUse` git destructive guard & production no-mock guard with `decision: "ask"` and fail-closed handling of malformed payloads).
    - `.agents/agents/*.md` subagents run with `commandExecutionPolicy: sandbox` (or `off` for `codebase-investigator`).
 6. **Non-Destructive SHA-256 Manifest Installer**:
    - Tracks managed files in `.agents/.aac-manifest.json`.
@@ -47,7 +47,7 @@ AAC V6 consolidates 64 legacy fragmented skills into a cohesive, deep-module arc
 | **Grilling Variants** (3 skills: `grill-me`, `grilling`, `grill-with-docs`) | **Unified `/grill-me` Skill** | Interactive one-question-at-a-time interview with `(Recommended)` first slot to define architecture & stress-test designs. |
 | **Scattered Implementation** (`implement`, `implement-spec`, `lean-build`, `prototype`) | **Technical Scrum Wave Engine (`/to-tickets`, `/implement`, `/handoff`)** | Vertical tracer-bullet tickets with Execution Waves DAG (`docs/sprint/SPRINT.md`), DoR, DoD, and cross-session handover. |
 | **Review & Verification Scripts** (`code-analyzer`, `quality-guard`, `security-scanner`) | **3 Native Subagents & Automated Suite** | Sandboxed `adversarial-reviewer`, `codebase-investigator`, `verification-runner`, plus `tests/aac.test.mjs`. |
-| **Fragile Bash/PS1 Overwriters** | **SHA-256 Manifest CLI (`bin/cli.mjs`)** | Non-destructive tracking in `.agents/.aac-manifest.json`, conflict backup (`.scratch/backups/`), `.aac-new`, `--dry-run`, and `uninstall`. |
+| **Fragile Bash/PS1 Overwriters** | **SHA-256 Manifest CLI (`bin/cli.mjs`)** | Non-destructive tracking in `.agents/.aac-manifest.json`, conflict backup (`.scratch/backups/`), `.aac-new`, `--dry-run`, `uninstall`, and manifest path validation (no traversal, managed paths only). |
 
 ---
 
@@ -77,13 +77,15 @@ flowchart LR
 
 ```text
 antigravity-agent/
+├── .gitattributes                             # Deterministic LF/CRLF normalization for hooks, rules & tests
+├── .gitignore                                 # Excludes secrets, scratch state, and MCP credentials
 ├── AGENTS.md                                  # Always-on Savage Gen-Z Principal Engineer & 6-Pillar Rules
 ├── CONTEXT.md                                 # User-Defined Architecture, Stack & Domain Glossary
 ├── package.json                               # NPX & GitHub Packages distributor (@rafaelghif/aac-core v6.0.0)
 ├── bin/cli.mjs                                # Non-destructive SHA-256 manifest CLI (init / upgrade / uninstall)
-├── install.sh                                 # Linux / macOS installer (delegates to bin/cli.mjs when Node is present)
-├── install.ps1                                # Windows PowerShell installer (delegates to bin/cli.mjs when Node is present)
-├── tests/aac.test.mjs                         # Automated test suite (CLI, hooks bypass corpus, frontmatter, packaging)
+├── install.sh                                 # Linux / macOS installer (delegates all writes to bin/cli.mjs)
+├── install.ps1                                # Windows PowerShell installer (delegates all writes to bin/cli.mjs)
+├── tests/aac.test.mjs                         # Automated test suite (CLI, hooks bypass corpus, official frontmatter contract, link integrity)
 ├── LICENSE                                    # MIT License
 ├── SECURITY.md                                # Threat model & vulnerability disclosure policy
 ├── CHANGELOG.md                               # Release history
@@ -91,16 +93,17 @@ antigravity-agent/
 ├── assets/
 │   └── banner.png                             # Official repository banner
 ├── docs/
-│   ├── adr/                                   # Architecture Decision Records
-│   └── agents/                                # Antigravity platform reference & domain specs
+│   ├── adr/                                   # Architecture Decision Records (0001–0004)
+│   └── agents/                                # Antigravity platform reference, skill routing, tracker config
 └── .agents/
-    ├── hooks.json                             # Cross-platform Node JSON lifecycle hooks (SessionStart, PreToolUse)
+    ├── hooks.json                             # Cross-platform inline Node lifecycle hooks (SessionStart, PreToolUse)
+    ├── mcp_config.example.json                # Secure MCP template (env-based secrets, explicit timeouts)
     ├── sidecars/repo-health/sidecar.json      # Antigravity App scheduled sidecar template
-    ├── rules/                                 # 9 Modular Rules (flat directory)
-    │   ├── coding-standards.md                # DRY, KISS, YAGNI, SOLID/SRP, Clean Code (always_on)
-    │   ├── architecture-and-flow.md           # User-Defined Architecture, Deep Modules, E2E Flow (always_on)
-    │   ├── ponytail.md                        # 7-Rung Minimalist Ladder, Root Cause & Surgical Edits (always_on)
-    │   ├── caveman.md                         # Savage Gen-Z high-signal style & persona switch (always_on)
+    ├── rules/                                 # 9 Modular Rules (flat directory, official trigger contract)
+    │   ├── coding-standards.md                # DRY, KISS, YAGNI, SOLID/SRP, Clean Code (model_decision)
+    │   ├── architecture-and-flow.md           # User-Defined Architecture, Deep Modules, E2E Flow (model_decision)
+    │   ├── ponytail.md                        # 7-Rung Minimalist Ladder, Root Cause & Surgical Edits (model_decision)
+    │   ├── caveman.md                         # Savage Gen-Z high-signal style & persona switch (model_decision)
     │   ├── database-migrations.md             # Expand-contract, CONCURRENTLY outside tx, SQL safety (model_decision)
     │   ├── security-and-auth.md               # BOLA/IDOR, idempotency, atomic locks, full SSRF defense (model_decision)
     │   ├── git-and-context.md                 # Conventional atomic commits, CONTEXT.md, Sprint Board (model_decision)
@@ -139,7 +142,35 @@ antigravity-agent/
 
 ---
 
+## Verification & Platform Contract
+
+Every claim in this repository is enforced by the shipped test suite, not by documentation alone:
+
+```bash
+npm test          # CLI idempotency, hook bypass corpus, official frontmatter/skill/subagent contract, relative-link integrity
+npm run pack:check  # npm packaging contents
+```
+
+CI runs both commands on `ubuntu-latest`, `macos-latest`, and `windows-latest`. `.gitattributes` pins LF for every text file (CRLF for `.ps1`) so frontmatter parsing and hook commands behave identically across platforms.
+
+Verified against the official Antigravity documentation (2026-11-01):
+
+| Artifact | Official contract |
+| :--- | :--- |
+| `.agents/rules/*.md` | Flat directory, YAML `trigger` required (`always_on`, `model_decision`, `glob`, `manual`), `globs` for `glob`, `description` for `model_decision`; 24 KB per file, 20,000-token aggregate budget |
+| `.agents/skills/<name>/SKILL.md` | One level deep, `name` + `description` frontmatter, progressive disclosure, decision tree for complex skills |
+| `.agents/agents/<name>.md` | `name`, `description`, `tools`, `subagent`, `mainAgent`, `model` (`inherit`/`flash`/`pro`), `commandExecutionPolicy` (`off`/`sandbox`), `skills` |
+| `.agents/hooks.json` | Named hooks with `SessionStart` / `PreToolUse` / `PostToolUse` / `PreInvocation` / `PostInvocation` / `Stop`; JSON on stdin/stdout; `decision` gating |
+| `.agents/sidecars/<id>/sidecar.json` + `~/.gemini/config/config.json` | `command` or `builtin`, `args`, `restart_policy`, enabled per sidecar with optional `projectId` |
+| `.agents/mcp_config.json` | `mcpServers` map; `command`/`args`/`env` for stdio or `serverUrl`/`headers` for remote; `timeoutSeconds` supported |
+
+The MCP template deliberately keeps credentials in `env`, never in `args`: command-line arguments are visible in process listings. Database and GitHub integrations should be installed from the Antigravity MCP Store, which manages credentials and OAuth for you.
+
+---
+
 ## Quick Start (Multi-Platform Installation, Upgrade & Uninstall)
+
+**Prerequisite**: Node.js **>= 22** on `PATH`. The CLI and every lifecycle hook are Node programs, so there is no supported install path without it.
 
 Install or upgrade into **any project** without touching the target project's `package.json`:
 
@@ -168,27 +199,36 @@ npx @rafaelghif/aac-core uninstall
 ```
 
 ### Option 2: Linux / macOS Shell (`install.sh`)
+The script resolves `bin/cli.mjs` and delegates every write to it; it never copies managed files itself.
 ```bash
-# Remote install:
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash
+# Recommended: download the pinned tag, inspect it, then run it.
+curl -fsSL -o install.sh https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh
+less install.sh
+bash install.sh
 
-# Remote non-destructive upgrade:
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.sh | bash -s -- --upgrade
+# Non-destructive upgrade:
+bash install.sh --upgrade
 
-# Local install / dry-run / upgrade:
-bash /path/to/antigravity-agent/install.sh /path/to/your-project [--upgrade] [--force] [--dry-run]
+# Target another project / preview / pin a different ref:
+bash install.sh /path/to/your-project [--upgrade] [--force] [--dry-run]
+AAC_REF=main bash install.sh --upgrade
+
+# Optional one-liner (same pinned tag, no mutable branch):
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh | bash -s -- --upgrade
 ```
 
 ### Option 3: Windows PowerShell (`install.ps1`)
 ```powershell
-# Remote install:
-irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
+# Recommended: download the pinned tag, inspect it, then run it in its own process.
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.ps1 -OutFile install.ps1
+notepad install.ps1
+powershell -NoProfile -File .\install.ps1 -TargetDir "C:\path\to\your-project" [-Upgrade] [-Force] [-DryRun]
 
-# Remote non-destructive upgrade:
-$env:AAC_UPGRADE="1"; irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
+# Pin a different ref:
+$env:AAC_REF="main"; powershell -NoProfile -File .\install.ps1 -Upgrade
 
-# Local install:
-powershell -File .\install.ps1 -TargetDir "C:\path\to\your-project" [-Upgrade] [-Force] [-DryRun]
+# Optional one-liner (same pinned tag, no mutable branch):
+irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.ps1 | iex
 ```
 
 ### Optional: Antigravity App Scheduled Sidecar (`--with-sidecar`)

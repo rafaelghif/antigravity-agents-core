@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Builds a single Scrum Sprint ticket or specification slice end-to-end from Definition of Ready (DoR) check and TDD seam loop to Definition of Done (DoD), atomic commit, and Sprint Board handover update. Use when implementing a ticket, building a feature slice, or when the user invokes /implement.
+description: Builds a single Scrum Sprint ticket or specification slice end-to-end from Definition of Ready (DoR) check and TDD seam loop to Definition of Done (DoD), atomic commit when the user authorizes it, and Sprint Board handover update. Use when implementing a ticket, building a feature slice, or when the user invokes /implement.
 ---
 
 # Implement (Scrum Ticket Execution & DoR/DoD Loop)
@@ -28,6 +28,6 @@ Build **one unblocked Scrum ticket or vertical specification slice** into produc
    - When all acceptance criteria for the slice pass in the single test file, run the **full test suite**, typechecker, and linter via `run_command`.
 4. **Atomic Commit & Cross-Session Sprint Sync**:
    - Check off completed sub-tasks and acceptance criteria (`[x]`) in the ticket file.
-   - Create a single atomic Conventional Commit (`feat(scope): ... (#NN)`) containing only this vertical slice.
-   - Record the commit SHA, verification status, and `Downstream Handover Notes` in the ticket's `## 6. Session Handover & Completion Log`.
-   - Update `docs/sprint/SPRINT.md`: set this ticket to `done` (with commit SHA), promote newly unblocked downstream tickets from `blocked` to `ready`, and state the next recommended ticket for the next session.
+   - If the user authorized commits in this session, create a single atomic Conventional Commit (`feat(scope): ... (#NN)`) containing only this vertical slice. Otherwise leave the tree green and record the proposed commit message and file list in the ticket log; do not commit on the user's behalf.
+   - Record the commit SHA (or `pending user authorization`), verification status, and `Downstream Handover Notes` in the ticket's `## 6. Session Handover & Completion Log`.
+   - Update `docs/sprint/SPRINT.md`: set this ticket to `done` (with the commit SHA, or `pending user authorization`), promote newly unblocked downstream tickets from `blocked` to `ready`, and state the next recommended ticket for the next session.

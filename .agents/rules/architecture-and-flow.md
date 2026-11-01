@@ -22,9 +22,10 @@ description: "User-defined dynamic architecture (interview-first), deep modules,
 
 ## 3. Resilience Engineering & Boundary Protection
 
-* **Circuit Breakers & Graceful Degradation**:
-  * Protect every integration with an external network service, third-party API, or asynchronous worker with an automated **Circuit Breaker** (Closed, Open, Half-Open) and explicit timeout bounds.
-  * Define explicit fallback behaviors to prevent external outages from taking down primary application workflows.
+* **Bounded Failure & Graceful Degradation**:
+  * Every external call — network service, third-party API, queue, or database — gets an explicit timeout plus a bounded retry policy with backoff and jitter. This part is mandatory.
+  * Add a **Circuit Breaker** (Closed, Open, Half-Open) when the dependency is high-volume, user-facing, or capable of amplifying one failure across the request path. For low-volume or batch-only calls, a timeout and retry ceiling is enough; do not add a breaker just to look production-ready.
+  * Define explicit fallback or degradation behavior for every dependency whose outage would otherwise take down a primary workflow.
 * **Consistency Boundaries & Saga Patterns**:
   * Respect architectural consistency limits: enforce **Strong Consistency** within a single database transactional boundary; use the **Transactional Outbox Pattern** or **Saga Pattern** with compensating actions when coordinating state mutations across distributed services or message queues.
 

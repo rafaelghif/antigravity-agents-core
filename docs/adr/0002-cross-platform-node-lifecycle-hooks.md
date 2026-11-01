@@ -1,7 +1,9 @@
 # 2. Cross-Platform Node.js Lifecycle Hooks Architecture
 
 Date: 2026-09-14
-Status: Accepted
+Status: Superseded by [ADR 0004](0004-inline-node-lifecycle-hooks.md)
+
+> **Superseded (2026-11-01)**: The external `.agents/hooks/*.cjs` scripts and reference `.sh`/`.ps1` implementations described below were never committed to V6. Hook commands are inline `node -e` programs so they do not depend on the hook working directory. See [ADR 0004](0004-inline-node-lifecycle-hooks.md) for the shipped architecture.
 
 ## Context
 

@@ -27,4 +27,4 @@ Restructure internal code while preserving 100% of observable external behavior 
    - Replace boolean flag clusters with a discriminated union.
    - Move methods exhibiting Feature Envy onto the module that owns the data.
 3. **Bracketed verification**:
-   - Run typecheck and tests immediately after each transformation. If verification fails and cannot be fixed within 30 seconds, revert (`git checkout -- <file>`) and take a smaller step.
+   - Run typecheck and tests immediately after each transformation. If verification fails and cannot be fixed within 30 seconds, undo only your own edits: re-apply the previous content with `replace_file_content`, or park your changes with `git stash push -- <file>`. Never run `git checkout -- <file>` or `git checkout -- .`; both discard the user's uncommitted work, not just yours. Then take a smaller step.

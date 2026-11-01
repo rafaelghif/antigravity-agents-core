@@ -19,8 +19,9 @@ description: "Core coding standards enforcing DRY, KISS, YAGNI, SOLID/SRP, inten
 * **Streaming & Backpressure Control**:
   * Process large files, bulk API exports, or continuous network streams using streaming pipelines with explicit backpressure management (`pipe`, `highWaterMark`). Never buffer unbounded data in memory to prevent Out-Of-Memory (OOM) crashes.
 * **Temporal & Currency Precision**:
-  * Store, compute, and serialize all timestamps in UTC (`ISO-8601` or epoch timestamps). Convert timezones exclusively at the final presentation boundary.
-  * Model currency strictly in integer minor units (e.g., cents using `BigInt` or `int64`) or fixed-point `Decimal`. The use of IEEE-754 floating-point numbers for money calculations is strictly prohibited.
+  * Store and compute timestamps in UTC as epoch milliseconds (integer) or ISO-8601 with an explicit `Z`, and serialize one canonical form per API contract. Convert timezones exclusively at the final presentation boundary; never persist local time or an implicit offset.
+  * Model currency strictly in integer minor units (e.g., cents as `int64`/`BigInt`) or fixed-point `Decimal`. The use of IEEE-754 floating-point numbers for money calculations is strictly prohibited.
+  * Keep `BigInt` off JSON boundaries: `JSON.stringify` throws on it. Serialize money as an integer or a decimal string and parse it back at the edge with an explicit scale.
 
 ## 3. Clean Code Mechanics & State Modeling
 

@@ -32,7 +32,7 @@ Describe the end-to-end user or system behavior this ticket delivers and why it 
 - **Verification Command**: `<exact runnable test & typecheck command>`
 - [ ] **Given** `<precondition>`, **when** `<action>`, **then** `<expected outcome>`.
 - [ ] **Boundary / Error Check**: `<invalid input, unauthorized tenant, or race condition>` fails fast with zero side effects.
-- [ ] **Definition of Done (DoD)**: All tests pass, linter/typecheck clean, atomic commit created, and `docs/sprint/SPRINT.md` updated.
+- [ ] **Definition of Done (DoD)**: All tests pass, linter/typecheck clean, atomic commit created (or explicitly deferred to the user), and `docs/sprint/SPRINT.md` updated.
 
 ## 6. Session Handover & Completion Log
 
