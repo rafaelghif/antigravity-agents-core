@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .agents/git-guard.cjs",
+            "command": "node -e \"require(require('fs').existsSync('git-guard.cjs')?'./git-guard.cjs':'./.agents/git-guard.cjs')\"",
             "timeout": 5
           }
         ]
