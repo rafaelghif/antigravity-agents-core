@@ -12,5 +12,4 @@ coverage/
 .agents/mcp_config.json
 .agents/mcp.env
 .agents/.aac-manifest.json
-.agents/.agents/
 review.md
