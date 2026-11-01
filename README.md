@@ -2,9 +2,9 @@
 
 <img src="assets/banner.png" alt="AAC (Antigravity Agent Core) Banner" width="100%" />
 
-# Antigravity Engineering Agent (V6)
+# Antigravity Agent Core (V6)
 
-**Plug-and-play Principal Software Engineering & Technical Scrum constitution, progressive-disclosure rules, focused deep-module skills, native subagents, cross-platform Node lifecycle hooks, and scheduled sidecars for Google Antigravity.**
+**Enterprise-grade Principal Software Engineering & Technical Scrum constitution, progressive-disclosure rules, deep-module skills, sandboxed subagents, cross-platform lifecycle hooks, and zero-daemon MCP integration for Google Antigravity.**
 
 <p align="center">
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.0.0-blue.svg?style=for-the-badge&logo=git" alt="Version 6.0.0" /></a>
@@ -18,21 +18,48 @@
 
 ---
 
+## Why Antigravity Agent Core?
+
+Most AI coding assistants act as **sycophantic yes-men**: they agree with broken architectural premises, generate fragile, mock-heavy boilerplate, silently drop state across multi-turn sessions, and fail under complex enterprise constraints.
+
+**Antigravity Agent Core (AAC V6)** upgrades Google Antigravity into an **uncompromising Principal Software Engineer & Technical Scrum Master**:
+
+- **Anti-Sycophancy Pair-Programming**: Questions flawed premises before code is written (`[Premise Breakdown] -> [Production Failure] -> [Superior Alternative]`).
+- **The 6 Engineering Pillars**: Stress-tests every architectural decision and diff to be *Future-Proof, Scalable, Maintainable, Secure, High-Performance, and Upgradeable*.
+- **Autonomous Technical Scrum**: Decomposes high-level goals into an Execution Wave DAG (`docs/sprint/SPRINT.md`), test-first vertical tickets, and persistent cross-session handovers.
+- **Zero-Mock Production Integrity**: Production paths require genuine environment-backed drivers; mocks and stubs are quarantined strictly to test directories via automated lifecycle guards.
+- **Zero-Daemon Primitives**: MCP tools and platform scripts run via standard Node stdio without Docker daemon dependencies or named pipe failures.
+- **Non-Destructive Management**: Installs and upgrades non-destructively via a SHA-256 manifest CLI (`bin/cli.mjs`) that protects user modifications and tracks managed assets.
+
+---
+
 ## Core Design Principles (V6 Enterprise Architecture)
 
-1. **High-Signal Principal Engineer Persona (Anti-Sycophancy)**: Direct, rigorous, and strictly non-sycophantic pair-programming. Eliminates false agreement in favor of objective technical evaluation: `[Premise Breakdown] -> [Production Failure Mode] -> [Superior Engineering Alternative]`. When an enterprise setting requires standard corporate tone, exporting `AAC_PERSONA=neutral` instructs the `SessionStart` hook to inject clinical Staff Engineer prose across all interactions.
-2. **User-Defined Architecture (Interview First, Zero Static Dogma)**: Never imposes a static folder hierarchy, rigid layer dogma, or assumed manifest stack. Discovers existing repo structure dynamically and **interviews the user first** (`ask_question` / `/grill-me`) whenever architecture, stack, or module topology are open.
-3. **The 6 Non-Negotiable Engineering Pillars**: Defined once in `AGENTS.md` §3—every design and diff is stress-tested to be **Future-Proof, Scalable, Maintainable, Secure, High-Performance, and Upgradeable**.
+1. **High-Signal Principal Engineer Persona (Anti-Sycophancy)**: Direct, rigorous, and strictly non-sycophantic pair-programming. Eliminates hollow validation in favor of objective engineering evaluation. When corporate environments require formal tone, exporting `AAC_PERSONA=neutral` instructs the `SessionStart` hook to inject clinical Staff Engineer prose across all interactions.
+2. **User-Defined Architecture (Interview First, Zero Static Dogma)**: Never imposes a rigid folder hierarchy, arbitrary layer dogma, or assumed technology stack. Discovers existing repository topology dynamically and **interviews the user first** (`ask_question` / `/grill-me`) whenever boundaries, databases, or conventions are undecided.
+3. **The 6 Non-Negotiable Engineering Pillars**: Defined once in `AGENTS.md` §3—every design and diff is stress-tested against:
+   - **Future-Proof**: Clean contracts, extensible domain models, zero hard-coded assumptions requiring rewrites.
+   - **Scalable**: Zero N+1 query loops, bounded memory/queues, horizontal readiness, safe concurrency under load.
+   - **Maintainable**: Low cognitive load (KISS, DRY, YAGNI, SOLID), deep modules (Ousterhout), intention-revealing names, zero clever spaghetti.
+   - **Secure**: Zero-trust boundary parsing ("Parse, don't validate"), strict authorization (zero BOLA/IDOR), atomic mutations (zero TOCTOU races), zero leaked secrets.
+   - **High-Performance**: Optimal algorithmic complexity, minimal I/O round-trips, proper indexing, explicit timeouts on external calls.
+   - **Upgradeable**: Narrow boundary seams, backward-compatible migrations (`Expand-Migrate-Contract`), explicit `// ponytail:` upgrade paths.
 4. **Expert Technical Scrum & Multi-Session Continuity**:
    - `/to-tickets` generates a committed **Scrum Sprint Wave Board (`docs/sprint/SPRINT.md`)** and session-sized vertical tracer-bullet tickets (`docs/sprint/tickets/<NN>-<slug>.md`) with **Definition of Ready (DoR)**, **Execution Waves (DAG)**, and **Definition of Done (DoD)**.
    - `/implement` executes 1 unblocked ticket test-first, commits atomically when the user authorizes commits, updates the ticket's `Session Handover & Completion Log`, and promotes newly unblocked tickets in `docs/sprint/SPRINT.md`.
    - `/handoff` checkpoints sprint progress, downstream seam notes, and the exact next command into `.scratch/handoff.md`.
-5. **Cross-Platform Tested Hooks & Contained Subagents**:
-   - `.agents/hooks.json` uses cross-platform `node -e` JSON parsers (`SessionStart` cold-start sprint/handoff detector, `PreToolUse` git destructive guard & production no-mock guard with `decision: "ask"` and fail-closed handling of malformed payloads).
-   - `.agents/agents/*.md` subagents run with `commandExecutionPolicy: sandbox` with full operational capabilities (view, write, search, run).
-6. **Non-Destructive SHA-256 Manifest Installer**:
+5. **Cross-Platform Lifecycle Hooks & Standalone Guards**:
+   - `.agents/hooks.json` uses cross-platform Node JSON parsers:
+     - `SessionStart`: Detects cold-start sprint/handoff artifacts and injects active persona directives.
+     - `PreToolUse` (Git Guard): Loads `.agents/git-guard.cjs` to intercept direct pushes to protected `main` or `master` branches with `decision: "ask"`, while keeping everyday dev commands (branch, commit, stash, checkout) frictionless.
+     - `PreToolUse` (Production No-Mock Guard): Blocks dummy IDs/tokens, synthetic stores, and deferred `TODO` stubs in production paths with fail-closed handling.
+6. **Contained Sandboxed Subagents**:
+   - `.agents/agents/*.md` subagents run with `commandExecutionPolicy: sandbox` with full operational capabilities (view, write, search, run) without polluting the parent conversation context.
+7. **Zero-Daemon MCP & Safe Platform Runtimes**:
+   - Default configurations use native Node stdio (`@modelcontextprotocol/server-github`) reading credentials from `env` or `.agents/mcp.env`, eliminating background Docker daemon dependencies and Windows named-pipe failures.
+8. **Non-Destructive SHA-256 Manifest CLI**:
    - Tracks managed files in `.agents/.aac-manifest.json`.
-   - `upgrade` preserves `CONTEXT.md` and never overwrites user-modified `AGENTS.md`, rules, skills, or agents unless `--force` is passed (backs up to `.scratch/backups/<timestamp>/` and writes incoming updates to `<file>.aac-new`).
+   - `upgrade` preserves `CONTEXT.md` and never overwrites user-modified files unless `--force` is passed (backs up conflicts to `.scratch/backups/<timestamp>/` and writes incoming updates to `<file>.aac-new`).
 
 ---
 
@@ -42,12 +69,12 @@ AAC V6 consolidates 64 legacy fragmented skills into a cohesive, deep-module arc
 
 | Legacy V5 Area (64 Skills Bloat) | V6 Consolidated Architecture | Primary Seams & Purpose |
 | :--- | :--- | :--- |
-| **Caveman Suite** (14 fragmented skills: `caveman-discover`, `caveman-learn`, `caveman-manage`, etc.) | **Progressive Rule (`caveman.md`)** | High-signal, high-velocity communication & token-efficient engineering protocol without prompt bloat. |
-| **Ponytail Suite** (6 fragmented skills: `ponytail-debt`, `ponytail-gain`, `ponytail-audit`, etc.) | **Progressive Rule (`ponytail.md`)** | 7-Rung Minimalist Ladder, root-cause caller mapping, and surgical in-place edits. |
+| **Caveman Suite** (14 fragmented skills: `caveman-discover`, `caveman-learn`, etc.) | **Progressive Rule (`caveman.md`)** | High-signal, high-velocity communication & token-efficient engineering protocol without prompt bloat. |
+| **Ponytail Suite** (6 fragmented skills: `ponytail-debt`, `ponytail-gain`, etc.) | **Progressive Rule (`ponytail.md`)** | 7-Rung Minimalist Ladder, root-cause caller mapping, and surgical in-place edits. |
 | **Grilling Variants** (3 skills: `grill-me`, `grilling`, `grill-with-docs`) | **Unified `/grill-me` Skill** | Interactive one-question-at-a-time interview with `(Recommended)` first slot to define architecture & stress-test designs. |
 | **Scattered Implementation** (`implement`, `implement-spec`, `lean-build`, `prototype`) | **Technical Scrum Wave Engine (`/to-tickets`, `/implement`, `/handoff`)** | Vertical tracer-bullet tickets with Execution Waves DAG (`docs/sprint/SPRINT.md`), DoR, DoD, and cross-session handover. |
-| **Review & Verification Scripts** (`code-analyzer`, `quality-guard`, `security-scanner`) | **3 Native Subagents & Automated Suite** | Sandboxed `adversarial-reviewer`, `codebase-investigator`, `verification-runner`, plus `tests/aac.test.mjs`. |
-| **Fragile Bash/PS1 Overwriters** | **SHA-256 Manifest CLI (`bin/cli.mjs`)** | Non-destructive tracking in `.agents/.aac-manifest.json`, conflict backup (`.scratch/backups/`), `.aac-new`, `--dry-run`, `uninstall`, and manifest path validation (no traversal, managed paths only). |
+| **Review & Verification Scripts** (`code-analyzer`, `quality-guard`, etc.) | **3 Native Subagents & Automated Suite** | Sandboxed `adversarial-reviewer`, `codebase-investigator`, `verification-runner`, plus `tests/aac.test.mjs`. |
+| **Fragile Bash/PS1 Overwriters** | **SHA-256 Manifest CLI (`bin/cli.mjs`)** | Non-destructive tracking in `.agents/.aac-manifest.json`, conflict backup (`.scratch/backups/`), `.aac-new`, `--dry-run`, and `uninstall`. |
 
 ---
 
@@ -73,12 +100,58 @@ flowchart LR
 
 ---
 
+## Interactive Command & Skills Directory
+
+AAC V6 ships 15 focused single-responsibility skills and 3 sandboxed native subagents organized by lifecycle phase:
+
+### 1. Discovery & Architecture
+| Command / Skill | When to Use | Primary Output / Public Seam |
+| :--- | :--- | :--- |
+| **`/grill-me`** | Undecided stack, architecture, or requirements | Interactive one-question interview stress-testing plans against the 6 Pillars. |
+| **`/domain-modeling`** | Ambiguous domain concepts or architectural decisions | Updates ubiquitous glossary in `CONTEXT.md` and records 3-Gate ADRs in `docs/adr/`. |
+| **`/codebase-design`** | Designing module interfaces and test seams | Deep module contracts designed using the Design-It-Twice method. |
+| **`/to-spec`** | Settled architecture ready for formal specification | Structured technical specification in `specs/<slug>.md` with explicit seams. |
+
+### 2. Technical Scrum Engine
+| Command / Skill | When to Use | Primary Output / Public Seam |
+| :--- | :--- | :--- |
+| **`/to-tickets`** | Decomposing a spec or epic into buildable slices | Execution Waves DAG in `docs/sprint/SPRINT.md` and vertical tickets with DoR/DoD. |
+| **`/implement`** | Building an unblocked vertical ticket | Test-first implementation slice, atomic commit upon authorization, board sync. |
+| **`/handoff`** | Ending session, switching context, or handing over | Checkpoints sprint progress and single next action into `.scratch/handoff.md`. |
+
+### 3. Engineering Quality & TDD
+| Command / Skill | When to Use | Primary Output / Public Seam |
+| :--- | :--- | :--- |
+| **`/tdd`** | Feature implementation and bug fixing | Red-Green-Refactor test loop asserting public module seams. |
+| **`/diagnosing-bugs`** | Reproducing failures, flaky tests, or regressions | Tight reproduction script and root-cause hypothesis falsification. |
+| **`/safe-refactor`** | Restructuring code without altering external behavior | Characterization tests followed by atomic, behavior-preserving transformations. |
+| **`/database-migration`** | Modifying schemas, tables, indexes, or API versions | Zero-downtime Expand-Migrate-Contract plan with rollback verification. |
+| **`/code-review`** | Reviewing diffs, pull requests, or branches | Two-axis audit: specification fidelity + 6-Pillar engineering standards. |
+| **`/pr`** | Opening or updating a pull request | Structured PR description with visual summary, door reversibility, and test evidence. |
+
+### 4. Automation & Tooling
+| Command / Skill | When to Use | Primary Output / Public Seam |
+| :--- | :--- | :--- |
+| **`/browsing`** | Live UI verification, E2E journeys, layout testing | Playwright browser automation scripts via `/browser` subagent. |
+| **`/office`** | Parsing spreadsheets, generating Word/PDF reports | Native multimodal ingestion and automated document generation scripts. |
+
+### 5. Native Sandboxed Subagents (`.agents/agents/`)
+| Subagent | Model | Policy | Core Responsibility |
+| :--- | :--- | :--- | :--- |
+| **`codebase-investigator`** | `flash` | `sandbox` | Fast operational reconnaissance, blast-radius mapping, and execution flow tracing. |
+| **`adversarial-reviewer`** | `inherit` | `sandbox` | Independent Red-Team critic auditing proposed diffs against the 6 Pillars. |
+| **`verification-runner`** | `flash` | `sandbox` | Isolated build, lint, typecheck, and test runner returning compact pass/fail traces. |
+
+---
+
 ## Repository Structure
 
 ```text
-antigravity-agent/
+antigravity-agents-core/
+├── .env.example                               # Environment template for local configuration
 ├── .gitattributes                             # Deterministic LF/CRLF normalization for hooks, rules & tests
 ├── .gitignore                                 # Excludes secrets, scratch state, and MCP credentials
+├── .npmignore                                 # Packaging exclusions for clean distribution
 ├── AGENTS.md                                  # Always-on Savage Gen-Z Principal Engineer & 6-Pillar Rules
 ├── CONTEXT.md                                 # User-Defined Architecture, Stack & Domain Glossary
 ├── package.json                               # NPX & GitHub Packages distributor (@rafaelghif/aac-core v6.0.0)
@@ -96,8 +169,10 @@ antigravity-agent/
 │   ├── adr/                                   # Architecture Decision Records (0001–0004)
 │   └── agents/                                # Antigravity platform reference, skill routing, tracker config
 └── .agents/
+    ├── git-guard.cjs                          # Fast, standalone push-to-main guard runner
     ├── hooks.json                             # Cross-platform inline Node lifecycle hooks (SessionStart, PreToolUse)
-    ├── mcp_config.example.json                # Secure MCP template (env-based secrets, explicit timeouts)
+    ├── mcp.env.example                        # Template for MCP credential isolation
+    ├── mcp_config.example.json                # Zero-daemon GitHub MCP template (Node stdio, env secrets)
     ├── sidecars/repo-health/sidecar.json      # Antigravity App scheduled sidecar template
     ├── rules/                                 # 9 Modular Rules (flat directory, official trigger contract)
     │   ├── coding-standards.md                # DRY, KISS, YAGNI, SOLID/SRP, Clean Code (model_decision)
@@ -115,7 +190,8 @@ antigravity-agent/
     │   │   ├── scripts/run-browser.mjs
     │   │   ├── examples/e2e-journey-example.mjs
     │   │   ├── references/locators-and-patterns.md
-    │   │   └── references/antigravity-subagent.md
+    │   │   ├── references/antigravity-subagent.md
+    │   │   └── resources/browser-test-template.mjs
     │   ├── office/                            # Native multimodal Office parsing & automated document authoring
     │   │   ├── SKILL.md
     │   │   ├── scripts/extract-office.py
@@ -149,14 +225,14 @@ antigravity-agent/
     └── agents/                                # 3 Native Custom Subagents (commandExecutionPolicy: sandbox)
         ├── codebase-investigator.md           # Fast operational recon & blast-radius tracer (model: flash, policy: sandbox)
         ├── adversarial-reviewer.md            # Independent Red-Team diff & 6-Pillar critic (policy: sandbox)
-        └── verification-runner.md             # Isolated build, lint, typecheck & test runner (policy: sandbox)
+        └── verification-runner.md             # Isolated build, lint, typecheck & test runner (model: flash, policy: sandbox)
 ```
 
 ---
 
 ## Verification & Platform Contract
 
-Every claim in this repository is enforced by the shipped test suite, not by documentation alone:
+Every claim in this repository is enforced by the shipped automated test suite, not by documentation alone:
 
 ```bash
 npm test          # CLI idempotency, hook bypass corpus, official frontmatter/skill/subagent contract, relative-link integrity
@@ -182,20 +258,17 @@ The MCP template deliberately keeps credentials in `env` or `.agents/mcp.env`, n
 
 ## Quick Start (Multi-Platform Installation, Upgrade & Uninstall)
 
-**Prerequisite**: Node.js **>= 22** on `PATH`. The CLI and every lifecycle hook are Node programs, so there is no supported install path without it.
+**Prerequisite**: Node.js **>= 22** on `PATH`. The CLI and lifecycle hooks are Node programs, so there is no supported install path without it.
 
-Install or upgrade into **any project** without touching the target project's `package.json`:
+Install or upgrade into **any project** without modifying the target project's `package.json`:
 
 ### Option 1: Universal NPX (npm Registry, GitHub Packages, or Direct GitHub)
 ```bash
-# Install via npm Registry:
+# Install into current project:
 npx @rafaelghif/aac-core init
 
-# Or via GitHub Packages (after configuring @rafaelghif:registry=https://npm.pkg.github.com):
-npx @rafaelghif/aac-core init
-
-# Or directly from GitHub:
-npx github:rafaelghif/antigravity-agents-core init
+# Or install into a specific target project:
+npx @rafaelghif/aac-core init --target /path/to/project
 
 # Preview planned changes without writing files:
 npx @rafaelghif/aac-core upgrade --dry-run
@@ -211,9 +284,9 @@ npx @rafaelghif/aac-core uninstall
 ```
 
 ### Option 2: Linux / macOS Shell (`install.sh`)
-The script resolves `bin/cli.mjs` and delegates every write to it; it never copies managed files itself.
+The script resolves `bin/cli.mjs` and delegates all writes to it; it never copies managed files directly.
 ```bash
-# Recommended: download the pinned tag, inspect it, then run it.
+# Recommended: download the pinned tag, inspect it, then run it:
 curl -fsSL -o install.sh https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh
 less install.sh
 bash install.sh
@@ -221,25 +294,28 @@ bash install.sh
 # Non-destructive upgrade:
 bash install.sh --upgrade
 
-# Target another project / preview / pin a different ref:
-bash install.sh /path/to/your-project [--upgrade] [--force] [--dry-run]
+# Target another project / force / dry-run:
+bash install.sh /path/to/your-project --upgrade --force --dry-run
 AAC_REF=main bash install.sh --upgrade
 
-# Optional one-liner (same pinned tag, no mutable branch):
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh | bash -s -- --upgrade
+# Quick one-liner (pinned tag):
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh | bash
 ```
 
 ### Option 3: Windows PowerShell (`install.ps1`)
 ```powershell
-# Recommended: download the pinned tag, inspect it, then run it in its own process.
+# Recommended: download the pinned tag, inspect it, then run it in its own process:
 Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.ps1 -OutFile install.ps1
 notepad install.ps1
-powershell -NoProfile -File .\install.ps1 -TargetDir "C:\path\to\your-project" [-Upgrade] [-Force] [-DryRun]
+powershell -NoProfile -File .\install.ps1
+
+# Target another directory / upgrade / force / dry-run:
+powershell -NoProfile -File .\install.ps1 -TargetDir "C:\path\to\your-project" -Upgrade
 
 # Pin a different ref:
 $env:AAC_REF="main"; powershell -NoProfile -File .\install.ps1 -Upgrade
 
-# Optional one-liner (same pinned tag, no mutable branch):
+# Quick one-liner (pinned tag):
 irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.ps1 | iex
 ```
 
