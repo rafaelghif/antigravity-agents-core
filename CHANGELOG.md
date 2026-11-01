@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-
+- **Open Source Acknowledgements & Lineage (`README.md`)**: Formally accredited community foundations in `README.md`, recognizing Matt Pocock (`mattpocock/skills`) for workflow orchestration patterns (`/grill-me`, `/to-spec`, `/to-tickets`, `/implement`), Caveman communication protocol, and Ponytail minimalist engineering principles, alongside foundational software architecture literature.
 - **`browsing` Skill (`.agents/skills/browsing/`)**: Standards-compliant Antigravity browser automation skill featuring the official 4-folder anatomy (`scripts/run-browser.mjs`, `examples/e2e-journey-example.mjs`, `references/locators-and-patterns.md`, `references/antigravity-subagent.md`), strict when-to-use vs anti-pattern decision boundaries, and integration with the `/browser` subagent and Playwright runners.
 - **`office` Skill (`.agents/skills/office/`)**: Standards-compliant Antigravity document processing skill featuring the official 4-folder anatomy (`scripts/extract-office.py`, `examples/generate-report.py`, `references/office-formats-and-tools.md`, `references/document-conversions.md`), multimodal native ingestion guidance, and automated Excel/Word/PDF generation.
 - **`.gitattributes` Line-Ending Determinism**: `* text=auto eol=lf` with `*.ps1 eol=crlf` and explicit binary rules, so the test suite and hooks no longer break on Windows checkouts with `core.autocrlf=true`.

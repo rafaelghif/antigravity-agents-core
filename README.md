@@ -248,3 +248,19 @@ irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/
 ```bash
 npx @rafaelghif/aac-core init --with-sidecar --project-id "<your-antigravity-project-id>"
 ```
+
+---
+
+## Acknowledgements & Open Source Lineage
+
+This framework adapts and builds upon patterns, workflows, and philosophies pioneered by the open-source software engineering and AI agent community:
+
+- **[Matt Pocock](https://github.com/mattpocock)** ([`mattpocock/skills`](https://github.com/mattpocock/skills)): Foundational inspiration for agent workflow orchestration (`/grill-me`, `/to-spec`, `/to-tickets`, `/implement`), the high-density **Caveman** communication protocol, and **Ponytail** minimalist engineering principles.
+- **John Ousterhout** (*A Philosophy of Software Design*): Theoretical principles behind deep modules, interface hiding, and avoiding shallow pass-through abstractions.
+- **Michael Feathers** (*Working Effectively with Legacy Code*): Principles of narrow boundary seams and testability without invasive mocks.
+
+---
+
+## License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for full details.
