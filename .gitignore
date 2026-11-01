@@ -10,5 +10,6 @@ coverage/
 .scratch/*
 !.scratch/.gitkeep
 .agents/mcp_config.json
+.agents/mcp.env
 .agents/.aac-manifest.json
 review.md

@@ -41,6 +41,7 @@
     "bin/",
     ".agents/",
     "!.agents/mcp_config.json",
+    "!.agents/mcp.env",
     "AGENTS.md",
     "CONTEXT.md",
     "install.sh",

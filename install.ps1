@@ -1,8 +1,18 @@
-# AAC (Antigravity Agent Core V6) — Windows PowerShell Installer
-# Usage:
-#   Remote Install: irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
-#   Remote Upgrade: $env:AAC_UPGRADE="1"; irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/main/install.ps1 | iex
-#   Local Install:  powershell -File .\install.ps1 [-TargetDir <path>] [-Upgrade] [-Force] [-DryRun] [-WithSidecar] [-ProjectId <id>]
+# AAC (Antigravity Agent Core V6) — installer for Windows PowerShell.
+#
+# Requires Node.js >= 22: bin\cli.mjs is the only component that writes managed files, and
+# .agents\hooks.json runs `node -e` guards at runtime. Without Node the hooks cannot execute,
+# so there is no supported "no-Node" install path.
+#
+# Recommended (download, inspect, then run in its own process):
+#   Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.ps1 -OutFile install.ps1
+#   notepad install.ps1
+#   powershell -NoProfile -File .\install.ps1 [-TargetDir <path>] [-Upgrade] [-Force] [-DryRun] [-WithSidecar] [-ProjectId <id>]
+#
+# Optional one-liner (same pinned tag; never a mutable branch):
+#   irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.ps1 | iex
+#
+# Pin a different ref explicitly: $env:AAC_REF="main"
 
 param(
     [string]$TargetDir = (Get-Location).Path,
@@ -13,109 +23,69 @@ param(
     [string]$ProjectId = $env:AAC_PROJECT_ID
 )
 
+$previousErrorActionPreference = $ErrorActionPreference
 $ErrorActionPreference = "Stop"
+
+$repo = "rafaelghif/antigravity-agents-core"
+$ref = if ([string]::IsNullOrWhiteSpace($env:AAC_REF)) { "v6.0.0" } else { $env:AAC_REF }
+
 $runId = [guid]::NewGuid().ToString("N")
 $tempZip = Join-Path ([System.IO.Path]::GetTempPath()) "aac-$runId.zip"
 $tempExtract = Join-Path ([System.IO.Path]::GetTempPath()) "aac-$runId-extract"
 
 try {
+    if ($ref -notmatch '^[A-Za-z0-9._/-]+$' -or $ref.Contains("..")) {
+        throw "Invalid AAC_REF '$ref' (allowed: letters, digits, dot, underscore, dash, slash)."
+    }
+
     if ($WithSidecar -and [string]::IsNullOrWhiteSpace($ProjectId)) {
         throw "--WithSidecar requires -ProjectId <id> (or `$env:AAC_PROJECT_ID)."
     }
 
+    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+    if (-not $nodeCmd) {
+        throw "Node.js >= 22 is required (the AAC CLI and lifecycle hooks are Node programs). Install it from https://nodejs.org, then re-run this installer."
+    }
+    # Windows PowerShell 5.1 strips embedded double quotes from native-exe arguments, so the version is
+    # read as plain text and parsed here instead of being evaluated by a `node -e '...'` expression.
+    $nodeVersion = (& node -p process.versions.node 2>$null | Out-String).Trim()
+    $nodeMajor = 0
+    if ($nodeVersion -match '^(\d+)\.') { $nodeMajor = [int]$Matches[1] }
+    if ($nodeMajor -lt 22) {
+        throw "Node.js >= 22 is required; found '$nodeVersion'."
+    }
+
     $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { "" }
-    if ($scriptDir -and (Test-Path (Join-Path $scriptDir ".agents"))) {
+    if ($scriptDir -and (Test-Path (Join-Path $scriptDir "bin\cli.mjs"))) {
         $sourceRoot = $scriptDir
     } else {
-        Write-Host "Downloading AAC v6.0.0..." -ForegroundColor Cyan
-        $tagUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/tags/v6.0.0.zip"
-        $mainUrl = "https://github.com/rafaelghif/antigravity-agents-core/archive/refs/heads/main.zip"
+        Write-Host "Downloading AAC $ref..." -ForegroundColor Cyan
+        $archiveUrl = "https://github.com/$repo/archive/$ref.zip"
         try {
-            Invoke-WebRequest -Uri $tagUrl -OutFile $tempZip -UseBasicParsing
+            Invoke-WebRequest -Uri $archiveUrl -OutFile $tempZip -UseBasicParsing
+            Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
         } catch {
-            Invoke-WebRequest -Uri $mainUrl -OutFile $tempZip -UseBasicParsing
+            throw "Download or extraction failed for $archiveUrl. Check the ref (AAC_REF=$ref) and your network, or clone the repo and run '.\install.ps1' from it. $($_.Exception.Message)"
         }
-        Expand-Archive -Path $tempZip -DestinationPath $tempExtract -Force
         $sourceRoot = (Get-ChildItem -Path $tempExtract -Directory | Select-Object -First 1).FullName
     }
 
-    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
-    $cliScript = Join-Path $sourceRoot "bin\cli.mjs"
-    if ($nodeCmd -and (Test-Path $cliScript)) {
-        $cliVerb = if ($Upgrade) { "upgrade" } else { "init" }
-        $cliArgs = @($cliScript, $cliVerb, "--target", $TargetDir)
-        if ($Force) { $cliArgs += "--force" }
-        if ($DryRun) { $cliArgs += "--dry-run" }
-        if ($WithSidecar) { $cliArgs += @("--with-sidecar", "--project-id", $ProjectId) }
-        & node @cliArgs
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-        return
+    if ([string]::IsNullOrWhiteSpace($sourceRoot) -or -not (Test-Path (Join-Path $sourceRoot "bin\cli.mjs"))) {
+        throw "AAC $ref does not contain bin\cli.mjs; refusing to continue."
     }
 
-    if (-not $DryRun) {
-        New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
-    }
+    $cliVerb = if ($Upgrade) { "upgrade" } else { "init" }
+    $cliArgs = @((Join-Path $sourceRoot "bin\cli.mjs"), $cliVerb, "--target", $TargetDir)
+    if ($Force) { $cliArgs += "--force" }
+    if ($DryRun) { $cliArgs += "--dry-run" }
+    if ($WithSidecar) { $cliArgs += @("--with-sidecar", "--project-id", $ProjectId) }
 
-    if ((Resolve-Path $TargetDir).Path -ne (Resolve-Path $sourceRoot).Path) {
-        if ($DryRun) {
-            Write-Host "[dry-run] Would install AAC v6.0.0 in: $TargetDir" -ForegroundColor Cyan
-            return
-        }
-
-        foreach ($sub in @("rules", "skills", "agents", "sidecars")) {
-            $srcSub = Join-Path $sourceRoot ".agents\$sub"
-            $dstSub = Join-Path $TargetDir ".agents\$sub"
-            if (Test-Path $srcSub) {
-                New-Item -ItemType Directory -Path $dstSub -Force | Out-Null
-                Copy-Item -Path "$srcSub\*" -Destination $dstSub -Recurse -Force
-            }
-        }
-
-        $srcHooks = Join-Path $sourceRoot ".agents\hooks.json"
-        $dstHooks = Join-Path $TargetDir ".agents\hooks.json"
-        if (Test-Path $dstHooks) {
-            $srcObj = Get-Content $srcHooks -Raw | ConvertFrom-Json
-            $dstObj = Get-Content $dstHooks -Raw | ConvertFrom-Json
-            foreach ($prop in $srcObj.PSObject.Properties) {
-                $existing = $dstObj.PSObject.Properties[$prop.Name]
-                if ($existing -and ($null -ne $existing.Value.enabled)) {
-                    $prop.Value.enabled = $existing.Value.enabled
-                }
-                $dstObj | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value -Force
-            }
-            $dstObj | ConvertTo-Json -Depth 10 | Set-Content -Path $dstHooks -Encoding UTF8
-        } else {
-            Copy-Item -Path $srcHooks -Destination $dstHooks -Force
-        }
-
-        $dstAgentsMd = Join-Path $TargetDir "AGENTS.md"
-        if (-not (Test-Path $dstAgentsMd) -or $Force) {
-            Copy-Item -Path (Join-Path $sourceRoot "AGENTS.md") -Destination $dstAgentsMd -Force
-        } else {
-            Copy-Item -Path (Join-Path $sourceRoot "AGENTS.md") -Destination "$dstAgentsMd.aac-new" -Force
-        }
-
-        $dstContextMd = Join-Path $TargetDir "CONTEXT.md"
-        if (-not (Test-Path $dstContextMd)) {
-            Copy-Item -Path (Join-Path $sourceRoot "CONTEXT.md") -Destination $dstContextMd -Force
-        }
-
-        $scratchDir = Join-Path $TargetDir ".scratch"
-        New-Item -ItemType Directory -Path $scratchDir -Force | Out-Null
-        $gitkeep = Join-Path $scratchDir ".gitkeep"
-        if (-not (Test-Path $gitkeep)) {
-            Set-Content -Path $gitkeep -Value "# Ephemeral scratchpad" -Force
-        }
-
-        $gitignore = Join-Path $TargetDir ".gitignore"
-        $ignoreRules = "`n# Antigravity Ephemeral State & Secrets`n.scratch/*`n!.scratch/.gitkeep`n.agents/mcp_config.json`n"
-        if (-not (Test-Path $gitignore) -or ((Get-Content $gitignore -Raw) -notmatch "\.scratch/\*")) {
-            Add-Content -Path $gitignore -Value $ignoreRules
-        }
-
-        Write-Host "✅ AAC v6.0.0 ready." -ForegroundColor Green
+    & node @cliArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "aac CLI exited with code $LASTEXITCODE."
     }
 } finally {
     if (Test-Path $tempZip) { Remove-Item -Force $tempZip -ErrorAction SilentlyContinue }
     if (Test-Path $tempExtract) { Remove-Item -Recurse -Force $tempExtract -ErrorAction SilentlyContinue }
+    $ErrorActionPreference = $previousErrorActionPreference
 }

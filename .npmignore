@@ -1,4 +1,6 @@
 .agents/mcp_config.json
+.agents/mcp.env
+.agents/**/mcp.env
 .agents/**/mcp_config.json
 .scratch/
 *.log
