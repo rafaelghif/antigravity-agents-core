@@ -1,0 +1,14 @@
+# Normalize line endings so Antigravity frontmatter parsing, hooks, and tests
+# behave identically on Windows, macOS, and Linux.
+* text=auto eol=lf
+
+# PowerShell parses most reliably with CRLF on Windows PowerShell 5.1.
+*.ps1 text eol=crlf
+
+# Binary assets must never be normalized.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
