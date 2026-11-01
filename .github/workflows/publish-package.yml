@@ -41,7 +41,7 @@ jobs:
   publish-npm:
     name: Publish to npm Registry
     needs: verify
-    if: github.event_name == 'release' && github.event.release.prerelease == false
+    if: (github.event_name == 'release' && github.event.release.prerelease == false) || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -60,7 +60,7 @@ jobs:
       - name: Verify Tag Matches package.json Version & Publish
         run: |
           CURRENT_VER=$(node -p "require('./package.json').version")
-          if [ "${GITHUB_REF_NAME}" != "v${CURRENT_VER}" ]; then
+          if [ "${GITHUB_EVENT_NAME}" = "release" ] && [ "${GITHUB_REF_NAME}" != "v${CURRENT_VER}" ]; then
             echo "Release tag ${GITHUB_REF_NAME} does not match v${CURRENT_VER}" >&2
             exit 1
           fi
@@ -76,7 +76,7 @@ jobs:
   publish-gpr:
     name: Publish to GitHub Packages Registry
     needs: verify
-    if: github.event_name == 'release' && github.event.release.prerelease == false
+    if: (github.event_name == 'release' && github.event.release.prerelease == false) || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
