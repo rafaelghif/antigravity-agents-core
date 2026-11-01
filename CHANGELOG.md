@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+
+- **`browsing` Skill (`.agents/skills/browsing/`)**: Standards-compliant Antigravity browser automation skill featuring the official 4-folder anatomy (`scripts/run-browser.mjs`, `examples/e2e-journey-example.mjs`, `references/locators-and-patterns.md`, `references/antigravity-subagent.md`), strict when-to-use vs anti-pattern decision boundaries, and integration with the `/browser` subagent and Playwright runners.
+- **`office` Skill (`.agents/skills/office/`)**: Standards-compliant Antigravity document processing skill featuring the official 4-folder anatomy (`scripts/extract-office.py`, `examples/generate-report.py`, `references/office-formats-and-tools.md`, `references/document-conversions.md`), multimodal native ingestion guidance, and automated Excel/Word/PDF generation.
 - **`.gitattributes` Line-Ending Determinism**: `* text=auto eol=lf` with `*.ps1 eol=crlf` and explicit binary rules, so the test suite and hooks no longer break on Windows checkouts with `core.autocrlf=true`.
 - **MCP Credential Template Pair (`.agents/mcp_config.example.json`, `.agents/mcp.env.example`)**: Cross-platform `git` + `gitea` example that reads secrets from `env`/`--env-file` instead of process arguments; `timeoutSeconds` set on every server.
 - **Verification & Platform Contract table (`README.md`)** and **`SECURITY.md` hook/mock threat model**: documents which guard covers which tool argument and which parts of the Antigravity lifecycle contract are actually relied on.
@@ -15,9 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Working `AAC_PERSONA=neutral` Switch**: the `SessionStart` hook now reads `AAC_PERSONA` and injects a clinical Staff Engineer prose directive when it is `neutral`; previously the switch was advertised in `AGENTS.md` and `README.md` but nothing consumed it.
 
 ### Changed
+
+- **Full Operational Subagents (`.agents/agents/*.md`)**: Upgraded all custom subagents (`codebase-investigator`, `adversarial-reviewer`, `verification-runner`) with full operational tools (`view_file`, `write_to_file`, `replace_file_content`, `multi_replace_file_content`, `list_dir`, `find_by_name`, `grep_search`, `search_web`, `read_url_content`, `run_command`) and `commandExecutionPolicy: sandbox`, eliminating artificial read-only restrictions.
+- **Anti-Boilerplate & Zero-Duplicate Component Invariants**: Enforced strict DRY/KISS/YAGNI protocol across `AGENTS.md`, `ponytail.md`, `coding-standards.md`, `implement`, and `code-review`. Mandates "Discovery Before Creation": agents must inspect existing directories (`components/`, `ui/`, `utils/`, `lib/`) via `grep_search` before authoring new code. Strictly bans creating duplicate UI components, parallel utility functions, or bespoke wrappers for patterns already handled by existing templates, UI libraries, or project helpers.
 - **Review & PR Output Contracts Hardened**: `code-review` adds a secrets/supply-chain axis and requires real diff line numbers instead of invented ranges; `pr` gained a `## Security & Data Impact` section (auth/authz, secrets, migrations, pinned dependencies); `release-audit` gained supply-chain and secret-hygiene checks.
 - **`tests/aac.test.mjs` Rewritten as an Executable Contract**: CRLF-robust frontmatter parsing, exact skill/rule/subagent name sets, agentskills.io name/description limits, official subagent tool whitelist, `workspacePaths` session-hook test, corrupt-manifest fail-closed test, and relative-link integrity across managed markdown.
-- **Hook Guards Hardened (`.agents/hooks.json`)**: git guard now strips stacked `sudo`/`env`/`command`/`nohup`/`timeout`/`bash -lc`/`powershell -Command` wrappers and stacked global git options (`-C`, `-c`, `--git-dir`, `--no-pager`, ...) in a loop, matches `git.exe` and `$(git ...)` forms, and covers `stash`, `reflog`, `gc`, `update-ref`, `worktree`, `submodule`, `rm`, and `filter-branch`; mock guard now inspects `CodeContent`, `ReplacementContent`, and `ReplacementChunks` and detects `jest.mock`/`vi.mock` plus `function`/`class` fakes. Timeout reduced to 5s.
+- **Streamlined Git Push Guard (`.agents/hooks.json`)**: Refactored git guard to eliminate over-engineered blocking of everyday development operations (checkout, branch, commit, stash, restore). The hook now specifically and cleanly intercepts direct pushes to protected `main` or `master` branches (`git push origin main`, `git push --force`) with `decision: "ask"`, removing all Windows shell quote collisions.
 - **Installer Fail-Closed (`bin/cli.mjs`)**: malformed `.aac-manifest.json` and `~/.gemini/config/config.json` now abort instead of silently discarding user state; duplicate sidecar install call removed; sidecars install before the source-repo early return; unknown positional arguments rejected; generated `.gitignore` ignores `.agents/mcp.env`.
 - **Installers Are Now Thin Delegates (`install.sh`, `install.ps1`)**: both resolve `bin/cli.mjs` and hand off every write, so there is exactly one manifest-tracked, non-destructive write path. The duplicated copy logic (~90 lines each) skipped backups, hashing, and `.aac-new` staging, silently clobbering user edits while SECURITY.md claimed the opposite. Both now fail fast on missing or too-old Node (>= 22) instead of pretending a no-Node install works when the hooks are Node programs; `AAC_REF` pins the download and a missing ref errors out instead of silently falling back to a mutable branch.
 - **Documentation Truth-Up**: `docs/agents/skill-directory.md` rewritten for the 13 skills that actually ship; `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md` no longer reference nonexistent plugins, MCP tools, or skills; `docs/agents/antigravity-platform.md` gained §13 customization discovery contracts and §14 MCP credential hygiene; `README.md` badges and rule triggers corrected.
@@ -27,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Skills Corrected**: `safe-refactor` no longer recommends `git checkout -- <file>` (it destroys the user's uncommitted work; it now uses `replace_file_content`/`git stash push -- <file>`); `implement` and `handoff` only commit when the user authorized commits and otherwise record a pending commit; `to-spec` creates `specs/` when absent; `grill-me` uses the canonical `/docs/commands/grill-me/` URL.
 
 ### Removed
-- **Standalone No-Node Install Path (`install.sh`, `install.ps1`)**: removed. Both installers now require Node.js >= 22 and exit with an actionable error, because the lifecycle guards they ship are Node programs. This is a **breaking change**: the next release must be `7.0.0`.
+- **Standalone No-Node Install Path (`install.sh`, `install.ps1`)**: consolidated in `v6.0.0`. Both installers require Node.js >= 22 and exit with an actionable error to ensure lifecycle hook and guard integrity.
 - **`docs/audit-checklist-64-skills.md`**: described a 64-skill catalog and a 100% audit that never matched the shipped artifact.
 - **`docs/templates/handoff.template.md`**: dead duplicate of `.agents/skills/handoff/resources/handoff-template.md`.
 
@@ -48,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [6.0.0] - 2026-10-28
 
 ### Changed
+
 - **Architectural Consolidation & Deep Modules**: Consolidated 64 fragmented legacy skills into 13 high-impact deep modules, eliminating redundant multi-variants (Caveman, Ponytail, and Grilling fragments) in favor of deep public seams and John Ousterhout's module depth philosophy.
 - **Savage Gen-Z Principal Engineer Constitution (`AGENTS.md`)**: Established an anti-sycophantic, high-signal engineering pair-programming persona anchored in the 6 Non-Negotiable Engineering Pillars (*Future-Proof, Scalable, Maintainable, Secure, High-Performance, Upgradeable*). Supports `AAC_PERSONA=neutral` for formal enterprise environments.
 - **User-Defined Architecture Protocol**: Removed rigid static folder and layer dogma; replaced with dynamic discovery and an interview-first protocol (`/grill-me`, `ask_question`) recorded in `CONTEXT.md`.
@@ -60,12 +68,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.4.0] - 2026-10-25
 
 ### Added
+
+
 - **Google Antigravity 2.0+ Platform Features & Best Practices ([docs/agents/antigravity-platform.md](docs/agents/antigravity-platform.md))**: Comprehensive master platform reference documenting 10 core Antigravity capabilities: Direct Subagent Messaging (`invoke_subagent`, `send_message`), Explore-Plan-Execute phased protocol, Native Lifecycle Hooks (`PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, `Stop`), Headless Automations, Subagent Git Worktree isolation (`Workspace: "branch"` / `"share"`), Multimodal Office/Zip attachments, Docked Prompts (`ask_question`), 20,000-token rules budget, `/compact` slash command, and `.gemini/config.json` project-level configuration.
 - **Explore -> Plan -> Execute & Subagent Worktree Isolation Guidelines ([.agents/rules/architecture-and-flow.md](.agents/rules/architecture-and-flow.md))**: Added Section 5 establishing formal architectural exploration, structured plan presentation before large diffs, and mandatory Git worktree isolation for concurrent subagent spikes.
 - **Worktree Concurrency & VCS Panel Integration ([.agents/rules/git-workflow.md](.agents/rules/git-workflow.md))**: Added Section 3 mandating isolated git worktrees for parallel agentic development and atomic diff segregation for Antigravity's VCS review panel.
 - **Open-Source Lineage & Acknowledgements ([README.md](README.md))**: Explicit attribution crediting foundational inspirations from Matt Pocock (Engineering skills suite), Julius Brussee (Caveman token compression), and Google Antigravity.
 
 ### Changed
+
 - **Upstream Skill Hardening & Antigravity Compatibility**:
   - **`diagnosing-bugs` ([.agents/skills/diagnosing-bugs/SKILL.md](.agents/skills/diagnosing-bugs/SKILL.md))**: Added forced mutation diff check to ensure bug reproduction occurs prior to applying behavioral patches.
   - **`tdd` ([.agents/skills/tdd/SKILL.md](.agents/skills/tdd/SKILL.md))**: Added explicit seam catch/miss trade-off analysis between public interface tests and fine-grained unit mocks.
@@ -85,6 +96,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.3.0] - 2026-09-24
 
 ### Added
+
+
 - **Master Skill Routing Directory & Quality-First Manifesto (`docs/agents/skill-directory.md`)**: Comprehensive master reference mapping all 64 workspace skills across 10 operational categories, with explicit trigger conditions, input requirements, output artifacts, and quality-first verification requirements.
 - **Environment Template & Diagnostics (`.env.example`)**: Added comprehensive environment template matching `.env` across Gitea, GitHub, and MCP database drivers, with `Environment Config` diagnostic check integrated into `aac doctor`.
 - **Universal PreInvocation Hook Contract (`memory-engine.cjs`)**: Conformed hook payload output to the official Antigravity specification returning `{ injectSteps: [{ ephemeralMessage: "..." }] }`, actively injecting session continuity reminders into agent context at invocation.
@@ -93,6 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Distribution Package Portability Audit**: Added automated test verifying zero hardcoded local machine paths across npm package tarballs and scaffolded project trees.
 
 ### Changed
+
 - **MCP Configuration Template Parity (`.agents/mcp_config.example.json`)**: Synchronized example template to match `.agents/mcp_config.json` 100% byte-for-byte across all 6 services (`git`, `github`, `gitea`, `postgres`, `mysql`, `mssql`).
 - **Preamble & Instruction Budget (`AGENTS.md`)**: Streamlined root instructions to stay strictly within the 12,000-character budget (`11,965` characters) while integrating references to the master skill catalog.
 - **Documentation Overhaul (`README.md`)**: Updated documentation to version 5.3.0, expanding the skills matrix to cover all 10 categories, detailing all 8 lifecycle hook groups, reflecting 45 automated test assertions, and documenting full database MCP connection schemas.
@@ -106,6 +120,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.2.0] - 2026-09-24
 
 ### Added
+
+
 - **Smart Workspace Upgrade Command (`upgrade`)**: Introduced `npx @rafaelghif/aac-core upgrade` to safely synchronize core rules, skills, plugins, and hooks from older versions (e.g. `v5.0.3` / `v5.1.0`) to latest without losing custom project work.
 - **Strict User Asset Protection**:
   - `CONTEXT.md`: Strictly preserved if present; user-defined domain models, bounded contexts, and glossaries are never overwritten.
@@ -127,25 +143,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Architectural & Semantic Diff Linters (`code-analyzer.cjs`)**: Added checks in `reviewDiff` catching hexagonal architecture layer violations, financial floating-point arithmetic, and deep nesting.
 
 ### Changed
+
 - **Version Bump**: Bumped framework version to `5.2.0` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`), adhering strictly to SemVer 2.0.0 for backwards-compatible feature additions.
 
 ## [5.1.0] - 2026-09-24
 
 ### Added
+
+
 - **Autonomous Session Continuity & Handoff Hook**: Added [`.agents/hooks/handoff-reminder.cjs`](.agents/hooks/handoff-reminder.cjs) (and `.js`) as a native Antigravity `Stop` lifecycle hook registered in [`.agents/hooks.json`](.agents/hooks.json).
 - **Token Limit Resilience**: When a session is interrupted due to token limits, step ceilings (`max_steps_exceeded`), or abnormal exits where conversational turns are impossible, the hook automatically parses `git status`, diff stat, and `transcript.jsonl` to synthesize `.scratch/handoff.md` without consuming LLM tokens.
 - **Loop Protection**: Built-in 1-turn retry ceiling via `.scratch/.handoff-prompted` guaranteeing zero infinite continuation loops.
 - **Automated Hook Verification Suite**: Added comprehensive test coverage in [`tests/cli.test.mjs`](tests/cli.test.mjs) verifying clean stop allowances, uncommitted code modification gating, loop protection, and abnormal termination auto-synthesis.
 
 ### Changed
+
 - **Version Bump**: Bumped version to `5.1.0` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`), strictly following SemVer 2.0.0 for backwards-compatible feature additions.
 
 ## [5.0.5] - 2026-09-24
 
 ### Added
+
+
 - **Always-On Rules Documentation**: Comprehensive documentation of workspace always-on operational rules in [`README.md`](README.md), including `production-integrity.md`, `ponytail.md`, `caveman.md`, `coding-standards.md`, `git-workflow.md`, and `memory-management.md`.
 
 ### Changed
+
 - **CI/CD Dual Registry Automation**: Overhauled [`.github/workflows/publish-package.yml`](.github/workflows/publish-package.yml) into a 3-job parallel pipeline to publish packages simultaneously to both npm public registry (`registry.npmjs.org`) and GitHub Packages (`npm.pkg.github.com`) upon release publication.
 - **Trigger De-duplication**: Removed duplicate `push: tags: ['v*']` trigger in GitHub Actions workflow to eliminate race conditions with the `release: [published]` trigger.
 - **Version Bump**: Bumped version to `5.0.5` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`).
@@ -153,17 +176,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.0.4] - 2026-09-24
 
 ### Added
+
+
 - **Production Integrity & Zero-Assumption Protocol**: Implemented [`production-integrity.md`](.agents/rules/production-integrity.md) (`trigger: always_on`) strictly prohibiting assumptions, hallucinations, dummy/fake mocks, and hardcoded placeholders in production code.
 - **Production Realism Standards**: Integrated production realism, zero-dummy policies, and test fixture isolation into [`coding-standards.md`](.agents/rules/coding-standards.md) and [`AGENTS.md`](AGENTS.md).
 - **Mandatory Clarification Routing**: Wired ambiguous requirements directly to `/grill-me` and native `ask_question` tool.
 
 ### Changed
+
 - **Version Bump**: Bumped root framework `@rafaelghif/aac-core` to `v5.0.4` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`).
 - **Caveman Learn Skill Release Preparation**: Bumped [`.agents/skills/caveman-learn/package.json`](.agents/skills/caveman-learn/package.json) to `v1.0.1` and configured `"publishConfig": { "access": "public" }` for public NPM registry release.
 
 ## [5.0.3] - 2026-09-15
 
 ### Added
+
+
 - **Init & Installer Scaffolding Verification**: Added comprehensive assertions in [`tests/cli.test.mjs`](tests/cli.test.mjs) verifying that `bin/cli.mjs init`, `install.ps1`, and `install.sh` create `.scratch/` (with `.gitkeep`) and `.gitignore` alongside `.agents/`, `docs/`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `CONTEXT.md`, and `skills-lock.json` with zero `package.json` pollution.
 - **Lifecycle Hook Test Verification**: Added automated test coverage in [`tests/cli.test.mjs`](tests/cli.test.mjs) verifying `block-dangerous-git.cjs` (blocking destructive git operations) and `verify-on-stop.cjs` (quality gate allowing clean stops and blocking on regressions).
 - **Test Suite Completeness**: Wired `.agents/skills/caveman-learn/tests/skill-file.test.mjs` into `package.json` `"test"` script, bringing total automated test count to 28 passing tests.
@@ -171,6 +199,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Manifest Package Completeness**: Included `install.ps1` and `install.sh` in `package.json` `"files"` array to provide offline inspection of standalone installation scripts within the NPM distribution package.
 
 ### Changed
+
 - **Version Bump**: Bumped version to `5.0.3` across manifests (`package.json`), CLI (`bin/cli.mjs`), installers (`install.ps1`, `install.sh`), test suites (`tests/cli.test.mjs`), and documentation (`README.md`).
 - **Markdown Link Standard Alignment**: Updated example file links in [`AGENTS.md`](AGENTS.md) to unescaped GitHub-style `file:///` markdown links for instant clickability while strictly maintaining character limits (<12k chars).
 
@@ -192,6 +221,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.0.1] - 2026-09-14
 
 ### Changed
+
 - Bump version to `5.0.1` for NPM registry publication under `@rafaelghif/aac-core`.
 - Synchronized all documentation, CLI, and test suite version assertions to `5.0.1`.
 
@@ -201,6 +231,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Version 5.0.0 is a complete rewrite and architectural evolution, moving from custom Python harness scripts (v4 AAC) to first-class, native **Google Antigravity Customization Architecture**:
 
 ### Added
+
+
 - **Gemini 3.8 Flash (High) Pairing Directives**: Optimized root [`AGENTS.md`](AGENTS.md) adhering to the **Caveman Principle** (terse, fluff-free technical precision) and **Ponytail Principle** (7-rung minimalist code ladder).
 - **Progressive Disclosure Skills**: Integrated all 64 modular skills in `.agents/skills/` across testing, architecture, planning, code review, and token reduction:
   - `ponytail` suite (minimalist code ladder, audit, debt, review).
@@ -230,6 +262,7 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Multi-Platform Parity**: Fully tested across Windows PowerShell 5.1+, Windows cmd, macOS, and Linux bash/sh environments.
 
 ### Changed
+
 - Refactored all inherited Claude Code specific patterns (`CLAUDE.md`, `.claude/`, generic `Skill` tool calls, `Bash` tool calls) to native Google Antigravity primitives (`AGENTS.md`, `.agents/`, `view_file`, `run_command`, `invoke_subagent`).
 - Cleaned and decoupled workspace configurations from machine-global state (`~/.gemini/config/`).
 
@@ -242,6 +275,8 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Comprehensive Antigravity Settings Sanitizer**: Implemented `sanitize_antigravity_settings` in `scripts/health_check.py`.
 - **Consumer Workspace Validation Scope**: Scoped global CLI settings validation in `scripts/validate.py` to framework development runs only.
 
+[Unreleased]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.3.1...v5.4.0
 [5.3.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.2.0...v5.3.0

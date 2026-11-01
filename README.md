@@ -109,7 +109,19 @@ antigravity-agent/
     │   ├── git-and-context.md                 # Conventional atomic commits, CONTEXT.md, Sprint Board (model_decision)
     │   ├── testing.md                         # Public-seam assertions, hermeticity, boundary coverage (glob)
     │   └── release-audit.md                   # Pre-release production readiness rubric (manual @mention)
-    ├── skills/                                # 13 Focused Single-Responsibility Skills
+    ├── skills/                                # 15 Focused Single-Responsibility Skills
+    │   ├── browsing/                          # Live UI verification, E2E journeys & /browser workflow
+    │   │   ├── SKILL.md
+    │   │   ├── scripts/run-browser.mjs
+    │   │   ├── examples/e2e-journey-example.mjs
+    │   │   ├── references/locators-and-patterns.md
+    │   │   └── references/antigravity-subagent.md
+    │   ├── office/                            # Native multimodal Office parsing & automated document authoring
+    │   │   ├── SKILL.md
+    │   │   ├── scripts/extract-office.py
+    │   │   ├── examples/generate-report.py
+    │   │   ├── references/office-formats-and-tools.md
+    │   │   └── references/document-conversions.md
     │   ├── grill-me/SKILL.md                  # One-question-at-a-time interview & 6-Pillar stress-test
     │   ├── domain-modeling/                   # Sharpens CONTEXT.md glossary & records 3-Gate ADRs
     │   │   ├── SKILL.md

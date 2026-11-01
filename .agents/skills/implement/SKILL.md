@@ -22,6 +22,7 @@ Build **one unblocked Scrum ticket or vertical specification slice** into produc
    - Read `@CONTEXT.md`, `docs/sprint/SPRINT.md` (if present), and the target ticket (`docs/sprint/tickets/<NN>-<slug>.md`), including any `Downstream Handover Notes` from parent tickets.
    - Mark the ticket status as `in-progress` and restate the exact `In-Scope` behavior and public seam you are building.
 2. **Execute Sub-Tasks at the Seam (Fast TDD Inner Loop)**:
+   - Search existing directories (`components/`, `utils/`, `lib/`, `hooks/`) via `grep_search` before creating code; reuse or extend existing components and templates instead of authoring duplicate boilerplate.
    - Follow the ticket's `## 4. Execution Plan (Red → Green → Refactor Sub-Tasks)` and the `tdd` skill.
    - Run the **single test file** and **typechecker** repeatedly during implementation to keep feedback under a few seconds.
 3. **Definition of Done (DoD) Verification Gate**:

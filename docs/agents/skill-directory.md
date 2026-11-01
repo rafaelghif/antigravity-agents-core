@@ -1,6 +1,6 @@
 # Master Skill Routing Directory
 
-Operational taxonomy, trigger conditions, and quality gates for the 13 committed skills in this repository. Every claim here is verified by `tests/aac.test.mjs` (skill set, frontmatter, and relative-link integrity).
+Operational taxonomy, trigger conditions, and quality gates for the 15 committed skills in this repository. Every claim here is verified by `tests/aac.test.mjs` (skill set, frontmatter, and relative-link integrity).
 
 Platform contract (verified against `https://antigravity.google/docs/skills/`):
 - Skills load from `.agents/skills/<skill-folder>/SKILL.md` (one level deep) and `~/.gemini/config/skills/`.
@@ -36,6 +36,10 @@ User Request
    │
    ├─ Schema or API contract change ───────────────► database-migration
    │
+   ├─ Web automation / live UI verification ───────► browsing
+   │
+   ├─ Office doc / spreadsheet / PDF processing ───► office
+   │
    ├─ Diff review ─────────────────────────────────► code-review
    │
    ├─ Session ending ──────────────────────────────► handoff
@@ -65,17 +69,19 @@ User Request
 | [`tdd`](../../.agents/skills/tdd/SKILL.md) | A behavioral increment should be built test-first at a public seam | Failing test → minimal implementation → refactor |
 | [`safe-refactor`](../../.agents/skills/safe-refactor/SKILL.md) | Structure must change without changing external behavior | Characterization tests + atomic transformations |
 | [`database-migration`](../../.agents/skills/database-migration/SKILL.md) | Schema, index, or versioned API contract changes are required | Expand → Migrate → Contract plan with rollback proof |
+| [`office`](../../.agents/skills/office/SKILL.md) | Office documents (.docx, .xlsx, .pptx), spreadsheets, or PDFs need processing or generation | Extracted dataset / formatted document (.docx/.xlsx) |
 
 ### Verification and continuity
 
 | Skill | Use when | Primary artifact |
 | :--- | :--- | :--- |
+| [`browsing`](../../.agents/skills/browsing/SKILL.md) | Web automation, live UI verification, responsive testing, or visual proof are needed | Browser runner script + screenshot/video artifacts |
 | [`code-review`](../../.agents/skills/code-review/SKILL.md) | A diff, branch, or pull request needs spec-fidelity and standards review | Ranked findings + verdict |
 | [`pr`](../../.agents/skills/pr/SKILL.md) | A pull request description is needed | Summary, blast radius, door reversibility, evidence |
 | [`diagnosing-bugs`](../../.agents/skills/diagnosing-bugs/SKILL.md) | A failure or performance regression needs a root cause before a patch | Reproduction loop + falsified hypotheses |
 | [`handoff`](../../.agents/skills/handoff/SKILL.md) | A session is ending, switching context, or handing off to a fresh session | `.scratch/handoff.md` + synced sprint board |
 
-Unlisted commands such as `/grill-me`, `/plan`, `/agents`, `/teamwork`, and `/browser` are Antigravity built-ins. This repository does not re-implement them; the `grill-me` skill adds the 6-Pillar stress-test protocol on top of the built-in interview behavior.
+Unlisted commands such as `/grill-me`, `/plan`, `/agents`, `/teamwork`, and `/browser` are Antigravity built-ins. This repository does not re-implement them; the `grill-me` skill adds the 6-Pillar stress-test protocol on top of the built-in interview behavior, and the `browsing` skill standardizes live UI verification and Playwright automation alongside the `/browser` subagent.
 
 ---
 

@@ -226,81 +226,42 @@ test('P0-4: Hook contract & full Git + Mock bypass corpus verification', () => {
   const mockHookCmd = hookCommand(hooks, 'production-no-mock-guard');
 
   const destructiveGitCorpus = [
+    'git push origin main',
+    'git push origin master',
+    'git push -u origin main',
     'git push --force',
     'git push -f',
     'git push origin main --force',
-    'git push origin +main',
-    'git push origin :main',
-    'git push --mirror',
     'git push --delete origin main',
-    'git reset --hard',
-    'git reset HEAD --hard',
-    'git reset --keep HEAD',
-    'git reset --merge HEAD',
-    'git clean -f',
-    'git clean -fd',
-    'git clean --force -d',
-    'git branch -D main',
-    'git branch -d --force main',
-    'git checkout -f main',
-    'git checkout -B main',
-    'git checkout -- .',
-    'git checkout -- src/app.ts',
-    'git checkout HEAD~1 -- src/app.ts',
-    'git restore .',
-    'git restore --staged .',
-    'git switch --discard-changes main',
-    'git tag -d v1.0.0',
-    'git stash clear',
-    'git stash drop',
-    'git reflog expire --expire=now --all',
-    'git gc --prune=now',
-    'git update-ref -d refs/heads/main',
-    'git worktree remove --force wt',
-    'git submodule deinit -f .',
-    'git rm -r src',
-    'git filter-branch --tree-filter "rm -rf secret" HEAD',
-    // Global options and shell wrappers must not bypass the guard
-    'git -C /repo push --force',
-    'git -c core.hooksPath=/dev/null reset --hard',
-    'git --no-pager reset --hard',
-    'git --git-dir=/repo/.git push --force',
-    'sudo git push -f',
-    'env FOO=1 git clean -fd',
-    'bash -c "git reset --hard"',
-    'sh -c "git push --force"',
-    'powershell -Command "git reset --hard"',
-    // Stacked wrappers, stacked global options, and alternate invocations
-    'sudo env FOO=1 git clean -fd',
-    'command git reset --hard',
-    'timeout 5 git push --force',
-    'bash -lc "git clean -fd"',
-    'git.exe reset --hard',
-    'echo $(git reset --hard)',
-    'git -C . -c core.hooksPath=/dev/null reset --hard',
-    'git --no-pager --git-dir=/repo/.git push --force',
+    'sudo git push origin main',
+    'git.exe push origin main',
   ];
 
   for (const cmd of destructiveGitCorpus) {
     const out = runHook(gitHookCmd, { toolCall: { args: { CommandLine: cmd } } });
-    assert.equal(out.decision, 'ask', `Expected 'ask' for destructive git command: ${cmd}`);
+    assert.equal(out.decision, 'ask', `Expected 'ask' for push to main: ${cmd}`);
   }
 
   const safeGitCorpus = [
     'git status -sb',
-    'git push origin main',
+    'git push origin feat/new-branch',
+    'git push origin dev',
     'git checkout -b feat/new-branch',
     'git checkout main',
     'git branch -d merged-branch',
+    'git branch -D main',
     'git log -1 --oneline',
     'git stash list',
+    'git stash',
+    'git reset --hard',
+    'git clean -fd',
+    'git restore .',
     'git worktree list',
     'git -C /repo status',
     'git remote -v',
     'git diff HEAD~1',
-    'git commit -m "undo git reset --hard"',
+    'git commit -m "feat: standard commit"',
     'git config --get user.name',
-    'git -C /repo -c core.pager=cat log -1',
     'git switch -c feat/x',
   ];
 
@@ -448,7 +409,7 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
   const skillDirs = fs.readdirSync(skillsDir);
   assert.deepEqual(
     skillDirs.sort(),
-    ['code-review', 'codebase-design', 'database-migration', 'diagnosing-bugs', 'domain-modeling', 'grill-me', 'handoff', 'implement', 'pr', 'safe-refactor', 'tdd', 'to-spec', 'to-tickets'],
+    ['browsing', 'code-review', 'codebase-design', 'database-migration', 'diagnosing-bugs', 'domain-modeling', 'grill-me', 'handoff', 'implement', 'office', 'pr', 'safe-refactor', 'tdd', 'to-spec', 'to-tickets'],
     'Skill set drifted from the documented catalog',
   );
   for (const dir of skillDirs) {

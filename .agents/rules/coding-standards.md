@@ -8,9 +8,10 @@ description: "Core coding standards enforcing DRY, KISS, YAGNI, SOLID/SRP, inten
 ## 1. Architectural Foundations (KISS, DRY, YAGNI, SOLID)
 
 * **KISS (Keep It Simple, Stupid)**: Favor flat, linear, obvious control flow over meta-programming, deep class hierarchies, or convoluted abstraction layers. Boring, readable code wins every time in production.
-* **DRY (Single Canonical Source of Truth)**: Consolidate domain calculations, validation schemas, and entity invariants in one place. Apply the Rule of Three; never copy-paste business logic across modules.
-* **YAGNI (You Aren't Gonna Need It)**: Implement only what current requirements mandate. Reject speculative generic abstractions, unused hook configurations, and premature extension frameworks.
+* **DRY (Single Canonical Source of Truth & Zero Duplicate Boilerplate)**: Consolidate domain calculations, validation schemas, UI primitives, and entity invariants in one place. Never recreate existing components, hooks, or utility functions in isolation—always search the workspace first. If a component or helper exists, reuse or compose it; duplicate implementations create design drift and upgrade nightmares.
+* **YAGNI (Anti-Boilerplate & Minimal Scaffolding)**: Implement only what current requirements mandate. Reject bespoke wrappers around standard framework features, redundant boilerplate generators, and speculative generic abstractions. Use existing project utilities and framework built-ins directly.
 * **SOLID & Deep Modules**: Functions and modules must operate at a uniform level of abstraction with a single reason to change. Design **Deep Modules**—a simple, compact public interface encapsulating rich, robust internal implementation. Eliminate shallow pass-through classes that add cognitive noise without adding leverage.
+* **Empirical Grounding (Zero Assumptions)**: Treat training memory as an unverified rumor. Never assume an external API signature, package version, or exported function exists without verifying against workspace manifests, installed types, or live documentation (`search_web`).
 
 ## 2. Mechanical Sympathy & High-Performance Low-Allocation Patterns
 
@@ -31,6 +32,7 @@ description: "Core coding standards enforcing DRY, KISS, YAGNI, SOLID/SRP, inten
   * Identifiers must reveal *why* they exist and *what* they represent (`activeSessionCount`, `calculateProratedRefundCents`, `isAuthorizedTenant`). Ban ambiguous abbreviations (`cnt`, `tmp`, `val`, `data2`).
 * **Guard Clauses & Flattened Control Flow**:
   * Enforce preconditions, input bounds, and error states at the top of the function and return early. Maintain the primary happy path at the unindented base level (maximum nesting depth: 2–3 levels).
+* **Zero Truncated Code**: Never emit placeholder comments like `// ... rest unchanged ...`. Every edit or file must be complete, syntactically valid, and drop-in runnable.
 * **Why-Only Comments**:
   * Never write comments that explain *what* the code does. Reserve comments exclusively for *why*: subtle protocol nuances, hardware quirks, concurrency invariants, or explicit `// ponytail: <ceiling and upgrade path>` limits.
 

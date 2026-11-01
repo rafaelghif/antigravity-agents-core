@@ -80,7 +80,7 @@ Intercept and enforce guardrails at critical agent execution lifecycle stages vi
 - `PostInvocation`: Inspect or audit generated model output.
 - `Stop`: Quality gates and handoff reminders before session conclusion.
 
-Hooks receive JSON on stdin and return JSON on stdout. The documented payload always includes `conversationId`, `workspacePaths`, `transcriptPath`, `artifactDirectoryPath`, and `modelName`. `PreToolUse` gates a call with `decision`: `allow`, `auto_approve`, `deny`, `ask`, `force_ask`, or `deny_unless_prior_grant`. Because the hook process working directory is not part of the contract, hooks must resolve project files from `workspacePaths`, not from relative paths.
+Hooks receive JSON on stdin and return JSON on stdout (camelCase protojson). The documented payload always includes `conversationId`, `workspacePaths`, `transcriptPath`, `artifactDirectoryPath`, and `modelName`. The working directory of the hook command is guaranteed to be the directory containing `hooks.json` (e.g., `.agents/`). `PreToolUse` gates a call with `decision`: `"allow"`, `"deny"`, `"ask"`, or `"force_ask"`, and supports argument injection/rewriting via `overwrite`. Multi-repo hooks can resolve root paths from `workspacePaths`.
 
 ---
 
@@ -190,7 +190,7 @@ Rules versus skills: a **rule** states a constraint or invariant; a **skill** pa
 
 ## 14. MCP Credential Hygiene
 
-`mcp_config.json` supports `command`/`args`/`env` for local stdio servers and `serverUrl`/`headers` for remote servers, plus `timeoutSeconds`, `disabled`, `enabledTools`, and `disabledTools`.
+`mcp_config.json` supports `command`/`args`/`env` for local Stdio servers and `url` (canonical Streamable HTTP, with `serverUrl` supported for backward compatibility) for remote servers, plus `cwd`, `timeoutSeconds`, `disabled`, `enabledTools`, and `disabledTools`. Note that legacy HTTP+SSE transport (`/sse`) is unsupported; remote servers must expose a Streamable HTTP endpoint (`/mcp`) or connect via a stdio bridge (`mcp-remote`).
 
 - Put secrets in `env`, never in `args` or `headers` committed to the repository: command-line arguments appear in process listings (`ps`, `/proc/<pid>/cmdline`) and shell history.
 - Prefer the MCP Store for database, GitHub, and cloud integrations. It manages OAuth tokens (stored in `~/.gemini/antigravity/mcp_oauth_tokens.json`) and keeps credentials out of workspace config.

@@ -24,7 +24,7 @@ Report security issues privately to `business.rafaelghifari@gmail.com`. Do not o
    - Executes inline Node JSON parsers (`node -e`) for cross-platform compatibility on Linux, macOS, and Windows, with a 5-second timeout.
    - Malformed hook payloads return `decision: "ask"` (fail-closed), so a schema change surfaces as a prompt instead of silently disabling the guard.
    - `lifecycle-session-bootstrap` resolves `.scratch/handoff.md`, `docs/sprint/SPRINT.md`, and `CONTEXT.md` from the documented `workspacePaths` stdin field, never from the hook working directory. It also injects a clinical-prose directive when `AAC_PERSONA=neutral` is present in the host environment.
-   - `git-destructive-guard` repeatedly strips stacked shell wrappers (`sudo`, `env VAR=...`, `command`, `nohup`, `timeout N`, `bash -lc`, `powershell -Command`) and stacked git global options (`-C`, `-c`, `--git-dir`, `--work-tree`, `--no-pager`, ...) before matching destructive subcommands anywhere in the segment, including `git.exe` and `$(git ...)` forms (`push --force/+ref/--mirror/--delete`, `reset --hard/--merge/--keep`, `clean -f`, `branch -D`, `checkout -f/-B/-- <path>`, `restore`, `switch --discard-changes/-C`, `tag -d`, `stash clear/drop`, `reflog expire/delete`, `gc --prune`, `update-ref -d`, `worktree remove/prune`, `submodule deinit -f`, `rm`, `filter-branch/filter-repo`) and returns `decision: "ask"`.
+   - `git-destructive-guard` intercepts direct pushes to protected `main` or `master` branches (`git push origin main`, `git push --force`) with `decision: "ask"`, preventing accidental overwrites while allowing normal local development operations (`checkout`, `commit`, `stash`, feature branch pushes) without friction.
    - `production-no-mock-guard` covers every file-write tool with its real argument name (`CodeContent`, `ReplacementContent`, `ReplacementChunks`) and intercepts fake stores (`mock*`, `fake*`, `dummy*`, `stub*`), `jest.mock`/`vi.mock`, dummy tokens, and deferred `TODO: implement` stubs in non-test files with `decision: "ask"`.
    - The mock guard's exemptions are test code (`*.test.*`, `*.spec.*`, `test_*.py`, `tests/`, `__tests__/`, `fixtures/`, `mocks/`) plus `*.md`, `hooks.json`, and `package.json`. Markdown and config files are exempt because documentation and the hook definitions themselves contain the words the detector matches; they are not executable production modules.
 3. **MCP Configuration (`.agents/mcp_config.example.json`)**:
@@ -35,8 +35,8 @@ Report security issues privately to `business.rafaelghifari@gmail.com`. Do not o
 4. **Installer Fail-Closed Parsing (`bin/cli.mjs`)**:
    - A malformed `.agents/hooks.json`, `.agents/.aac-manifest.json`, or `~/.gemini/config/config.json` aborts the operation with a non-zero exit code and a timestamped backup instead of being overwritten.
 5. **Subagent Containment (`.agents/agents/*.md`)**:
-   - `codebase-investigator` runs with `commandExecutionPolicy: off` (strictly read-only) and no `run_command` tool.
-   - `adversarial-reviewer` and `verification-runner` run with `commandExecutionPolicy: sandbox` (never `auto`).
+   - All custom subagents (`adversarial-reviewer`, `codebase-investigator`, `verification-runner`) run with `commandExecutionPolicy: sandbox` (never un-sandboxed `auto`) and full edit, search, and execution tools.
+
    - `tools` lists use only documented Antigravity tool names; an unmapped tool name can hang a subagent.
 6. **Scheduled Sidecar (`.agents/sidecars/repo-health/sidecar.json`)**:
    - Supported on **Antigravity App** only (global sidecars under `~/.gemini/config/sidecars/`).
