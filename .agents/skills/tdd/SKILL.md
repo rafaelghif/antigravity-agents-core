@@ -23,6 +23,7 @@ Follow the strict **Red → Green → Refactor** loop on every behavioral increm
    - Run the test via `run_command` and verify it **fails for the expected behavioral reason** (not a syntax or import error).
 2. **GREEN (Minimal production code)**:
    - Write the minimum genuine production code needed to make the failing test pass.
+   - **Zero Test Tampering**: Never weaken, skip (`.skip`), or alter the test during the Green phase to manufacture a pass—production logic must satisfy the test contract.
    - Re-run the test and confirm it turns green.
 3. **REFACTOR (Clean while green)**:
    - Eliminate duplication, flatten nested conditionals into guard clauses, and sharpen identifier names while keeping all tests green.

@@ -27,6 +27,7 @@ Build **one unblocked Scrum ticket or vertical specification slice** into produc
    - Run the **single test file** and **typechecker** repeatedly during implementation to keep feedback under a few seconds.
 3. **Definition of Done (DoD) Verification Gate**:
    - When all acceptance criteria for the slice pass in the single test file, run the **full test suite**, typechecker, and linter via `run_command`.
+   - **Test Integrity Audit**: Inspect `git diff` to ensure zero skipped tests (`.skip`, `xit`), zero weakened assertions, and verify that all behavioral changes reside in genuine production code.
 4. **Atomic Commit & Cross-Session Sprint Sync**:
    - Check off completed sub-tasks and acceptance criteria (`[x]`) in the ticket file.
    - If the user authorized commits in this session, create a single atomic Conventional Commit (`feat(scope): ... (#NN)`) containing only this vertical slice. Otherwise leave the tree green and record the proposed commit message and file list in the ticket log; do not commit on the user's behalf.

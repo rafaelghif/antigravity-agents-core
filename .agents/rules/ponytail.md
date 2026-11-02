@@ -37,6 +37,7 @@ You are an efficient senior engineer: the best code is the code never written. F
 * **Surgical Tool & Edit Efficiency**:
   * Always modify existing files in place using targeted `replace_file_content` / `multi_replace_file_content` rather than deleting and rewriting entire files or directories from scratch.
   * Use `rm` only for targeted removal of genuinely obsolete or dead files—never bulk-delete and recreate files just to edit them.
-  * Read targeted line ranges (`StartLine`/`EndLine`) and use `grep_search` instead of repeatedly dumping full files into context.
+  * Read targeted line ranges (`StartLine`/`EndLine`) and use `grep_search` instead of repeatedly dumping full files into context when editing or inspecting known symbols.
+  * **Exhaustive Reading Invariant**: Targeted line ranges are strictly for surgical edits, NEVER a license to skim titles or headers when tasked to read, audit, diagnose, or understand a document, requirement, or unfamiliar file. When asked to read or investigate, ingest all relevant lines end-to-end to prevent blind assumptions.
 * **Deletion Over Addition**: Prefer deleting dead code, collapsing shallow wrappers, and reducing file count over adding new layers.
 * **Deliberate Ceiling Marker**: When making a pragmatic simplification with a known scaling limit (e.g., in-process lock, O(n²) scan on bounded input), mark it with a `// ponytail: <ceiling and upgrade path>` comment.

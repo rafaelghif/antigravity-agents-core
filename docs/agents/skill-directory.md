@@ -1,6 +1,6 @@
 # Master Skill Routing Directory
 
-Operational taxonomy, trigger conditions, and quality gates for the 15 committed skills in this repository. Every claim here is verified by `tests/aac.test.mjs` (skill set, frontmatter, and relative-link integrity).
+Operational taxonomy, trigger conditions, and quality gates for the 16 committed skills in this repository. Every claim here is verified by `tests/aac.test.mjs` (skill set, frontmatter, and relative-link integrity).
 
 Platform contract (verified against `https://antigravity.google/docs/skills/`):
 - Skills load from `.agents/skills/<skill-folder>/SKILL.md` (one level deep) and `~/.gemini/config/skills/`.
@@ -34,6 +34,8 @@ User Request
    │
    ├─ Bug / regression ────────────────────────────► diagnosing-bugs ─► tdd / safe-refactor
    │
+   ├─ Documentation / API / 2026 best-practice research ──► research
+   │
    ├─ Schema or API contract change ───────────────► database-migration
    │
    ├─ Web automation / live UI verification ───────► browsing
@@ -58,6 +60,7 @@ User Request
 | [`grill-me`](../../.agents/skills/grill-me/SKILL.md) | Architecture, stack, or requirements are undecided; a plan needs 6-Pillar stress-testing | Settled decision frontier |
 | [`domain-modeling`](../../.agents/skills/domain-modeling/SKILL.md) | Domain terms, bounded contexts, invariants, or a hard-to-reverse decision need recording | `CONTEXT.md`, `docs/adr/NNNN-*.md` |
 | [`codebase-design`](../../.agents/skills/codebase-design/SKILL.md) | Module interfaces, interface depth, or public test seams need design | Design-It-Twice comparison |
+| [`research`](../../.agents/skills/research/SKILL.md) | Technical investigation, official docs, library APIs, or 2026 best practices need research | `.scratch/research/<topic>.md` |
 | [`to-spec`](../../.agents/skills/to-spec/SKILL.md) | Settled decisions need a technical specification with explicit seams and out-of-scope boundaries | `specs/<slug>.md` |
 
 ### Execution

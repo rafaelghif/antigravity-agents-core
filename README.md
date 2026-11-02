@@ -7,7 +7,7 @@
 **Enterprise-grade Principal Software Engineering & Technical Scrum constitution, progressive-disclosure rules, deep-module skills, sandboxed subagents, cross-platform lifecycle hooks, and zero-daemon MCP integration for Google Antigravity.**
 
 <p align="center">
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.0.0-blue.svg?style=for-the-badge&logo=git" alt="Version 6.0.0" /></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.0.1-blue.svg?style=for-the-badge&logo=git" alt="Version 6.0.1" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity_2.0-8A2BE2.svg?style=for-the-badge&logo=google" alt="Platform" /></a>
   <a href="https://antigravity.google/docs/rules"><img src="https://img.shields.io/badge/engine-Dynamic_High_Reasoning-0052CC.svg?style=for-the-badge&logo=googlecloud" alt="Dynamic High Reasoning" /></a>
   <a href="#v5--v6-evolution--consolidation-matrix"><img src="https://img.shields.io/badge/architecture-deep_modules-success.svg?style=for-the-badge" alt="Deep Modules" /></a>
@@ -102,7 +102,7 @@ flowchart LR
 
 ## Interactive Command & Skills Directory
 
-AAC V6 ships 15 focused single-responsibility skills and 3 sandboxed native subagents organized by lifecycle phase:
+AAC V6 ships 16 focused single-responsibility skills and 3 sandboxed native subagents organized by lifecycle phase:
 
 ### 1. Discovery & Architecture
 | Command / Skill | When to Use | Primary Output / Public Seam |
@@ -110,6 +110,7 @@ AAC V6 ships 15 focused single-responsibility skills and 3 sandboxed native suba
 | **`/grill-me`** | Undecided stack, architecture, or requirements | Interactive one-question interview stress-testing plans against the 6 Pillars. |
 | **`/domain-modeling`** | Ambiguous domain concepts or architectural decisions | Updates ubiquitous glossary in `CONTEXT.md` and records 3-Gate ADRs in `docs/adr/`. |
 | **`/codebase-design`** | Designing module interfaces and test seams | Deep module contracts designed using the Design-It-Twice method. |
+| **`/research`** | Investigating APIs, official documentation, or 2026 best practices | Evidence-based synthesis in `.scratch/research/<topic>.md` citing primary sources. |
 | **`/to-spec`** | Settled architecture ready for formal specification | Structured technical specification in `specs/<slug>.md` with explicit seams. |
 
 ### 2. Technical Scrum Engine
@@ -154,7 +155,7 @@ antigravity-agents-core/
 ├── .npmignore                                 # Packaging exclusions for clean distribution
 ├── AGENTS.md                                  # Always-on Savage Gen-Z Principal Engineer & 6-Pillar Rules
 ├── CONTEXT.md                                 # User-Defined Architecture, Stack & Domain Glossary
-├── package.json                               # NPX & GitHub Packages distributor (@rafaelghif/aac-core v6.0.0)
+├── package.json                               # NPX & GitHub Packages distributor (@rafaelghif/aac-core v6.0.1)
 ├── bin/cli.mjs                                # Non-destructive SHA-256 manifest CLI (init / upgrade / uninstall)
 ├── install.sh                                 # Linux / macOS installer (delegates all writes to bin/cli.mjs)
 ├── install.ps1                                # Windows PowerShell installer (delegates all writes to bin/cli.mjs)
@@ -184,7 +185,7 @@ antigravity-agents-core/
     │   ├── git-and-context.md                 # Conventional atomic commits, CONTEXT.md, Sprint Board (model_decision)
     │   ├── testing.md                         # Public-seam assertions, hermeticity, boundary coverage (glob)
     │   └── release-audit.md                   # Pre-release production readiness rubric (manual @mention)
-    ├── skills/                                # 15 Focused Single-Responsibility Skills
+    ├── skills/                                # 16 Focused Single-Responsibility Skills
     │   ├── browsing/                          # Live UI verification, E2E journeys & /browser workflow
     │   │   ├── SKILL.md
     │   │   ├── scripts/run-browser.mjs
@@ -192,6 +193,7 @@ antigravity-agents-core/
     │   │   ├── references/locators-and-patterns.md
     │   │   ├── references/antigravity-subagent.md
     │   │   └── resources/browser-test-template.mjs
+    │   ├── research/SKILL.md                  # High-trust primary-source investigation & empirical grounding
     │   ├── office/                            # Native multimodal Office parsing & automated document authoring
     │   │   ├── SKILL.md
     │   │   ├── scripts/extract-office.py
@@ -287,7 +289,7 @@ npx @rafaelghif/aac-core uninstall
 The script resolves `bin/cli.mjs` and delegates all writes to it; it never copies managed files directly.
 ```bash
 # Recommended: download the pinned tag, inspect it, then run it:
-curl -fsSL -o install.sh https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh
+curl -fsSL -o install.sh https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.1/install.sh
 less install.sh
 bash install.sh
 
@@ -299,13 +301,13 @@ bash install.sh /path/to/your-project --upgrade --force --dry-run
 AAC_REF=main bash install.sh --upgrade
 
 # Quick one-liner (pinned tag):
-curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.1/install.sh | bash
 ```
 
 ### Option 3: Windows PowerShell (`install.ps1`)
 ```powershell
 # Recommended: download the pinned tag, inspect it, then run it in its own process:
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.ps1 -OutFile install.ps1
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.1/install.ps1 -OutFile install.ps1
 notepad install.ps1
 powershell -NoProfile -File .\install.ps1
 
@@ -316,7 +318,7 @@ powershell -NoProfile -File .\install.ps1 -TargetDir "C:\path\to\your-project" -
 $env:AAC_REF="main"; powershell -NoProfile -File .\install.ps1 -Upgrade
 
 # Quick one-liner (pinned tag):
-irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.1/install.ps1 | iex
 ```
 
 ### Optional: Antigravity App Scheduled Sidecar (`--with-sidecar`)

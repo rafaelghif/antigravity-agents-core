@@ -32,5 +32,6 @@ Isolate and fix bugs systematically by building a deterministic reproduction loo
 - If 3 consecutive hypotheses fail, remove **only** your temporary debug instrumentation via `replace_file_content` (or `git stash push -- <instrumented-files>`—never run `git checkout -- .` which would destroy the user's uncommitted work) and re-evaluate the architecture with the user.
 
 ### Phase 3: Root-cause fix & regression lock
-- Fix the shared root cause once (never patch a single caller while leaving sibling callers broken).
-- Remove temporary debug traces, confirm the reproduction command turns **green**, and run the full test suite.
+- Fix the shared root cause once in production code (never patch a single caller while leaving sibling callers broken).
+- **Anti-Test-Bypass Invariant**: The reproduction test is the behavioral oracle. The fix must be exclusively in production logic. Modifying, skipping (`.skip`), deleting, or weakening assertions in the test to artificially produce a green exit code is strictly prohibited.
+- Remove temporary debug traces, confirm the reproduction command turns **green** from the genuine production fix, and run the full test suite.

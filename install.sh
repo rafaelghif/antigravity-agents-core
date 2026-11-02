@@ -6,19 +6,19 @@
 # so there is no supported "no-Node" install path.
 #
 # Recommended (download, inspect, then run — no remote code is executed sight-unseen):
-#   curl -fsSL -o install.sh https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh
+#   curl -fsSL -o install.sh https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.1/install.sh
 #   less install.sh
 #   bash install.sh [target_dir] [--upgrade] [--force] [--dry-run] [--with-sidecar --project-id <id>]
 #
 # Optional one-liner (same pinned tag; never a mutable branch):
-#   curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.0/install.sh | bash -s -- [args]
+#   curl -fsSL https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.0.1/install.sh | bash -s -- [args]
 #
 # Pin a different ref explicitly: AAC_REF=main bash install.sh
 
 set -euo pipefail
 
 REPO="rafaelghif/antigravity-agents-core"
-AAC_REF="${AAC_REF:-v6.0.0}"
+AAC_REF="${AAC_REF:-v6.0.1}"
 
 case "$AAC_REF" in
   ''|*..*|*[!A-Za-z0-9._/-]*)

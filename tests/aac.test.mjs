@@ -331,11 +331,75 @@ test('P0-4: Hook contract & full Git + Mock bypass corpus verification', () => {
     assert.equal(out.decision, 'allow', `Expected 'allow' for genuine production code: ${snippet}`);
   }
 
+  const bannedTestTamperCorpus = [
+    "it.skip('should pay', () => {})",
+    "test.skip('edge case', () => {})",
+    "describe.skip('suite', () => {})",
+    "xit('temporary bypass', () => {})",
+    "xdescribe('skipped group', () => {})",
+    "@pytest.mark.skip(reason='broken')",
+    "@unittest.skip('not implemented')",
+    "t.Skip('skip in Go')",
+    "expect(true).toBe(true)",
+    "assert.ok(true)",
+  ];
+
+  for (const snippet of bannedTestTamperCorpus) {
+    const out = runHook(mockHookCmd, { toolCall: { args: { TargetFile: 'src/service/payment.test.ts', CodeContent: snippet } } });
+    assert.equal(out.decision, 'ask', `Expected 'ask' for test tampering snippet: ${snippet}`);
+    assert.match(out.reason, /Anti-Test-Tampering Guard/i);
+  }
+
   // Guard payloads that cannot be parsed must fail closed (ask), never silently allow.
   for (const [name, cmd] of [['git-destructive-guard', gitHookCmd], ['production-no-mock-guard', mockHookCmd]]) {
     const out = runHookRaw(cmd, '{ this is not json');
     assert.equal(out.decision, 'ask', `${name} must fail closed on malformed stdin, not allow`);
     assert.match(out.reason, /fail-closed/i, `${name} must explain the fail-closed decision`);
+  }
+});
+
+test('P0-7: quality-gate-stop-sensor blocks premature completion when working tree has regressions', () => {
+  const hooks = JSON.parse(fs.readFileSync(hooksJsonPath, 'utf8'));
+  const stopHookCmd = hooks['quality-gate-stop-sensor'].Stop[0].command;
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-stop-test-'));
+  try {
+    // 1. Clean tree or non-model_stop returns allow
+    const cleanOut = runHook(stopHookCmd, { terminationReason: 'user_stop', workspacePaths: [tmpDir] }, repoRoot);
+    assert.equal(cleanOut.decision, 'allow');
+
+    // 2. Initialize a git repo with a failing package test and modified files
+    spawnSync('git', ['init'], { cwd: tmpDir });
+    fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
+      scripts: { test: 'node -e "process.exit(1)"' }
+    }));
+    fs.writeFileSync(path.join(tmpDir, 'tracked.txt'), 'initial\n');
+    spawnSync('git', ['add', '.'], { cwd: tmpDir });
+    spawnSync('git', ['commit', '-m', 'initial'], {
+      cwd: tmpDir,
+      env: { ...process.env, GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@test.com', GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@test.com' }
+    });
+
+    // Modify file so working tree is dirty
+    fs.writeFileSync(path.join(tmpDir, 'tracked.txt'), 'modified\n');
+
+    const dirtyFailingOut = runHook(stopHookCmd, { terminationReason: 'model_stop', workspacePaths: [tmpDir] }, repoRoot);
+    assert.equal(dirtyFailingOut.decision, 'continue', 'Stop hook must return continue when tests fail on dirty working tree');
+    assert.match(dirtyFailingOut.reason, /Quality Gate Sensor Failed/i);
+
+    // 3. When tests pass, allow stop
+    fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
+      scripts: { test: 'node -e "process.exit(0)"' }
+    }));
+    const dirtyPassingOut = runHook(stopHookCmd, { terminationReason: 'model_stop', workspacePaths: [tmpDir] }, repoRoot);
+    assert.equal(dirtyPassingOut.decision, 'allow', 'Stop hook must allow stop when tests pass');
+
+    // 4. When tests pass exit code 0, BUT git diff introduces test skipping (.skip / xit / etc.), reject stop
+    fs.writeFileSync(path.join(tmpDir, 'service.test.js'), 'it.skip("bypassed test", () => {});\n');
+    const tamperedOut = runHook(stopHookCmd, { terminationReason: 'model_stop', workspacePaths: [tmpDir] }, repoRoot);
+    assert.equal(tamperedOut.decision, 'continue', 'Stop hook must return continue when test tampering is detected in git diff');
+    assert.match(tamperedOut.reason, /Test tampering \/ skipping detected/i);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
 
@@ -408,6 +472,29 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
   // Temporal fidelity: ensure AGENTS.md strictly forbids regressing years to training cutoff defaults.
   assert.match(agentsContent, /Zero Temporal Regressive Bias/i, 'AGENTS.md must mandate zero temporal regressive bias');
 
+  // Exhaustive reading & anti-skimming: ensure AGENTS.md strictly mandates exhaustive reading and forbids title-only skimming / unverified assumptions.
+  assert.match(agentsContent, /Zero Skimming & Mandatory Exhaustive Reading/i, 'AGENTS.md must mandate exhaustive reading and forbid shallow skimming');
+  assert.match(agentsContent, /Engineering Pushback ≠ Operational Insubordination/i, 'AGENTS.md must enforce operational obedience to explicit user directives');
+
+  // Live research & 2024 cutoff alarm: ensure AGENTS.md mandates live search and strictly forbids 2024 parametric assumptions.
+  assert.match(agentsContent, /2024 Training Cutoff Alarm/i, 'AGENTS.md must alert on 2024 training cutoff');
+  assert.match(agentsContent, /Mandatory Live Search/i, 'AGENTS.md must mandate live web search on search directives');
+  assert.match(agentsContent, /Strict Negative Constraints/i, 'AGENTS.md must declare explicit strict negative constraints');
+
+  // Anti-looping & anti-premature completion: ensure AGENTS.md enforces circuit-breakers and zero-mudah-puas.
+  assert.match(agentsContent, /Zero Polite Loops|Anti-Looping Circuit Breaker/i, 'AGENTS.md must mandate anti-looping circuit breaker');
+  assert.match(agentsContent, /Zero Mudah Puas/i, 'AGENTS.md must mandate zero mudah puas validation proof');
+  assert.match(agentsContent, /Anti-Test-Tampering/i, 'AGENTS.md must mandate anti-test-tampering');
+
+  const testingRule = fs.readFileSync(path.join(rulesDir, 'testing.md'), 'utf8');
+  assert.match(testingRule, /Zero Mudah Puas/i, 'testing.md must mandate anti-premature completion proof');
+  assert.match(testingRule, /Anti-Test-Tampering/i, 'testing.md must mandate anti-test-tampering');
+
+  const codingRule = fs.readFileSync(path.join(rulesDir, 'coding-standards.md'), 'utf8');
+  assert.match(codingRule, /Exhaustive Reading/i, 'coding-standards.md must mandate exhaustive reading');
+  assert.match(codingRule, /Mandatory Live Research/i, 'coding-standards.md must mandate live research');
+  assert.match(codingRule, /Behavioral Contract Inviolability/i, 'coding-standards.md must mandate contract inviolability');
+
   // Security-rule regression: never document a non-existent constant-time API.
   const securityRule = fs.readFileSync(path.join(rulesDir, 'security-and-auth.md'), 'utf8');
   assert.doesNotMatch(securityRule, /subtle\.timingSafeEqual/, 'security-and-auth.md must not cite the non-existent crypto.subtle.timingSafeEqual');
@@ -418,7 +505,7 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
   const skillDirs = fs.readdirSync(skillsDir);
   assert.deepEqual(
     skillDirs.sort(),
-    ['browsing', 'code-review', 'codebase-design', 'database-migration', 'diagnosing-bugs', 'domain-modeling', 'grill-me', 'handoff', 'implement', 'office', 'pr', 'safe-refactor', 'tdd', 'to-spec', 'to-tickets'],
+    ['browsing', 'code-review', 'codebase-design', 'database-migration', 'diagnosing-bugs', 'domain-modeling', 'grill-me', 'handoff', 'implement', 'office', 'pr', 'research', 'safe-refactor', 'tdd', 'to-spec', 'to-tickets'],
     'Skill set drifted from the documented catalog',
   );
   for (const dir of skillDirs) {
