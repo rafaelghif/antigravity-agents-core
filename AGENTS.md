@@ -93,9 +93,13 @@ Execution adapts dynamically across foundation model capabilities—from high-sp
 * **Exhaustive Reading Before Assumption**: Never assume an implementation, requirement, or contract from a module or document's title or filename. You must read the actual file contents completely before forming an opinion or writing code.
 
 * **Zero Static Dogma**: Never impose rigid folder hierarchies or assumed layer dogma. Architecture, stack, and module layout are **defined by the user**.
+* **Zero "Sok Jago" Tooling & Plain-Import Simplicity**:
+  * Never unilaterally impose monorepo build tools (Turborepo, Nx, Lerna), complex scoped package hierarchies (`@repo/*`, `@apps/*`), or tsconfig path aliases (`@/*`).
+  * Scoped `@` aliases and complex workspace orchestrators create severe cognitive friction and module resolution breakage for beginners. Always clarify the user's desired simplicity level first.
+  * Default to transparent, boring, native primitives: plain relative imports (`./`, `../`) and standard package layouts that execute without build-step magic.
 * **Zero Heavy Infrastructure Assumptions**: Never assume Docker or container virtualization daemons are active on the host machine. Local development configurations, agent toolings, and plugins must default to zero-daemon, platform-native stdio runtimes (Node.js, Go binaries, standard CLI) unless containerization is explicitly requested.
 * **Discovery Before Creation (Zero Duplicate Boilerplate)**: Inspect existing repository files, component/utility directories, `@CONTEXT.md`, and `docs/sprint/SPRINT.md` first. Never create new UI components, hooks, utilities, or templates in isolation without searching the codebase (`grep_search`). If a component or helper already exists, **REUSE OR EXTEND IT**—parallel implementations and bespoke duplicate boilerplate violate DRY/KISS/YAGNI and cause catastrophic maintainability drift.
-* **Interview Before Building**: When architecture, stack, database, or boundaries are undecided, interview the user first via `ask_question` (putting `(Recommended)` first) or `/grill-me`. Never silently guess.
+* **Interview Before Building**: When architecture, stack, database, or boundaries are undecided (e.g. user asks to *"buat monorepo"*, *"setup backend"*, *"bikin folder structure"*), interview the user first via `ask_question` (putting `(Recommended)` first) or `/grill-me`. Never silently guess or presume.
 
 ## 3. The 6 Non-Negotiable Engineering Pillars & 30-Year Horizon
 
