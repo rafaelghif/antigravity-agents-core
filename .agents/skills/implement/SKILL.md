@@ -9,10 +9,13 @@ Build **one unblocked Scrum ticket or vertical specification slice** into produc
 
 ## Decision tree
 
-1. **Were multiple tickets passed or is the spec still unsplit for a multi-session build?**
+1. **Is this a single focused feature slice or bugfix without multi-session sprint tickets?**
+   - **Yes** → Execute the **Fast-Path Implementation**: Lock focus on the public seam, read relevant context end-to-end, execute the TDD inner loop (sub-tasks at the seam), run full verification, and present the atomic diff. Skip sprint board paperwork.
+   - **No** → Proceed to step 2 for Scrum Sprint ticket workflows.
+2. **Were multiple tickets passed or is the spec still unsplit for a multi-session build?**
    - **Yes** → Implement **only one unblocked ticket** per run (check `docs/sprint/SPRINT.md` for the next `ready` ticket in the active Wave). If the spec is too large for one session and has no Sprint Board yet, recommend `/to-tickets` first.
-   - **No** → Proceed to step 2.
-2. **Does the ticket pass Definition of Ready (all `Blocked by` tickets are `done` and public seams are confirmed)?**
+   - **No** → Proceed to step 3.
+3. **Does the ticket pass Definition of Ready (all `Blocked by` tickets are `done` and public seams are confirmed)?**
    - **No** → If blocked by an unfinished ticket, alert the user and point to the blocking ticket first. If the public seam is unconfirmed, propose the seam signature and confirm with the user before coding.
    - **Yes** → Execute the 4 implementation steps below.
 

@@ -350,6 +350,11 @@ test('P0-4: Hook contract & full Git + Mock bypass corpus verification', () => {
     assert.match(out.reason, /Anti-Test-Tampering Guard/i);
   }
 
+  // Dual-platform tool argument support (edit_file / write_file with Path and Replacement)
+  const editFileBypass = runHook(mockHookCmd, { toolCall: { args: { Path: 'src/repo/account.ts', Replacement: 'const mockStore = new Map();' } } });
+  assert.equal(editFileBypass.decision, 'ask', 'production-no-mock-guard must intercept mock patterns in edit_file tool calls with Path and Replacement');
+  assert.match(editFileBypass.reason, /production-no-mock-guard/i);
+
   // Guard payloads that cannot be parsed must fail closed (ask), never silently allow.
   for (const [name, cmd] of [['git-destructive-guard', gitHookCmd], ['production-no-mock-guard', mockHookCmd]]) {
     const out = runHookRaw(cmd, '{ this is not json');
@@ -417,6 +422,19 @@ test('P1-1: SessionStart hook resolves workspacePaths from stdin instead of proc
     const message = JSON.stringify(out);
     assert.match(message, /handoff\.md/);
     assert.match(message, /SPRINT\.md/);
+
+    const contextOnlyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-session-context-'));
+    try {
+      fs.writeFileSync(path.join(contextOnlyDir, 'CONTEXT.md'), '# Context\n');
+      const ctxOut = runHook(sessionHookCmd, { workspacePaths: [contextOnlyDir] }, repoRoot);
+      const ctxMsg = JSON.stringify(ctxOut);
+      assert.match(ctxMsg, /CONTEXT\.md/);
+      assert.doesNotMatch(ctxMsg, /handoff\.md/);
+      assert.doesNotMatch(ctxMsg, /SPRINT\.md/);
+      assert.match(ctxMsg, /domain terminology/);
+    } finally {
+      fs.rmSync(contextOnlyDir, { recursive: true, force: true });
+    }
 
     const emptyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-session-empty-'));
     try {

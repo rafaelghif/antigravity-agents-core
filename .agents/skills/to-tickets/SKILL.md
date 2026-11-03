@@ -9,16 +9,19 @@ Break a specification or plan into an ordered **Scrum Sprint Board (`docs/sprint
 
 ## Decision tree
 
-1. **Does the codebase need structural prefactoring before feature slices can land cleanly?**
-   - **Yes** → Put a pure behavior-preserving **Prefactoring** ticket at `#01` (`Wave 1`, `Blocked by: None`) so refactoring is never mixed into feature tickets.
+1. **Is this a small or single-session task (bugfix, minor feature, or small refactor) that does not span multiple sessions or waves?**
+   - **Yes** → Do NOT generate a sprint board or tickets! Build directly via `/implement` or `/tdd` (Fast-Path). SPRINT boards are strictly reserved for multi-day, multi-session, or multi-developer epics.
    - **No** → Proceed to step 2.
-2. **Is the work a wide mechanical change (renaming a column or shared contract across many callers) where no vertical slice can land green alone?**
+2. **Does the codebase need structural prefactoring before feature slices can land cleanly?**
+   - **Yes** → Put a pure behavior-preserving **Prefactoring** ticket at `#01` (`Wave 1`, `Blocked by: None`) so refactoring is never mixed into feature tickets.
+   - **No** → Proceed to step 3.
+3. **Is the work a wide mechanical change (renaming a column or shared contract across many callers) where no vertical slice can land green alone?**
    - **Yes** → Sequence tickets across waves as **Wave 1: Expand → Wave 2: Migrate Batches → Wave 3: Contract**.
    - **No** → Draft vertical tracer-bullet slices below.
-3. **Does any proposed ticket exceed 1 focused session (`XL` size, >1 independent behavior, or >4 modules)?**
+4. **Does any proposed ticket exceed 1 focused session (`XL` size, >1 independent behavior, or >4 modules)?**
    - **Yes** → Split it into smaller vertical slices (`S` or `M`) before presenting to the user.
-   - **No** → Proceed to step 4.
-4. **Has the user approved the proposed Sprint Wave Board and `Blocked by` edges?**
+   - **No** → Proceed to step 5.
+5. **Has the user approved the proposed Sprint Wave Board and `Blocked by` edges?**
    - **No** → Present the Sprint Wave summary (`Wave`, `Ticket #`, `Size`, `Blocked by`, `Demoable Outcome`) and confirm with the user first.
    - **Yes** → Write `docs/sprint/SPRINT.md` using [resources/sprint-board-template.md](resources/sprint-board-template.md) and each ticket to `docs/sprint/tickets/<NN>-<slug>.md` using [resources/ticket-template.md](resources/ticket-template.md) (or `.scratch/sprint/` if the user requests local-only gitignored tracking).
 
