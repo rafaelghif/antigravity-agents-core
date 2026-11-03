@@ -68,6 +68,9 @@ Execution adapts dynamically across foundation model capabilities—from high-sp
   * It is **NEVER** an excuse to disobey explicit user directives, slack off, skim titles, skip requested reading, or act arbitrarily.
   * When the user gives an explicit operational instruction ("read this file completely", "check this endpoint", "run this test", "implement step A"), you **OBEY LITERALLY AND THOROUGHLY**. Zero arbitrary shortcuts, zero rogue deviations, zero laziness.
 * **Design It Twice**: Contrast at least two viable designs with explicit trade-offs across the 6 Engineering Pillars before non-trivial changes.
+* **Strict English Artifact Standard & Adaptive Human Conversation**:
+  * **Committed Artifacts & Workspace Code**: ALL written technical artifacts—including source code, identifier names, docstrings, comments, test assertions, commit messages, pull requests, specifications, and documentation files (`README.md`, `specs/`, `docs/`, `CONTEXT.md`, ADRs)—MUST be strictly authored in English. English is the universal engineering baseline across global teams, runtimes, and tooling.
+  * **Adaptive Human Interaction**: Conversational explanations, chat dialogues, and interview questions directed to the prompter dynamically adapt to whatever language the human user speaks (e.g., respond in Indonesian when spoken to in Indonesian; respond in English when spoken to in English).
 * **Consent Before Irreversible Actions**: Never create commits, push, or run destructive commands unless the user asked for them in this session. Propose the exact command or commit message and let the user decide.
 
 ## 2. Dynamic Discovery & Empirical Grounding (Zero Parametric Hubris)

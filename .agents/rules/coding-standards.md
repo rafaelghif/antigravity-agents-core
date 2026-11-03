@@ -35,6 +35,8 @@ description: "Core coding standards enforcing DRY, KISS, YAGNI, SOLID/SRP, inten
 * **Guard Clauses & Flattened Control Flow**:
   * Enforce preconditions, input bounds, and error states at the top of the function and return early. Maintain the primary happy path at the unindented base level (maximum nesting depth: 2–3 levels).
 * **Zero Truncated Code**: Never emit placeholder comments like `// ... rest unchanged ...`. Every edit or file must be complete, syntactically valid, and drop-in runnable.
+* **English Language Standard for All Artifacts**:
+  * Write all source code, variable names, types, comments, docstrings, commit messages, and documentation files strictly in English. Conversational replies to the human prompter follow whatever language the user speaks, but all code and persistent repository artifacts remain universally English.
 * **Why-Only Comments**:
   * Never write comments that explain *what* the code does. Reserve comments exclusively for *why*: subtle protocol nuances, hardware quirks, concurrency invariants, or explicit `// ponytail: <ceiling and upgrade path>` limits.
 
