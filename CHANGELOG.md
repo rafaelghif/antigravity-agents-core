@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.1.0] - 2026-11-03
+
+### Added
+
+- **30-Year Systems Engineering Standards (`AGENTS.md`, `coding-standards.md`, `ponytail.md`)**:
+  - Encoded Rich Hickey's *Simplicity as Unentanglement* (simplicity is an architectural property: decoupled state, orthogonal boundaries, explicit data flow, NOT character truncation or cryptic one-liners).
+  - Eliminated the Ponytail Rung 6 "One-Liner" anti-pattern in favor of *Clarity & Explicit Invariants* (boring, linear, typed code with guard clauses that can be debugged at 3 AM).
+  - Codified the principle of *Broad Holistic Ingestion, Surgical Precision Emission* to eradicate the false economy of token-starvation.
+- **Dynamic Context Bootstrap (`.agents/hooks.json`)**:
+  - Upgraded `SessionStart` lifecycle hook to dynamically inspect workspace state. When only `CONTEXT.md` exists, guides the agent to domain context without hallucinating instructions to read non-existent `.scratch/handoff.md` and `docs/sprint/SPRINT.md`.
+- **Dual-Platform Tool Matcher & Argument Extraction (`.agents/hooks.json`)**:
+  - Expanded `production-no-mock-guard` tool matcher to include `write_file` and `edit_file` alongside `write_to_file`, `replace_file_content`, and `multi_replace_file_content`.
+  - Added support for `Path` and `Replacement` arguments, ensuring full protection across all Antigravity CLI, IDE, and subagent surfaces.
+- **Fast-Path Workflow Execution (`.agents/skills/implement/`, `.agents/skills/to-tickets/`)**:
+  - Added fast-path decision branches to `/implement` and `/to-tickets` allowing isolated bugfixes and single-session feature slices to land directly via TDD without forcing unnecessary Scrum Sprint ticket bureaucracy.
+- **Presumption-Free Topology & Plain-Import Simplicity (`AGENTS.md`, `architecture-and-flow.md`)**:
+  - Inhibited premature generation of monorepo build orchestrators (Turborepo, Nx, Lerna), scoped package schemes (`@repo/*`), and tsconfig path aliases (`@/*`).
+  - Mandated interview-first clarification via `ask_question` with standard relative imports (`./`, `../`) as the default simplicity baseline.
+- **Strict English Technical Artifact Standard with Adaptive Localization (`AGENTS.md`, `caveman.md`, `coding-standards.md`, `git-and-context.md`)**:
+  - Mandated that all written repository artifacts (source code, identifiers, docstrings, commit messages, PR descriptions, specs, and docs) must be strictly in English.
+  - Conversational chat and explanations dynamically adapt to the human prompter's language (e.g. Indonesian).
+
 ## [6.0.1] - 2026-11-02
 
 ### Added
@@ -284,7 +306,8 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Comprehensive Antigravity Settings Sanitizer**: Implemented `sanitize_antigravity_settings` in `scripts/health_check.py`.
 - **Consumer Workspace Validation Scope**: Scoped global CLI settings validation in `scripts/validate.py` to framework development runs only.
 
-[Unreleased]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.0.1...HEAD
+[Unreleased]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.1.0...HEAD
+[6.1.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.0.1...v6.1.0
 [6.0.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.4.0...v6.0.0
 [5.4.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.3.1...v5.4.0
