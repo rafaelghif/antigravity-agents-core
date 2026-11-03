@@ -8,11 +8,15 @@ description: "User-defined dynamic architecture (interview-first), deep modules,
 ## 1. Dynamic Discovery & User-Defined Architecture
 
 * **Zero Static Dogma**: Never impose rigid folder hierarchies, pre-baked layer structures, or assumed framework dogma. The user defines their system topology, stack, and module layout.
-* **Discovery Before Action (Anti-Presumptive Scaffolding)**: Always inspect existing workspace manifests, configs, and `@CONTEXT.md` first. If architecture, folder layout, or stack boundaries are undecided (e.g. user says *"buat monorepo"*, *"setup project"*, *"bikin folder structure"*), **never assume or jump straight into scaffolding complex setups**. Interview the user first via `ask_question` (with `(Recommended)` first) or `/grill-me`.
-* **Zero "Sok Jago" Tooling & Plain-Import Simplicity**:
-  * Never unilaterally impose monorepo build orchestrators (Turborepo, Nx, Lerna), complex scoped package schemes (`@repo/*`, `@apps/*`), or tsconfig path aliases (`@/*`).
-  * Path aliases and monorepo tooling introduce runtime fragility, module resolution breakage in CLI/test runners, and steep cognitive overload for beginners who can't trace where files live.
-  * Always clarify the user's desired simplicity level first. Default to the simplest, most boring and transparent primitive: standard relative imports (`./`, `../`) and standard package structures that run natively without build magic.
+* **Discovery Before Action (Anti-Presumptive Scaffolding)**: Always inspect existing workspace manifests, configs, and `@CONTEXT.md` first. When system topology, folder structure, or stack boundaries are open-ended (e.g. requests to "create monorepo", "scaffold backend", or "organize project"), never assume a complex setup or generate opinionated directory trees silently. Interview the user first via `ask_question` (with `(Recommended)` on the minimal path) or `/grill-me`.
+* **Presumption-Free Topology & Plain-Import Simplicity**:
+  * **Precondition Check**: When scaffolding or restructuring without explicit tooling requirements:
+    * **Action**: Do not unilaterally introduce monorepo build orchestrators (Turborepo, Nx, Lerna), scoped package hierarchies (`@repo/*`, `@apps/*`), or TypeScript path aliases (`@/*`).
+    * **Resolution Protocol**: Clarify the desired simplicity tier first via `ask_question`, offering transparent choices:
+      1. Minimal & Flat (Standard directories, plain relative imports `./`, zero build-step magic).
+      2. Native Workspace (Standard package manager workspaces without third-party orchestrators).
+      3. Enterprise Monorepo (Dedicated orchestrators and scoped packages, only when explicitly requested).
+  * **Default Import Seam**: Unless the user explicitly requests path aliasing (`@/*`), default to plain relative imports (`./`, `../`). Plain imports preserve runtime portability, prevent module-resolution breakage across CLI/test runners, and provide zero cognitive friction for developers tracing files on disk.
 * **Critical 6-Pillar Stress-Testing**: Rigorously critique architectural proposals against real-world production failure modes (circular dependencies, lock contention, cascading outages, vendor lock-in) before finalizing designs.
 
 ## 2. Deep Modules & Narrow Boundary Seams (Ousterhout & Feathers)

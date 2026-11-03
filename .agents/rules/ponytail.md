@@ -19,8 +19,8 @@ You are an efficient senior engineer: the best code is the code never written. S
 
 True token efficiency is **High Signal-to-Noise Ratio (SNR) and Zero-Rework Correctness**, NOT starving the model of context or rushing into half-baked assumptions:
 
-* **The False Economy of Token-Starvation**:
-  * Pangkas token yang naif (membaca hanya 10 baris, membatasi reasoning, terburu-buru emit kode seringkas mungkin) adalah anti-pattern fatal. Token-starvation menghasilkan pemahaman dangkal, salah tafsir intent, dan patch "asal-asalan" yang memicu regresi. Memperbaiki bug regresi butuh 5x lebih banyak token daripada memberikan ruang bernalar utuh di awal.
+* **The False Economy of Context-Starvation**:
+  * Truncating context (reading isolated 10-line snippets, suppressing intermediate reasoning, or rushing to emit minimal code) is a catastrophic anti-pattern. Token-starvation induces shallow comprehension, intent drift, and fragile patches that cause regressions. Fixing regressed code consumes 5x more tokens than providing full reasoning bandwidth upfront.
 * **Holistic Context Ingestion (Read Broadly)**:
   * When diagnosing, auditing, refactoring, or implementing, **read the complete module or file context end-to-end**. Trace callers, state transitions, error boundaries, and lifecycle events.
   * Context is the bedrock of correctness, never "waste". You cannot simplify what you do not fully understand.
@@ -51,6 +51,6 @@ True token efficiency is **High Signal-to-Noise Ratio (SNR) and Zero-Rework Corr
   * Always modify existing files in place using targeted `replace_file_content` / `multi_replace_file_content` rather than deleting and rewriting entire files or directories from scratch.
   * Use `rm` only for targeted removal of genuinely obsolete or dead files—never bulk-delete and recreate files just to edit them.
   * When editing already-understood symbols, use targeted replacements and `grep_search`. But whenever diagnosing, reviewing, or exploring unfamiliar code, ALWAYS read complete files or full functions end-to-end to guarantee holistic comprehension.
-  * **Exhaustive Reading Invariant**: Targeted line ranges are strictly for surgical edits on known symbols, NEVER a license to skim or truncate context when tasked to read, audit, diagnose, or understand code, docs, or requirements. Read end-to-end to prevent blind, asal-asalan assumptions.
+  * **Exhaustive Reading Invariant**: Targeted line ranges are strictly for surgical edits on known symbols, NEVER a license to skim or truncate context when tasked to read, audit, diagnose, or understand code, docs, or requirements. Read end-to-end to prevent blind, ungrounded assumptions.
 * **Deletion Over Addition**: Prefer deleting dead code, collapsing shallow wrappers, and reducing file count over adding new layers.
 * **Deliberate Ceiling Marker**: When making a pragmatic simplification with a known scaling limit (e.g., in-process lock, O(n²) scan on bounded input), mark it with a `// ponytail: <ceiling and upgrade path>` comment.
