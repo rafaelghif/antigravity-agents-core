@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.2.1] - 2026-11-09
+
+### Fixed
+
+- **Installer Pinned Ref Synchronization**: Aligned default `AAC_REF` in `install.sh` and `$ref` in `install.ps1` to pinned `v6.2.1` so remote piped one-liners (`curl ... | bash` and `irm ... | iex`) download the matching archive instead of falling back to stale tags.
+- **Security Documentation Truth-Up**: Synchronized pinned download reference in `SECURITY.md` to `v6.2.1`.
+- **Installer Version Regression Test Gate**: Extended test `P0-6` in `tests/aac.test.mjs` to strictly assert that `install.sh`, `install.ps1`, `bin/cli.mjs`, and `SECURITY.md` always match `package.json.version`.
+
 ## [6.2.0] - 2026-11-09
 
 ### Added
@@ -334,7 +342,8 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Comprehensive Antigravity Settings Sanitizer**: Implemented `sanitize_antigravity_settings` in `scripts/health_check.py`.
 - **Consumer Workspace Validation Scope**: Scoped global CLI settings validation in `scripts/validate.py` to framework development runs only.
 
-[Unreleased]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.2.0...HEAD
+[Unreleased]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.2.1...HEAD
+[6.2.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.2.0...v6.2.1
 [6.2.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.0.1...v6.1.0
 [6.0.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.0.0...v6.0.1

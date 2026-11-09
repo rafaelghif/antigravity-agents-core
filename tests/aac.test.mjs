@@ -202,6 +202,16 @@ test('P0-6: Installers delegate every write to bin/cli.mjs and refuse to run wit
   assert.doesNotMatch(ps1, /ConvertTo-Json/, 'install.ps1 must not merge hooks itself: PowerShell 5.1 writes a UTF-8 BOM that breaks JSON.parse');
   assert.doesNotMatch(ps1, /Copy-Item[^\r\n]*\.agents/, 'install.ps1 must not copy managed files itself');
 
+  // Pinned release alignment: install.sh, install.ps1, bin/cli.mjs, and SECURITY.md must strictly track package.json.version.
+  const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
+  const cliBody = fs.readFileSync(path.join(repoRoot, 'bin', 'cli.mjs'), 'utf8');
+  const securityBody = fs.readFileSync(path.join(repoRoot, 'SECURITY.md'), 'utf8');
+
+  assert.match(sh, new RegExp(`AAC_REF="\\$\\{AAC_REF:-v${pkg.version}\\}"`), `install.sh default ref must match package.json v${pkg.version}`);
+  assert.match(ps1, new RegExp(`\\$ref = if \\(\\[string\\]::IsNullOrWhiteSpace\\(\\$env:AAC_REF\\)\\) \\{ "v${pkg.version}" \\}`), `install.ps1 default ref must match package.json v${pkg.version}`);
+  assert.match(cliBody, new RegExp(`const VERSION = '${pkg.version}';`), `bin/cli.mjs VERSION must match package.json ${pkg.version}`);
+  assert.match(securityBody, new RegExp(`pinned to the \`v${pkg.version}\` ref`), `SECURITY.md must document pinned downloads matching package.json v${pkg.version}`);
+
   // `bash` on Windows is the WSL relay, which cannot run a Windows-path script; syntax-check on POSIX only.
   if (process.platform !== 'win32' && canRun('bash', ['-c', 'exit 0'])) {
     const syntax = spawnSync('bash', ['-n', path.join(repoRoot, 'install.sh')], { encoding: 'utf8' });

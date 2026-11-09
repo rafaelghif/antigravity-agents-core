@@ -1,16 +1,16 @@
-# AAC (Antigravity Agent Core V6) — installer for Windows PowerShell.
+﻿# AAC (Antigravity Agent Core V6) — installer for Windows PowerShell.
 #
 # Requires Node.js >= 22: bin\cli.mjs is the only component that writes managed files, and
 # .agents\hooks.json runs `node -e` guards at runtime. Without Node the hooks cannot execute,
 # so there is no supported "no-Node" install path.
 #
 # Recommended (download, inspect, then run in its own process):
-#   Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.1.0/install.ps1 -OutFile install.ps1
+#   Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.2.1/install.ps1 -OutFile install.ps1
 #   notepad install.ps1
 #   powershell -NoProfile -File .\install.ps1 [-TargetDir <path>] [-Upgrade] [-Force] [-DryRun] [-WithSidecar] [-ProjectId <id>]
 #
 # Optional one-liner (same pinned tag; never a mutable branch):
-#   irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.1.0/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.2.1/install.ps1 | iex
 #
 # Pin a different ref explicitly: $env:AAC_REF="main"
 
@@ -27,7 +27,7 @@ $previousErrorActionPreference = $ErrorActionPreference
 $ErrorActionPreference = "Stop"
 
 $repo = "rafaelghif/antigravity-agents-core"
-$ref = if ([string]::IsNullOrWhiteSpace($env:AAC_REF)) { "v6.1.0" } else { $env:AAC_REF }
+$ref = if ([string]::IsNullOrWhiteSpace($env:AAC_REF)) { "v6.2.1" } else { $env:AAC_REF }
 
 $runId = [guid]::NewGuid().ToString("N")
 $tempZip = Join-Path ([System.IO.Path]::GetTempPath()) "aac-$runId.zip"
