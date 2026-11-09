@@ -22,8 +22,10 @@ Review the diff between `HEAD` and a base reference along two axes: **Specificat
    - Run `git diff <base>...HEAD` (or `git diff`) via `run_command`.
    - For every modified function signature or shared type, run `grep_search` across the repo to confirm unchanged callers are not broken.
 2. **Audit Axis 1 — Specification Fidelity & Test Integrity**:
-   - Verify the diff fulfills all requirements and acceptance criteria from the originating spec/ticket.
+   - Verify the diff fulfills all requirements and acceptance criteria from the originating spec, ticket, and DDR, including every `REQ-###`, `INV-###`, `NFR-###`, `SEC-###`, and `ERR-###` in its traceability matrix.
+   - Flag as `🔴 Blocking` any behavior, schema, endpoint, number, or command the diff invents without a cited `DEC-###`, spec ID, or repository `path:line`. Unsourced invention is a specification-fidelity defect, not a style nit.
    - **Test Tampering Audit**: Flag as `🔴 Blocking` any test tampering: disabled or skipped tests (`.skip`, `xit`), deleted assertions, weakened checks (`expect(true).toBe(true)`, `toBeDefined()`), or System-Under-Test mocking.
+   - **MVP / Prototype Debt Audit**: Flag as `🔴 Blocking` any missing boundary validation, authorization/tenancy check, idempotency, error mapping, observability, migration/rollback, or production hardening; any placeholder, `TODO`, fake data, dummy token, or stub in production paths; and any "MVP", "prototype", "temporary", or "hardening later" justification. The specification's production gates are not optional.
    - Flag any unagreed public seams, missing boundary checks, dummy/mock data stores, or deferred `// TODO` stubs.
 3. **Audit Axis 2 — Standards, Security & Minimalism**:
    - **Security & Concurrency**: Check for injection risks, missing BOLA/IDOR tenant checks, TOCTOU race conditions, non-idempotent mutations, and network calls inside DB transactions.

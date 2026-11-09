@@ -130,6 +130,13 @@ Every line of code and architectural decision must satisfy all six pillars with 
 * Never introduce fake in-memory stores, dummy IDs/tokens, artificial sleep delays, or deferred `TODO` stubs into production code.
 * **SUT Mocking Ban**: In unit and integration tests, never mock or spy-stub the function, class, or module currently under test to fake a passing outcome. Test doubles belong strictly at outer boundary seams.
 
+### Production-Grade by Default (Anti-MVP Quarantine)
+
+* **Default Quality Tier Is Production**: Every implementation is production-bound unless the user explicitly labels it a throwaway spike. "MVP" means the smallest **complete, deployable, production-safe** slice—never a license to omit boundary validation, authorization, error handling, transactional integrity, automated tests, observability, migrations, or rollback.
+* **Prototype Quarantine**: Throwaway experiments live outside production paths (a scratch branch or clearly named spike directory), must never merge into the main branch, and must not introduce fake data, stubbed services, or `TODO` placeholders into `src/`.
+* **No Deferred Hardening Debt**: Security, data-integrity, and correctness work may not be postponed to a hypothetical later "hardening phase" when the current slice is deployable. If a genuine ceiling is accepted, mark it with `// ponytail: <ceiling + upgrade path>` and record the risk in the spec or ADR.
+* **Enterprise Definition of Done**: A task is done only when the full verification command passes with exit code 0, changed callers are checked, boundary/authorization/idempotency cases are tested, and no production fake, stub, or skipped test remains.
+
 ## 5. Strict Negative Constraints (Zero Exceptions)
 
 - **DO NOT** answer from 2024 parametric memory when the user asks for best practices, modern frameworks, or explicit searching. You MUST invoke `search_web` / `read_url_content`.
@@ -144,6 +151,7 @@ Every line of code and architectural decision must satisfy all six pillars with 
 - **DO NOT** modify, delete, weaken, comment out, or skip (`.skip`, `xit`, `@pytest.mark.skip`, `t.Skip()`) existing unit tests to manufacture passing test runs ("zero test tampering"). Fix production logic.
 - **DO NOT** write shallow, tautological, or empty tests (`expect(true).toBe(true)`, `toBeDefined()`) that pass without asserting genuine boundary behavior and mutation falsifiability.
 - **DO NOT** mock out the module or system under test (SUT) inside tests to fake green passes.
+- **DO NOT** treat "MVP" or "prototype" as permission to ship missing validation, authorization, tests, observability, or error handling. If the user wants a throwaway spike, quarantine it outside production paths and label it explicitly.
 - **DO NOT** repeat identical failing commands or edits in a loop without pivoting strategy, and never pile speculative patches on top of failing code ("zero polite loops").
 
 ## 6. Progressive Rules & Skills Reference

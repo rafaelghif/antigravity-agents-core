@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.2.0] - 2026-11-09
+
+### Added
+
+- **Discovery Decision Record (DDR) Pipeline**:
+  - `grill-me` now ends in `docs/discovery/<feature-slug>.md` instead of a chat summary. Every settled decision gets a `DEC-###`, every open question `OQ-###`, and every approved assumption `ASM-###`, with alternatives, rationale, consequences, and a completeness gate.
+  - `to-spec` now requires the confirmed DDR, applies an explicit source-priority hierarchy, builds a Fact Ledger (`KNOWN`/`OPEN`/`ASSUMED`/`N/A`), maps every DDR section into the spec, and refuses to mark `READY FOR TICKETS` while a ticket-blocking unknown remains. The spec template gained `Source` columns and fill rules; `resources/spec-example.md` shows the required provenance detail.
+  - `to-tickets` now consumes the readiness-passed spec plus the DDR, derives tickets from observable behavior through a coverage ledger, cites `Source Requirements`/`Source Decisions` on every ticket, rejects filler/vertical-less tickets, and validates source coverage before presenting the board.
+  - `domain-modeling` now reconciles `CONTEXT.md`, the DDR, specs, ADRs, and code; detects contradictions instead of silently resolving them; and emits a propagation report for every changed ID.
+  - `implement` and `code-review` now treat uncited behavior as a defect: a ticket/spec ID or repository `path:line` must back every requirement, number, schema, and command.
+
+- **Production-Grade by Default (Anti-MVP Contract)**:
+  - Added an always-on `Production-Grade by Default (Anti-MVP Quarantine)` invariant to `AGENTS.md` and `coding-standards.md`: "MVP" now means the smallest complete, deployable, production-safe slice, never permission to omit validation, authorization, tests, observability, migrations, or rollback. Throwaway spikes are quarantined outside production paths.
+  - `to-spec` now enforces measurable NFR budgets, security/privacy/abuse contracts, failure and rollback contracts, observability, and a `REQ/INV/NFR/SEC/ERR` traceability matrix before tickets are generated.
+  - `to-tickets` now emits production-grade vertical slices with traceability IDs, a Production Quality Contract, anti-deferred-hardening rules, ticket hygiene controls, and an enterprise Definition of Done. The sprint board gained a traceability matrix, wave exit gate, and board change control.
+  - `domain-modeling` now treats invariants, state machines, ownership boundaries, data classification, and measurable quality attributes as first-class domain artifacts, and the ADR template records reversibility, 6-Pillar decision drivers, and migration/rollback consequences.
+  - `implement`, `tdd`, and `code-review` now explicitly reject happy-path "MVP" stubs: implementation must be the smallest complete production behavior, and review flags prototype debt as a blocking finding.
+  - `CONTEXT.md` now carries stable invariant (`INV-###`), state-machine (`ST-###`), NFR, and error IDs plus authentication/ownership boundaries, so specs, tickets, and tests share one traceable source of truth.
+
+### Changed
+
+- **Skill Descriptions and Templates**: `to-spec`, `to-tickets`, `implement`, `tdd`, and `domain-modeling` descriptions now advertise production-grade triggers; `grill-me` settles the production quality frontier before feature details; `to-spec` and `to-tickets` templates were rebuilt around production readiness rather than MVP scaffolding.
+- **Documentation Truth-Up**: `README.md`, `docs/agents/skill-directory.md`, and `docs/agents/domain.md` now document the anti-MVP quality bar and traceability artifacts.
+
+### Fixed
+
+- **Prototype-Quality Drift**: Removed the "minimal production logic" wording that invited happy-path stubs and replaced it with mandatory production hardening gates across the spec → ticket → implement → review pipeline.
+
 ## [6.1.0] - 2026-11-03
 
 ### Added
@@ -306,7 +334,8 @@ Version 5.0.0 is a complete rewrite and architectural evolution, moving from cus
 - **Comprehensive Antigravity Settings Sanitizer**: Implemented `sanitize_antigravity_settings` in `scripts/health_check.py`.
 - **Consumer Workspace Validation Scope**: Scoped global CLI settings validation in `scripts/validate.py` to framework development runs only.
 
-[Unreleased]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.1.0...HEAD
+[Unreleased]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.2.0...HEAD
+[6.2.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.0.1...v6.1.0
 [6.0.1]: https://github.com/rafaelghif/antigravity-agents-core/compare/v6.0.0...v6.0.1
 [6.0.0]: https://github.com/rafaelghif/antigravity-agents-core/compare/v5.4.0...v6.0.0

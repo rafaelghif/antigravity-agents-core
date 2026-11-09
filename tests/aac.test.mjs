@@ -603,3 +603,101 @@ test('P1-7: Managed markdown links resolve (no stale catalog references)', () =>
   }
   assert.deepEqual(broken, [], `Broken relative markdown links:\n${broken.join('\n')}`);
 });
+
+test('P1-8: Production-grade anti-MVP contract is encoded across specs, tickets, domain model, and execution skills', () => {
+  const read = (relPath) => fs.readFileSync(path.join(repoRoot, relPath), 'utf8');
+  const skillsRoot = '.agents/skills';
+
+  // Global constitution and coding standard must define the default quality tier.
+  assert.match(read('AGENTS.md'), /Production-Grade by Default \(Anti-MVP Quarantine\)/);
+  assert.match(read('AGENTS.md'), /DO NOT\*\* treat "MVP" or "prototype" as permission/);
+  assert.match(read('.agents/rules/coding-standards.md'), /Production-Grade by Default \(Anti-MVP\)/);
+
+  // grill-me must end in a durable Discovery Decision Record with stable IDs and anti-hallucination rules.
+  const grillMe = read(`${skillsRoot}/grill-me/SKILL.md`);
+  assert.match(grillMe, /Discovery Decision Record \(DDR\)/);
+  assert.match(grillMe, /docs\/discovery\/<feature-slug>\.md/);
+  assert.match(grillMe, /`DEC-###`/);
+  assert.match(grillMe, /`OQ-###`/);
+  assert.match(grillMe, /`ASM-###`/);
+  assert.match(grillMe, /## Anti-hallucination rules/);
+  const discoveryTemplate = read(`${skillsRoot}/grill-me/resources/discovery-record-template.md`);
+  assert.match(discoveryTemplate, /How to fill this record \(LLM rules\)/);
+  assert.match(discoveryTemplate, /Discovery Completeness Gate/);
+  assert.match(discoveryTemplate, /Blocking rule/);
+
+  // to-spec: a spec without a DDR is unsourced guessing; provenance and readiness gates are mandatory.
+  const toSpec = read(`${skillsRoot}/to-spec/SKILL.md`);
+  assert.match(toSpec, /## Input \/ Output Contract/);
+  assert.match(toSpec, /## Source Priority \(highest wins\)/);
+  assert.match(toSpec, /Step 1 — Build the Fact Ledger before writing prose/);
+  assert.match(toSpec, /## Step 4 — Anti-hallucination rules \(non-negotiable\)/);
+  assert.match(toSpec, /READY FOR TICKETS/);
+  assert.match(toSpec, /Anti-MVP rule/);
+  assert.match(toSpec, /NFR-###/);
+  assert.match(toSpec, /resources\/spec-example\.md/);
+  const specTemplate = read(`${skillsRoot}/to-spec/resources/spec-template.md`);
+  assert.match(specTemplate, /How to fill this template \(LLM rules\)/);
+  assert.match(specTemplate, /Quality Bar\*\*: `production`/);
+  assert.match(specTemplate, /\| ID \| Requirement \| Given \/ When \/ Then \| Priority \| Source \|/);
+  assert.match(specTemplate, /Non-Functional Requirements \(Measurable\)/);
+  assert.match(specTemplate, /Traceability Matrix/);
+  assert.match(specTemplate, /Production Readiness Definition/);
+  const specExample = read(`${skillsRoot}/to-spec/resources/spec-example.md`);
+  assert.match(specExample, /Illustrative Only/);
+  assert.match(specExample, /Do not copy these domain facts/);
+  assert.match(specExample, /`DEC-003`/);
+  assert.match(specExample, /Readiness verdict: NOT READY/);
+
+  // to-tickets: every ticket carries source provenance, production quality gates, and cannot defer hardening.
+  const toTickets = read(`${skillsRoot}/to-tickets/SKILL.md`);
+  assert.match(toTickets, /## Input \/ Output Contract/);
+  assert.match(toTickets, /## Source Priority \(highest wins\)/);
+  assert.match(toTickets, /coverage ledger/);
+  assert.match(toTickets, /## Anti-hallucination rules \(non-negotiable\)/);
+  assert.match(toTickets, /## Output validation gates/);
+  assert.match(toTickets, /Production Quality Contract/);
+  assert.match(toTickets, /No deferred hardening/);
+  assert.match(toTickets, /Ticket Hygiene/);
+  const ticketTemplate = read(`${skillsRoot}/to-tickets/resources/ticket-template.md`);
+  assert.match(ticketTemplate, /How to fill this ticket \(LLM rules\)/);
+  assert.match(ticketTemplate, /Quality Tier\*\*: `production`/);
+  assert.match(ticketTemplate, /Source Requirements\*\*/);
+  assert.match(ticketTemplate, /Source Decisions\*\*/);
+  assert.match(ticketTemplate, /Production Quality Checklist/);
+  assert.match(ticketTemplate, /Mutation Falsifiability/);
+  assert.match(ticketTemplate, /Definition of Done \(Enterprise\)/);
+  const sprintTemplate = read(`${skillsRoot}/to-tickets/resources/sprint-board-template.md`);
+  assert.match(sprintTemplate, /How to fill this board \(LLM rules\)/);
+  assert.match(sprintTemplate, /Source Lineage/);
+  assert.match(sprintTemplate, /Traceability Matrix/);
+  assert.match(sprintTemplate, /Wave Exit Gate/);
+  assert.match(sprintTemplate, /Board Hygiene & Change Control/);
+
+  // domain-modeling: reconciles DDR/CONTEXT/spec conflicts, propagates changes, and refuses invented domain facts.
+  const domainModeling = read(`${skillsRoot}/domain-modeling/SKILL.md`);
+  assert.match(domainModeling, /## Input \/ Output Contract/);
+  assert.match(domainModeling, /docs\/discovery\/<feature-slug>\.md/);
+  assert.match(domainModeling, /## Source Priority \(highest wins\)/);
+  assert.match(domainModeling, /3 ADR Gates/);
+  assert.match(domainModeling, /Make invariants testable/);
+  assert.match(domainModeling, /Record measurable quality attributes/);
+  assert.match(domainModeling, /propagation report/);
+  assert.match(domainModeling, /## Anti-hallucination rules \(non-negotiable\)/);
+  assert.match(domainModeling, /## Validation gates/);
+  const adrTemplate = read(`${skillsRoot}/domain-modeling/resources/adr-template.md`);
+  assert.match(adrTemplate, /How to fill this ADR \(LLM rules\)/);
+  assert.match(adrTemplate, /DDR Source\*\*/);
+  assert.match(adrTemplate, /Reversibility\*\*/);
+  assert.match(adrTemplate, /Decision Drivers \(6 Pillars\)/);
+  assert.match(adrTemplate, /Data Migration & Rollback/);
+  assert.match(adrTemplate, /Invariant Impact/);
+
+  // Execution and review skills cannot silently downgrade "minimal" to a happy-path prototype, nor accept unsourced inventions.
+  assert.match(read(`${skillsRoot}/implement/SKILL.md`), /smallest complete production behavior/);
+  assert.match(read(`${skillsRoot}/implement/SKILL.md`), /Zero-Debt Audit/);
+  assert.match(read(`${skillsRoot}/implement/SKILL.md`), /Source Requirements/);
+  assert.match(read(`${skillsRoot}/tdd/SKILL.md`), /Smallest complete production behavior/);
+  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /MVP \/ Prototype Debt Audit/);
+  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /without a cited `DEC-###`/);
+});

@@ -13,3 +13,4 @@ description: "Apply these guidelines whenever creating git commits, managing bra
 6. Keep `@CONTEXT.md` strictly as a living domain glossary and user-defined module boundary map—track active Sprint execution in `docs/sprint/SPRINT.md` and never dump raw task checklists into `@CONTEXT.md`.
 7. Record Architectural Decision Records in `docs/adr/NNNN-<slug>.md` only when a decision is hard to reverse, surprising without context, and the result of a genuine trade-off.
 8. Store cross-session handoff state in `.scratch/handoff.md` with a single runnable immediate next action.
+9. Keep Discovery Decision Records in `docs/discovery/<feature-slug>.md`. Every `DEC-###` is a confirmed, sourced decision; specs, tickets, and ADRs cite it instead of restating it from memory or inventing a replacement.
