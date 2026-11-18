@@ -1,75 +1,84 @@
-# Project Context & Domain Glossary
+# Project Context, Codebase Index & Domain Map
 
-> **Zero Static Template**: Nothing in this file is pre-defined by dogma. Populate and evolve this file dynamically after interviewing the user (`/grill-me` / `/domain-modeling`) or inspecting the existing workspace.
-
----
-
-## 1. System Overview & User-Defined Stack
-
-- **Primary Purpose**: _[Defined with user via interview or discovered from repo]_
-- **Runtime, Language & Tooling**: _[Defined by user or discovered dynamically from workspace]_
-- **Architecture & Folder Topology**: _[Defined by user—never force a static template]_
-- **Persistence & Infrastructure**: _[Defined by user or discovered from workspace]_
-- **Verification Command**: _[Exact command to run build, lint, typecheck, and tests]_
+> **Living Codebase Index**: Populate Sections 1–5 by inspecting the actual repository (or running `/index-project`) before implementing features. Never invent paths, components, utilities, or commands—every entry must match real files on disk.
 
 ---
 
-## 2. User-Defined Module Boundaries & Public Seams
+## 1. Stack, Tooling & Exact Verification Commands
 
-| Module / Path | Responsibility | Public Seam (Entry Point) | Ownership / Authorization Boundary | Dependency Constraints |
-| :--- | :--- | :--- | :--- | :--- |
-| _[Defined by user]_ | _[Core responsibility]_ | _[Public interface / seam]_ | _[Tenant/owner rule and forbidden access]_ | _[What this module must never import]_ |
+- **Primary Purpose**: _[To be indexed from README / user context]_
+- **Runtime, Language & Package Manager**: _[To be indexed from package.json / manifests]_
+- **Frameworks & Core Libraries**: _[To be indexed with exact versions]_
+- **UI Kit, Styling & Icon Library**: _[e.g., Tailwind / shadcn / Radix / MUI / lucide-react / N/A]_
+- **Validation, State & Data Fetching**: _[e.g., Zod / React Query / Prisma / Drizzle / N/A]_
+- **Path Aliases & Import Style**: _[e.g., plain relative `./` `../`, or exact `tsconfig.json` paths]_
+- **Verification Commands**:
+  - Test: `_[exact command from manifest]_`
+  - Typecheck: `_[exact command or N/A]_`
+  - Lint: `_[exact command or N/A]_`
+  - Build: `_[exact command or N/A]_`
 
 ---
 
-## 3. Ubiquitous Language & Core Invariants
+## 2. Repository Topology & Entry Points
 
-| ID | Term / Entity | Definition | Enforced Invariants |
+| Directory / File | Responsibility | Key Entry Points / Exports | Notes |
 | :--- | :--- | :--- | :--- |
-| `INV-001` | _[Defined by user]_ | _[Canonical domain meaning]_ | _[State, concurrency, security, or precision invariant]_ |
-
-Invariants must be precise and falsifiable. "The system must be consistent" is not an invariant; "a refund may never exceed the captured payment minus prior refunds" is.
+| _[e.g., `src/`]_ | _[responsibility]_ | _[exact files]_ | _[routing, conventions]_ |
 
 ---
 
-## 4. State Machines & Forbidden Transitions
+## 3. Shared UI, Design System & Frontend Inventory
 
-| State Machine | State | Allowed Transitions | Forbidden Transitions | Trigger / Guard |
+> Mark `N/A` if this repository has no UI layer. Before creating any UI component, check this table and search component directories.
+
+- **Design Tokens / Theme / CSS Entry**: _[exact path to CSS variables, Tailwind config, or theme file]_
+- **Icon Library**: _[package name & import convention]_
+- **Layout & Feedback Patterns**: _[toast/alert helper, modal/dialog pattern, form wrapper, error boundary]_
+
+| Component / Primitive | File Path | Exported Symbols & Variants | When to Reuse / Extend |
+| :--- | :--- | :--- | :--- |
+| _[e.g., `Button`]_ | _[exact path]_ | _[exports/props]_ | _[all clickable actions]_ |
+
+---
+
+## 4. Shared Utilities, Hooks, API Clients & Schemas
+
+> Before writing a helper, fetcher, formatter, hook, or validation schema, check here first.
+
+| Category | File Path | Exported Symbols | Purpose |
+| :--- | :--- | :--- | :--- |
+| API / HTTP Client | _[exact path]_ | _[exports]_ | _[auth headers, retries, error normalization]_ |
+| Auth / Session / Tenancy | _[exact path]_ | _[exports]_ | _[session extraction, RBAC/tenant guard]_ |
+| Validation / Schemas | _[exact path]_ | _[exports]_ | _[shared boundary schemas]_ |
+| Formatting / Domain Utils | _[exact path]_ | _[exports]_ | _[dates, currency, pagination]_ |
+| Shared Hooks | _[exact path]_ | _[exports]_ | _[reusable state/query hooks]_ |
+
+---
+
+## 5. Module Boundaries & Public Seams
+
+| Module / Path | Responsibility | Public Seam (Entry Point) | Ownership / Auth Boundary | Forbidden Imports |
 | :--- | :--- | :--- | :--- | :--- |
-| `ST-001` | _[state]_ | _[next states]_ | _[illegal states]_ | _[condition]_ |
-
-If a combination of boolean flags can represent an impossible state, collapse it into a discriminated union so the illegal state cannot exist.
+| _[module]_ | _[responsibility]_ | _[entry point]_ | _[owner/tenant rule]_ | _[imports banned]_ |
 
 ---
 
-## 5. Data Classification, Retention & Compliance
+## 6. Ubiquitous Language, Invariants & State Machines
 
-| Data Asset | Classification | Owner | Retention / Deletion | Audit Requirement |
+| ID | Term / Rule | Canonical Definition & Falsifiable Invariant | Source |
+| :--- | :--- | :--- | :--- |
+| `INV-001` | _[term/invariant]_ | _[precise falsifiable statement]_ | _[`DEC-###` / `path:line`]_ |
+
+| ID | State Machine | State | Allowed Next States | Forbidden Transitions | Trigger / Guard |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `ST-001` | _[entity]_ | _[state]_ | _[allowed]_ | _[illegal]_ | _[condition]_ |
+
+---
+
+## 7. Quality Budgets (`NFR-###`) & Error Taxonomy (`ERR-###`)
+
+| ID | Attribute / Condition | Target / Status Code | Measurement / Recovery Behavior | Source |
 | :--- | :--- | :--- | :--- | :--- |
-| _[asset]_ | `public` / `internal` / `confidential` / `restricted` | _[owner]_ | _[rule]_ | _[requirement]_ |
-
----
-
-## 6. Quality Attributes & Measurable NFR Budgets
-
-| ID | Attribute | Budget / Target | Measurement Method | Behavior When Exceeded |
-| :--- | :--- | :--- | :--- | :--- |
-| `NFR-001` | _[latency, throughput, durability, availability, recovery]_ | _[measurable target]_ | _[benchmark or production metric]_ | _[degrade, shed load, or alert]_ |
-
----
-
-## 7. Failure Taxonomy & Error Contract
-
-| ID | Failure Class | Detection | Recovery / Degradation | Error Contract |
-| :--- | :--- | :--- | :--- | :--- |
-| `ERR-001` | _[validation, conflict, dependency, authorization]_ | _[signal]_ | _[retry, fallback, fail fast]_ | _[status/code and user-visible behavior]_ |
-
----
-
-## 8. Domain Change Protocol
-
-1. Every term, invariant, state machine, data class, NFR, and error code gets a stable ID.
-2. The confirmed Discovery Decision Record (`docs/discovery/<feature-slug>.md`) is the upstream source for settled decisions; specs and tickets must cite its `DEC-###` IDs rather than restating them from memory.
-3. Use `/domain-modeling` to propagate a changed ID into `specs/` and `docs/sprint/SPRINT.md` before implementation resumes, and surface any conflict instead of silently choosing a winner.
-4. An ADR is required when a decision passes all three gates in `/domain-modeling`.
-5. Never let a domain rule live only in chat, a ticket comment, or an implementation detail.
+| `NFR-001` | _[attribute]_ | _[numeric target + unit]_ | _[measurement + degradation]_ | _[`DEC-###`]_ |
+| `ERR-001` | _[failure condition]_ | _[code/status]_ | _[expected recovery]_ | _[`DEC-###`]_ |

@@ -1,37 +1,28 @@
 ---
 name: diagnosing-bugs
-description: Diagnoses bugs and performance regressions by building tight reproduction loops and falsifying root-cause hypotheses. Use when debugging failures, flaky tests, race conditions, or unexpected behavior.
+description: Isolates bugs and performance regressions using deterministic reproduction loops, hypothesis falsification, and shared root-cause fixes across all callers. Use when debugging failures, flaky tests, race conditions, or unexpected behavior.
 ---
 
 # Diagnosing Bugs
 
-Isolate and fix bugs systematically by building a deterministic reproduction loop first, falsifying competing hypotheses, and fixing the shared root cause across all callers.
+Reproduce deterministically first, falsify competing hypotheses, and fix the shared root cause across all callers without tampering with tests.
 
 ## Decision tree
 
-1. **Do you have a single command that reproduces the bug deterministically?**
-   - **No** → Start at **Phase 1 (Build & Tighten the Feedback Loop)**. Do not edit production code yet.
+1. **Do you have a single command that reproduces the bug reliably?**
+   - **No** → Execute **Phase 1 (Reproduce)** before editing production code.
    - **Yes** → Proceed to step 2.
-2. **Have you proven the exact line and state transition where actual behavior diverges from the invariant?**
+2. **Have you proven the exact `file:line` and state transition where actual behavior diverges?**
    - **No** → Execute **Phase 2 (Falsify Hypotheses)**.
-   - **Yes** → Proceed to step 3.
-3. **Have you checked every caller of the broken function across the codebase?**
-   - **No** → Run `grep_search` to inspect all callers before applying the fix.
-   - **Yes** → Execute **Phase 3 (Root-Cause Fix & Regression Lock)**.
+   - **Yes** → Search all callers (`rg -n` via `run_command` or search tool), then execute **Phase 3 (Root-Cause Fix)**.
 
-## Debugging workflow
+## Workflow
 
-### Phase 1: Build & tighten the feedback loop
-- Construct a fast (<5s) command via `run_command` that turns **red** on this specific bug (unit/integration test at the closest seam, `curl`/CLI fixture, or `git bisect run` harness).
-- For intermittent or race-condition bugs, loop the trigger concurrently to raise the reproduction rate until it fails reliably.
-- Redact all secrets or credentials in captured logs as `<REDACTED>`.
-
-### Phase 2: Falsify hypotheses
-- Trace data and execution flow backward from the symptom to the origin of the bad state.
-- Formulate 2–3 competing hypotheses and add minimal assertions or traces to falsify wrong ones.
-- If 3 consecutive hypotheses fail, remove **only** your temporary debug instrumentation via `replace_file_content` (or `git stash push -- <instrumented-files>`—never run `git checkout -- .` which would destroy the user's uncommitted work) and re-evaluate the architecture with the user.
-
-### Phase 3: Root-cause fix & regression lock
-- Fix the shared root cause once in production code (never patch a single caller while leaving sibling callers broken).
-- **Anti-Test-Bypass Invariant**: The reproduction test is the behavioral oracle. The fix must be exclusively in production logic. Modifying, skipping (`.skip`), deleting, or weakening assertions in the test to artificially produce a green exit code is strictly prohibited.
-- Remove temporary debug traces, confirm the reproduction command turns **green** from the genuine production fix, and run the full test suite.
+1. **Phase 1 — Reproduce**:
+   - Build a fast (<5s) failing test or command via `run_command` that triggers the bug. For race conditions/flakiness, run repeatedly or concurrently to raise reproduction rate. Redact any captured secrets as `<REDACTED>`.
+2. **Phase 2 — Falsify Hypotheses**:
+   - Trace state backward from the failure to its origin. Test 2–3 competing hypotheses with minimal diagnostics.
+   - **Circuit Breaker**: If 3 consecutive hypotheses fail, remove only your temporary debug edits (via `edit_file` or `git stash push -- <instrumented-files>`; never `git checkout -- .`) and escalate/re-align via `ask_question`.
+3. **Phase 3 — Root-Cause Fix & Regression Lock**:
+   - Fix the shared root cause once in production code (updating any affected sibling callers). Never `.skip`, delete, or weaken tests to pass.
+   - Remove temporary diagnostics and run the full test suite via `run_command` to confirm exit code `0`.

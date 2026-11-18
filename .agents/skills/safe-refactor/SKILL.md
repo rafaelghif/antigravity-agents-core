@@ -1,30 +1,28 @@
 ---
 name: safe-refactor
-description: Restructures code in atomic behavior-preserving steps verified by characterization and regression tests. Use when refactoring code, eliminating duplication, or deepening shallow modules without changing external behavior.
+description: Restructures code in atomic behavior-preserving steps verified by characterization and regression tests. Use when refactoring code, eliminating duplication, or consolidating shared UI/helpers without changing external behavior.
 ---
 
 # Safe Refactor
 
-Restructure internal code while preserving 100% of observable external behavior at every step.
+Restructure internal code and eliminate duplication while preserving 100% of observable external behavior at every step.
 
 ## Decision tree
 
-1. **Are you trying to change observable business behavior and restructure code in the same step?**
-   - **Yes** → Separate into two commits: complete the pure behavior-preserving refactor first, then implement the behavioral change.
+1. **Are you trying to change observable behavior and restructure code in the same step?**
+   - **Yes** → Separate into two passes/commits: land the behavior-preserving refactor first, then apply the behavioral change.
    - **No** → Proceed to step 2.
-2. **Do passing automated tests already cover the public seam of the code being refactored?**
-   - **No** → Write **Characterization Tests** at the public seam first and confirm they pass before modifying internals.
-   - **Yes** → Proceed to step 3.
+2. **Do passing automated tests cover the public seam of the code being refactored?**
+   - **No** → Write characterization tests at the public seam and confirm they pass before changing internals.
+   - **Yes** → Proceed to workflow below.
 
-## Refactoring workflow
+## Workflow
 
-1. **Baseline & caller check**:
-   - Run `grep_search` to map every caller of the target symbol across the workspace.
-   - Run the typechecker and test suite via `run_command` to confirm a green baseline.
-2. **Apply one atomic transformation at a time**:
-   - Inline shallow pass-through wrappers or middle-man delegates.
-   - Extract duplicated logic into a single pure helper.
-   - Replace boolean flag clusters with a discriminated union.
-   - Move methods exhibiting Feature Envy onto the module that owns the data.
-3. **Bracketed verification**:
-   - Run typecheck and tests immediately after each transformation. If verification fails and cannot be fixed within 30 seconds, undo only your own edits: re-apply the previous content with `replace_file_content`, or park your changes with `git stash push -- <file>`. Never run `git checkout -- <file>` or `git checkout -- .`; both discard the user's uncommitted work, not just yours. Then take a smaller step.
+1. **Baseline & Caller Check**:
+   - Search all callers of target symbols (`rg -n` via `run_command` or search tool).
+   - Run the typechecker and test suite via `run_command` to verify a green baseline.
+2. **Atomic Transformations**:
+   - Extract duplicated UI/helpers/validators into existing shared modules.
+   - Collapse shallow pass-through wrappers and replace boolean flag clusters with discriminated unions.
+3. **Bracketed Verification**:
+   - Run typecheck and tests immediately after each transformation. If a step breaks and cannot be fixed cleanly, revert only your own edit (via `edit_file` or `git stash push -- <file>`, never `git checkout -- .`) and take a smaller step.

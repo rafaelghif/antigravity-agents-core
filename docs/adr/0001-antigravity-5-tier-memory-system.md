@@ -25,3 +25,7 @@ We adopt a **5-Tier Memory Architecture** within the repository:
 ## Amendment (2026-11-01)
 
 The original Tier 2 wording described every modular rule as `trigger: always_on`. The shipped catalog uses `model_decision` for domain rules (path and description injected up front, body loaded on demand), `glob` for testing, and `manual` for the release audit. Only `AGENTS.md` is unconditionally injected. The rest of the tier model is unchanged.
+
+## Amendment (2026-11-18)
+
+To eliminate progressive-disclosure misses and keep `AGENTS.md` well below Antigravity's 24 KB per-file limit, domain rules that govern everyday file edits (`ui-and-dry.md`, `coding-standards.md`, `database-migrations.md`, `testing.md`) now use `trigger: glob` so they load automatically when matching files are touched. Security, architecture, and git/context remain `model_decision`, and `release-audit.md` remains `manual`. `CONTEXT.md` now serves as both the concrete codebase index (`/index-project`) and the domain invariant registry.

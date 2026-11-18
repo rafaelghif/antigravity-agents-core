@@ -9,58 +9,37 @@
 - **Related Spec**: `specs/<feature-slug>.md`
 - **Related IDs**: `INV-###`, `ST-###`, `NFR-###`, `SEC-###`, `ERR-###`
 
-## How to fill this ADR (LLM rules)
-
-1. **Cite a source for every claim**: `DEC-###`, a spec ID, `path:line`, or a live primary-source URL. No unsourced rationale.
-2. **Never invent an option**: the alternatives table must contain options that were actually considered in the DDR or the review.
-3. **Copy numbers verbatim**: latency, retention, RTO/RPO, and migration windows must not be rounded.
-4. **Name the closest rejected option** and the exact production failure it would have introduced.
-5. **No implementation dump**: record the contract, invariants, and consequences, not a code listing.
-6. **Do not restate the whole spec**: an ADR explains *why* this decision beat its alternatives and what it costs.
-7. **Mark unknowns `OPEN`** with an owner and a resolution path; never hide them behind confident prose.
+> Provenance rule: cite `DEC-###`, spec IDs, `path:line`, or verified primary URLs. Never invent rejected options or round numeric targets; mark unknowns `OPEN`.
 
 ## Context
 
-State the architectural problem, domain forces, production constraints, and the failure modes that forced a decision. Cite the relevant `INV-###`, `NFR-###`, or `SEC-###` identifiers from `CONTEXT.md`, the DDR, or the spec. (`Source: DEC-###`)
+Architectural problem, domain forces, and constraints (`Source: DEC-###`).
 
 ## Decision Drivers (6 Pillars)
 
-- **Future-Proof**: <extensibility and contract stability impact>
-- **Scalable**: <load, data-growth, and concurrency impact>
-- **Maintainable**: <cognitive load and module-boundary impact>
-- **Secure**: <auth, tenancy, data-exposure, and abuse impact>
-- **High-Performance**: <latency, throughput, and resource impact>
-- **Upgradeable**: <migration, rollback, and backward-compatibility impact>
+- **Future-Proof / Upgradeable**: <extensibility, migration, rollback impact>
+- **Scalable / High-Performance**: <load, concurrency, latency/resource impact>
+- **Maintainable / Secure**: <cognitive load, boundaries, auth/tenancy/abuse impact>
 
 ## Options Considered
 
-| Option | Strengths | Failure Modes / Production Risks | Migration & Rollback Cost | Source |
+| Option | Strengths | Failure Modes / Risks | Migration & Rollback Cost | Source |
 | :--- | :--- | :--- | :--- | :--- |
-| **Option A** | <summary> | <how it fails under load, attack, or partial failure> | <cost> | `DEC-###` |
-| **Option B** | <summary> | <how it fails under load, attack, or partial failure> | <cost> | `DEC-###` |
+| **Option A** | <summary> | <failure mode> | <cost> | `DEC-###` |
+| **Option B** | <summary> | <failure mode> | <cost> | `DEC-###` |
 
 ## Decision
 
-State the chosen option and the specific trade-off rationale. Name the rejected option that came closest and why it lost. (`Source: DEC-###`)
+Chosen option, exact trade-off rationale, and why the closest alternative lost (`Source: DEC-###`).
 
 ## Consequences
 
-- **Positive**: What becomes simpler, safer, faster, or cheaper.
-- **Negative / Ceiling**: What trade-offs or scaling limits we accept (`// ponytail:` ceiling and upgrade path when applicable).
-- **Security & Compliance**: Authorization, tenancy, secrets, PII, retention, and audit impact.
-- **Performance & Scalability**: Measured or expected budgets and the load at which the decision breaks.
-- **Observability & Operability**: Logs, metrics, alerts, dashboards, runbook, and shutdown impact.
-- **Data Migration & Rollback**: Expand-migrate-contract path, backfill, rollback trigger, and recovery proof.
-- **Invariant Impact**: Which `INV-###`/`ST-###` entries change, and the exact new forbidden state.
+- **Positive**: <benefits>
+- **Negative / Ceiling**: <accepted limits (`// ponytail:` ceiling + upgrade path)>
+- **Security, Observability & Migration**: <auth/PII impact, logs/metrics, expand-migrate-contract + rollback trigger>
+- **Invariant Impact**: <affected `INV-###`/`ST-###` and new forbidden states>
 
-## Validation
+## Validation & Follow-Up
 
-How the decision will be proven correct: the test seam, benchmark, migration rehearsal, security test, or production signal that falsifies a wrong choice. (`Source: spec §11`)
-
-## Follow-Up
-
-- [ ] Update `CONTEXT.md` invariants, state transitions, and glossary.
-- [ ] Update affected specs and the `docs/sprint/SPRINT.md` traceability matrix.
-- [ ] Record the rollback trigger and owner.
-- [ ] Mark any superseded decision or ADR explicitly; never leave two active truths.
-- [ ] Record the propagation report for every affected ticket.
+- [ ] Test seam, benchmark, or migration rehearsal proving the choice (`Source: spec §8`).
+- [ ] Update `CONTEXT.md`, affected specs, `docs/sprint/SPRINT.md`, and supersede any replaced ADR.

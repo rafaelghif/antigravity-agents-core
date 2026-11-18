@@ -4,7 +4,7 @@
 
 # Antigravity Agent Core (V6)
 
-**Enterprise-grade Principal Software Engineering & Technical Scrum constitution, progressive-disclosure rules, deep-module skills, sandboxed subagents, cross-platform lifecycle hooks, and zero-daemon MCP integration for Google Antigravity.**
+**LLM-native Principal Software Engineering & Technical Scrum constitution, glob-scoped rules, codebase-indexed skills, sandboxed subagents, cross-platform lifecycle hooks, and zero-daemon MCP integration for Google Antigravity.**
 
 <p align="center">
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.2.1-blue.svg?style=for-the-badge&logo=git" alt="Version 6.2.1" /></a>
@@ -22,43 +22,44 @@
 
 Most AI coding assistants act as **sycophantic yes-men**: they agree with broken architectural premises, generate fragile, mock-heavy boilerplate, silently drop state across multi-turn sessions, and fail under complex enterprise constraints.
 
-**Antigravity Agent Core (AAC V6)** upgrades Google Antigravity into an **uncompromising Principal Software Engineer & Technical Scrum Master**:
+**Antigravity Agent Core (AAC V6)** upgrades Google Antigravity into an **uncompromising, LLM-native Principal Software Engineer & Technical Scrum Master**:
 
-- **Anti-Sycophancy Pair-Programming**: Questions flawed premises before code is written (`[Premise Breakdown] -> [Production Failure] -> [Superior Alternative]`).
+- **Anti-Yes-Man & Ambiguity Stop Gate**: Audits prompts, PRDs, and tickets before coding; challenges flawed premises (`[Premise Flaw] -> [Production Failure Mode] -> [Concrete Alternative]`) and halts with `ask_question` whenever requirements, UI states, auth rules, or API contracts are unclear.
+- **Codebase Indexing & Shared UI / DRY Enforcement**: Indexes real repositories into `CONTEXT.md` (`/index-project`) and enforces `Reuse → Extend → Compose → Create` via `glob`-activated `ui-and-dry.md` and `coding-standards.md` rules.
 - **The 6 Engineering Pillars**: Stress-tests every architectural decision and diff to be *Future-Proof, Scalable, Maintainable, Secure, High-Performance, and Upgradeable*.
-- **Autonomous Technical Scrum**: Decomposes high-level goals into an Execution Wave DAG (`docs/sprint/SPRINT.md`), test-first vertical tickets, and persistent cross-session handovers.
-- **Zero-Mock Production Integrity**: Production paths require genuine environment-backed drivers; mocks and stubs are quarantined strictly to test directories via automated lifecycle guards.
-- **Zero-Daemon Primitives**: MCP tools and platform scripts run via standard Node stdio without Docker daemon dependencies or named pipe failures.
-- **Non-Destructive Management**: Installs and upgrades non-destructively via a SHA-256 manifest CLI (`bin/cli.mjs`) that protects user modifications and tracks managed assets.
+- **Codebase-Grounded Technical Scrum**: Decomposes specs into an Execution Wave DAG (`docs/sprint/SPRINT.md`) and vertical tickets citing real `path:symbol` reusable assets and `DEC-###` provenance.
+- **Zero-Mock Production Integrity & Closed-Loop Stop Gate**: Production paths require genuine environment-backed drivers; mocks/tampered tests are blocked by `PreToolUse` and `Stop` (`NO_TOOL_CALL`) hooks.
+- **Zero-Daemon Primitives & Non-Destructive CLI**: Node stdio MCP + SHA-256 manifest CLI (`bin/cli.mjs`) protecting user edits.
 
 ---
 
 ## Core Design Principles (V6 Enterprise Architecture)
 
-1. **High-Signal Principal Engineer Persona (Anti-Sycophancy)**: Direct, rigorous, and strictly non-sycophantic pair-programming. Eliminates hollow validation in favor of objective engineering evaluation. When corporate environments require formal tone, exporting `AAC_PERSONA=neutral` instructs the `SessionStart` hook to inject clinical Staff Engineer prose across all interactions.
-2. **User-Defined Architecture (Interview First, Zero Static Dogma)**: Never imposes a rigid folder hierarchy, arbitrary layer dogma, or assumed technology stack. Discovers existing repository topology dynamically and **interviews the user first** (`ask_question` / `/grill-me`) whenever boundaries, databases, or conventions are undecided.
-3. **The 6 Non-Negotiable Engineering Pillars**: Defined once in `AGENTS.md` §3—every design and diff is stress-tested against:
+1. **LLM-Native Anti-Yes-Man Posture**: Direct, clinical, strictly non-sycophantic engineering execution. Audits prompts, PRDs, and tickets before writing code and stops with `ask_question` whenever requirements, UI states, auth rules, or API contracts are ambiguous.
+2. **Codebase Indexing & Zero-Duplication (`CONTEXT.md` + `ui-and-dry.md`)**: Maps real project stack, commands, shared UI primitives, tokens, utilities, and module seams via `/index-project`, enforcing `Reuse → Extend → Compose → Create` via `glob`-scoped rules.
+3. **The 6 Non-Negotiable Engineering Pillars**: Every design and diff is stress-tested against:
    - **Future-Proof**: Clean contracts, extensible domain models, zero hard-coded assumptions requiring rewrites.
    - **Scalable**: Zero N+1 query loops, bounded memory/queues, horizontal readiness, safe concurrency under load.
    - **Maintainable**: Low cognitive load (KISS, DRY, YAGNI, SOLID), deep modules (Ousterhout), intention-revealing names, zero clever spaghetti.
    - **Secure**: Zero-trust boundary parsing ("Parse, don't validate"), strict authorization (zero BOLA/IDOR), atomic mutations (zero TOCTOU races), zero leaked secrets.
    - **High-Performance**: Optimal algorithmic complexity, minimal I/O round-trips, proper indexing, explicit timeouts on external calls.
    - **Upgradeable**: Narrow boundary seams, backward-compatible migrations (`Expand-Migrate-Contract`), explicit `// ponytail:` upgrade paths.
-4. **Production-Grade by Default (Anti-MVP)**:
-   - Every artifact is production-bound unless explicitly labeled a throwaway spike. "MVP" means the smallest **complete, deployable, production-safe** slice—never permission to omit validation, authorization, tests, observability, migrations, or rollback.
-   - `/grill-me` ends in a durable `docs/discovery/<slug>.md` Discovery Decision Record with stable `DEC/OQ/ASM` IDs, so downstream artifacts cite decisions instead of hallucinating them.
-   - `/to-spec` expands that record through a Fact Ledger and source columns into measurable NFR budgets, security/failure contracts, and requirement-to-test traceability; `/to-tickets` emits deployable vertical slices with source provenance and production quality gates; `/implement` audits the full DoD before declaring done.
+4. **Grounded Discovery-to-Delivery Pipeline**:
+   - Every artifact is production-bound unless explicitly labeled a throwaway spike. "MVP" means the smallest **complete, deployable, production-safe** slice.
+   - `/discover` (pairing with built-in `/grill-me`) writes a `docs/discovery/<slug>.md` Discovery Decision Record with stable `DEC/OQ/ASM` IDs.
+   - `/to-spec` and `/to-tickets` ground specs and vertical tickets in real codebase assets (`path:symbol`) without forcing fake filler on inapplicable gates, while `/implement` runs a mandatory Ambiguity & Reuse Audit before writing tests or code.
 5. **Expert Technical Scrum & Multi-Session Continuity**:
    - `/to-tickets` generates a committed **Scrum Sprint Wave Board (`docs/sprint/SPRINT.md`)** and session-sized vertical tracer-bullet tickets (`docs/sprint/tickets/<NN>-<slug>.md`) with **Definition of Ready (DoR)**, **Execution Waves (DAG)**, **traceability matrix**, and **enterprise Definition of Done (DoD)**.
    - `/implement` executes 1 unblocked ticket test-first, commits atomically when the user authorizes commits, updates the ticket's `Session Handover & Completion Log`, and promotes newly unblocked tickets in `docs/sprint/SPRINT.md`.
    - `/handoff` checkpoints sprint progress, downstream seam notes, and the exact next command into `.scratch/handoff.md`.
 6. **Cross-Platform Lifecycle Hooks & Standalone Guards**:
    - `.agents/hooks.json` uses cross-platform Node JSON parsers:
-     - `SessionStart`: Detects cold-start sprint/handoff artifacts and injects active persona directives.
+     - `SessionStart`: Detects cold-start sprint/handoff artifacts, flags unindexed template `CONTEXT.md` files, and injects active persona directives.
      - `PreToolUse` (Git Guard): Loads `.agents/git-guard.cjs` to intercept direct pushes to protected `main` or `master` branches with `decision: "ask"`, while keeping everyday dev commands (branch, commit, stash, checkout) frictionless.
-     - `PreToolUse` (Production No-Mock Guard): Blocks dummy IDs/tokens, synthetic stores, and deferred `TODO` stubs in production paths with fail-closed handling.
+     - `PreToolUse` (Production No-Mock Guard): Blocks dummy IDs/tokens, synthetic stores, and deferred `TODO` stubs in production paths, plus test-tampering patterns in test files.
+     - `Stop` (Quality Gate Sensor): Intercepts `NO_TOOL_CALL` / `MAX_INVOCATIONS` (with `continuationActive` loop guard) to verify test integrity and run the repo test suite before allowing completion.
 7. **Contained Sandboxed Subagents**:
-   - `.agents/agents/*.md` subagents run with `commandExecutionPolicy: sandbox` with full operational capabilities (view, write, search, run) without polluting the parent conversation context.
+   - `.agents/agents/*.md` subagents run with `commandExecutionPolicy: sandbox` using surface-compatible Antigravity tools without polluting the parent conversation context.
 8. **Zero-Daemon MCP & Safe Platform Runtimes**:
    - Default configurations use native Node stdio (`@modelcontextprotocol/server-github`) reading credentials from `env` or `.agents/mcp.env`, eliminating background Docker daemon dependencies and Windows named-pipe failures.
 9. **Non-Destructive SHA-256 Manifest CLI**:
@@ -69,14 +70,14 @@ Most AI coding assistants act as **sycophantic yes-men**: they agree with broken
 
 ## V5 → V6 Evolution & Consolidation Matrix
 
-AAC V6 consolidates 64 legacy fragmented skills into a cohesive, deep-module architecture, eliminating cognitive noise, redundant variants, and token bloat while upgrading core engineering workflows:
+AAC V6 consolidates 64 legacy fragmented skills into an LLM-native, deep-module architecture, eliminating cognitive noise, redundant variants, and token bloat while upgrading core engineering workflows:
 
 | Legacy V5 Area (64 Skills Bloat) | V6 Consolidated Architecture | Primary Seams & Purpose |
 | :--- | :--- | :--- |
-| **Caveman Suite** (14 fragmented skills: `caveman-discover`, `caveman-learn`, etc.) | **Progressive Rule (`caveman.md`)** | High-signal, high-velocity communication & token-efficient engineering protocol without prompt bloat. |
-| **Ponytail Suite** (6 fragmented skills: `ponytail-debt`, `ponytail-gain`, etc.) | **Progressive Rule (`ponytail.md`)** | 7-Rung Minimalist Ladder, root-cause caller mapping, and surgical in-place edits. |
-| **Grilling Variants** (3 skills: `grill-me`, `grilling`, `grill-with-docs`) | **Unified `/grill-me` Skill** | Interactive one-question-at-a-time interview with `(Recommended)` first slot to define architecture & stress-test designs. |
-| **Scattered Implementation** (`implement`, `implement-spec`, `lean-build`, `prototype`) | **Technical Scrum Wave Engine (`/to-tickets`, `/implement`, `/handoff`)** | Production-grade vertical tracer-bullet tickets with traceability, quality gates, Execution Waves DAG (`docs/sprint/SPRINT.md`), DoR, enterprise DoD, and cross-session handover. |
+| **Caveman Suite** (14 fragmented skills) | **LLM-Native `AGENTS.md` (<10 KB)** | Zero-fluff, deterministic anti-yes-man and verification contracts without human prose bloat or truncation. |
+| **Ponytail Suite** (6 fragmented skills) | **Glob Rules (`ui-and-dry.md`, `coding-standards.md`)** | Automatic pre-edit discovery, `Reuse → Extend → Compose → Create`, caller mapping, and surgical edits. |
+| **Grilling Variants** (3 skills) | **`/discover` + `/index-project`** | Codebase indexing into `CONTEXT.md` plus structured ambiguity interviews (avoiding collision with built-in `/grill-me`). |
+| **Scattered Implementation** (`implement`, `implement-spec`, `lean-build`, `prototype`) | **Technical Scrum Engine (`/to-tickets`, `/implement`, `/handoff`)** | Ambiguity-audited, codebase-grounded vertical slices with Execution Waves DAG (`docs/sprint/SPRINT.md`), DoR, DoD, and handover. |
 | **Review & Verification Scripts** (`code-analyzer`, `quality-guard`, etc.) | **3 Native Subagents & Automated Suite** | Sandboxed `adversarial-reviewer`, `codebase-investigator`, `verification-runner`, plus `tests/aac.test.mjs`. |
 | **Fragile Bash/PS1 Overwriters** | **SHA-256 Manifest CLI (`bin/cli.mjs`)** | Non-destructive tracking in `.agents/.aac-manifest.json`, conflict backup (`.scratch/backups/`), `.aac-new`, `--dry-run`, and `uninstall`. |
 
@@ -86,22 +87,22 @@ AAC V6 consolidates 64 legacy fragmented skills into a cohesive, deep-module arc
 
 ```mermaid
 flowchart LR
-    G["/grill-me\n(One Question at a Time)"] --> DDR["docs/discovery/<slug>.md\n(DDR: DEC / OQ / ASM IDs)"]
-    DDR --> F{"Decision Tree\nSettled?"}
+    Idx["/index-project\n(CONTEXT.md Repo Index)"] --> Disc["/discover + /grill-me\n(DDR: DEC / OQ / ASM IDs)"]
+    Disc --> F{"Ambiguities\nSettled?"}
     F -->|"New Domain Terms /\n3-Gate Trade-off"| DM["/domain-modeling\n(CONTEXT.md + ADR)"]
     F -->|"Module Boundary /\nSeam Design"| CD["/codebase-design\n(Design It Twice)"]
     F -->|"Multi-Session Feature"| Spec["/to-spec\n(specs/<slug>.md)"]
     F -->|"Scrum Wave Planning"| Tickets["/to-tickets\n(docs/sprint/SPRINT.md)"]
-    F -->|"Small Single Slice"| Impl["/implement\n(DoR -> TDD -> DoD)"]
+    F -->|"Ticket / Single Slice"| Impl["/implement\n(Ambiguity Audit -> Reuse -> TDD)"]
     F -->|"End Session"| Handoff["/handoff\n(.scratch/handoff.md)"]
     DM --> Spec
     CD --> Spec
-    DDR --> Spec
-    DDR --> Tickets
+    Disc --> Spec
+    Disc --> Tickets
     Spec --> Tickets
     Tickets -->|"Wave 1..N"| Impl
     Impl <-->|"Next Session"| Handoff
-    Impl --> Review["/code-review\n(Spec + 6 Pillars)"]
+    Impl --> Review["/code-review\n(Spec + DRY + 6 Pillars)"]
     Review --> PR["/pr\n(Summary + Door + Evidence)"]
 ```
 
@@ -109,22 +110,23 @@ flowchart LR
 
 ## Interactive Command & Skills Directory
 
-AAC V6 ships 16 focused single-responsibility skills and 3 sandboxed native subagents organized by lifecycle phase:
+AAC V6 ships 17 focused single-responsibility skills and 3 sandboxed native subagents organized by lifecycle phase:
 
-### 1. Discovery & Architecture
+### 1. Indexing, Discovery & Architecture
 | Command / Skill | When to Use | Primary Output / Public Seam |
 | :--- | :--- | :--- |
-| **`/grill-me`** | Undecided stack, architecture, or requirements | One-question interview that ends in a confirmed `docs/discovery/<slug>.md` Discovery Decision Record with stable `DEC/OQ/ASM` IDs. |
+| **`/index-project`** | Unindexed repo or template `CONTEXT.md` | Grounded `CONTEXT.md` mapping stack, verification commands, shared UI, tokens, utilities, and seams. |
+| **`/discover`** | Undecided stack, unclear PRD/ticket, or missing UI/edge-case rules | Structured interview (pairs with built-in `/grill-me`) ending in `docs/discovery/<slug>.md` with `DEC/OQ/ASM` IDs. |
 | **`/domain-modeling`** | Ambiguous domain concepts or architectural decisions | Reconciles `CONTEXT.md` with the DDR, updates the invariant/state registry, records 3-Gate ADRs, and reports propagation. |
 | **`/codebase-design`** | Designing module interfaces and test seams | Deep module contracts designed using the Design-It-Twice method. |
-| **`/research`** | Investigating APIs, official documentation, or 2026 best practices | Evidence-based synthesis in `.scratch/research/<topic>.md` citing primary sources. |
-| **`/to-spec`** | A confirmed DDR ready for enterprise-grade specification | Production-ready `specs/<slug>.md` with a Fact Ledger, source columns, measurable NFRs, security/failure contracts, seams, traceability, and a readiness verdict. |
+| **`/research`** | Investigating APIs, official documentation, or 2026 best practices | Evidence-based synthesis citing live primary sources. |
+| **`/to-spec`** | A confirmed DDR/PRD ready for grounded technical specification | Unambiguous `specs/<slug>.md` with reusable repo touchpoints, security/failure contracts, and traceability. |
 
-### 2. Technical Scrum Engine
+### 2. Technical Scrum & Execution
 | Command / Skill | When to Use | Primary Output / Public Seam |
 | :--- | :--- | :--- |
-| **`/to-tickets`** | Decomposing a readiness-passed spec and DDR into buildable slices | Execution Waves DAG in `docs/sprint/SPRINT.md`, a source-lineage table, production quality gates, and vertical tickets with provenance, DoR, and enterprise DoD. |
-| **`/implement`** | Building an unblocked vertical ticket | Test-first implementation slice, atomic commit upon authorization, board sync. |
+| **`/to-tickets`** | Decomposing a readiness-passed spec into buildable vertical slices | Execution Waves DAG in `docs/sprint/SPRINT.md` and vertical tickets citing real `path:symbol` reusable assets. |
+| **`/implement`** | Building any ticket (Jira, GitHub, Sprint, or feature slice) | Mandatory Ambiguity & Feasibility Audit (`ask_question` if unclear) -> Reuse Plan -> TDD -> DoD sync. |
 | **`/handoff`** | Ending session, switching context, or handing over | Checkpoints sprint progress and single next action into `.scratch/handoff.md`. |
 
 ### 3. Engineering Quality & TDD
@@ -160,8 +162,8 @@ antigravity-agents-core/
 ├── .gitattributes                             # Deterministic LF/CRLF normalization for hooks, rules & tests
 ├── .gitignore                                 # Excludes secrets, scratch state, and MCP credentials
 ├── .npmignore                                 # Packaging exclusions for clean distribution
-├── AGENTS.md                                  # Always-on Savage Gen-Z Principal Engineer & 6-Pillar Rules
-├── CONTEXT.md                                 # User-Defined Architecture, Stack & Domain Glossary
+├── AGENTS.md                                  # Always-on LLM Execution Contract (<10 KB, anti-yes-man, grounding, verification)
+├── CONTEXT.md                                 # Living Codebase Index (UI/utils/commands) & Domain Glossary
 ├── package.json                               # NPX & GitHub Packages distributor (@rafaelghif/aac-core v6.2.1)
 ├── bin/cli.mjs                                # Non-destructive SHA-256 manifest CLI (init / upgrade / uninstall)
 ├── install.sh                                 # Linux / macOS installer (delegates all writes to bin/cli.mjs)
@@ -184,17 +186,17 @@ antigravity-agents-core/
     ├── mcp.env.example                        # Template for MCP credential isolation
     ├── mcp_config.example.json                # Zero-daemon GitHub MCP template (Node stdio, env secrets)
     ├── sidecars/repo-health/sidecar.json      # Antigravity App scheduled sidecar template
-    ├── rules/                                 # 9 Modular Rules (flat directory, official trigger contract)
-    │   ├── coding-standards.md                # DRY, KISS, YAGNI, SOLID/SRP, Clean Code (model_decision)
-    │   ├── architecture-and-flow.md           # User-Defined Architecture, Deep Modules, E2E Flow (model_decision)
-    │   ├── ponytail.md                        # 7-Rung Minimalist Ladder, Root Cause & Surgical Edits (model_decision)
-    │   ├── caveman.md                         # Savage Gen-Z high-signal style & persona switch (model_decision)
-    │   ├── database-migrations.md             # Expand-contract, CONCURRENTLY outside tx, SQL safety (model_decision)
+    ├── rules/                                 # 8 Modular Rules (flat directory, glob + model_decision + manual)
+    │   ├── ui-and-dry.md                      # Shared UI reuse, tokens, UI state matrix, a11y (glob)
+    │   ├── coding-standards.md                # DRY helpers, boundary parsing, precision, guard clauses (glob)
+    │   ├── database-migrations.md             # Expand-contract, CONCURRENTLY outside tx, SQL safety (glob)
+    │   ├── testing.md                         # Public-seam assertions, hermeticity, anti-tampering (glob)
+    │   ├── architecture-and-flow.md           # User-defined topology, deep modules, resilience, callers (model_decision)
     │   ├── security-and-auth.md               # BOLA/IDOR, idempotency, atomic locks, full SSRF defense (model_decision)
     │   ├── git-and-context.md                 # Conventional atomic commits, CONTEXT.md, Sprint Board (model_decision)
-    │   ├── testing.md                         # Public-seam assertions, hermeticity, boundary coverage (glob)
     │   └── release-audit.md                   # Pre-release production readiness rubric (manual @mention)
-    ├── skills/                                # 16 Focused Single-Responsibility Skills
+    ├── skills/                                # 17 Focused Single-Responsibility Skills
+    │   ├── index-project/SKILL.md             # Indexes real repo stack, commands, shared UI, utils & seams into CONTEXT.md
     │   ├── browsing/                          # Live UI verification, E2E journeys & /browser workflow
     │   │   ├── SKILL.md
     │   │   ├── scripts/run-browser.mjs
@@ -209,7 +211,7 @@ antigravity-agents-core/
     │   │   ├── examples/generate-report.py
     │   │   ├── references/office-formats-and-tools.md
     │   │   └── references/document-conversions.md
-    │   ├── grill-me/                          # One-question interview ending in a Discovery Decision Record (DDR)
+    │   ├── discover/                          # Ambiguity & architecture interview -> Discovery Decision Record (DDR)
     │   │   ├── SKILL.md
     │   │   └── resources/discovery-record-template.md
     │   ├── domain-modeling/                   # Reconciles CONTEXT.md with the DDR, invariant/state registry & 3-Gate ADRs

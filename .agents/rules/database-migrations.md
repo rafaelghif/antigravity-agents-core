@@ -1,25 +1,18 @@
 ---
-trigger: model_decision
-description: "Apply these guidelines whenever writing or reviewing database migrations, SQL queries, or schema changes."
+trigger: glob
+globs: "*.sql, **/migrations/**, **/migrate/**, **/prisma/**, **/drizzle/**, **/alembic/**, **/db/**"
+description: "Zero-downtime database migration rules: Expand-Migrate-Contract, CONCURRENTLY indexing, lock timeouts, and tenant-safe SQL."
 ---
 
-# Database & Migration Rules (World-Class Zero-Downtime Engineering)
+# Database & Migration Rules
 
-1. **Lock Timeout Defense (Anti-Starvation)**:
-   - Every production DDL migration must explicitly configure defensive lock and statement timeouts (e.g., `SET lock_timeout = '2s'; SET statement_timeout = '30s';`). This prevents queued DDL locks (`ACCESS EXCLUSIVE`) from blocking live OLTP read/write traffic and causing cascading pool exhaustion.
-2. **Zero-Downtime Index Operations**:
-   - Always create and drop indexes concurrently on live tables (e.g., `CREATE INDEX CONCURRENTLY` in PostgreSQL), and ensure the migration executes **outside of an active transaction block** (Rails/ActiveRecord: `disable_ddl_transaction!`; plain SQL: run the statement outside `BEGIN`).
-3. **Non-Blocking Foreign Key Validation**:
-   - Never add a foreign key constraint to a large table in a single blocking command. Add the constraint as `NOT VALID` first (takes a momentary lock), then run `VALIDATE CONSTRAINT` in a subsequent step (validates without holding an exclusive table lock).
-4. **Expand-Migrate-Contract Pattern**:
-   - Never drop, rename, or tighten a column type in a single deployment.
-   - **Expand**: Add the new column as nullable or with a non-locking constant default. PostgreSQL 11+ stores a constant `DEFAULT` in the catalog without rewriting the table, but a volatile default (e.g., `now()`, `random()`) still rewrites it — add such values in a separate backfill instead.
-   - **Migrate**: Enable application dual-writing, backfill existing rows in bounded, cursor-based batches (`WHERE id > $last_id ORDER BY id ASC LIMIT 1000`) with pause intervals to avoid replication lag, and switch readers.
-   - **Contract**: Remove legacy columns only after all deployed instances consume the new schema.
-5. **No I/O Inside Database Transactions**:
-   - Never perform external HTTP calls, third-party API invocations, email dispatches, or slow synchronous operations inside an open database transaction. Keep transactions short and bounded — no unbounded scans, no user interaction, no network round-trips — so connection-pool slots and row locks are released quickly; long-running work such as backfills and DDL belongs outside the request transaction.
-6. **Index Architecture & Leftmost Prefix Rule**:
-   - Design composite indexes matching query filter semantics: equality predicates first, followed by range predicates or sort keys (`WHERE tenant_id = $1 AND created_at > $2` → Index `(tenant_id, created_at)`). Leverage covering indexes (`INCLUDE (col)`) on hot read queries to eliminate table heap fetches.
-7. **Strict Parameterization & Tenant Isolation**:
-   - Every SQL query must use parameterized statements; string concatenation or interpolation in SQL strings is strictly banned.
-   - Every read, update, and delete query in multi-tenant schemas must explicitly filter by the authenticated `tenant_id`.
+1. **Defensive Timeouts**: Every production DDL migration must set lock and statement timeouts (e.g., `SET lock_timeout = '2s'; SET statement_timeout = '30s';`) so queued `ACCESS EXCLUSIVE` locks cannot stall live OLTP traffic.
+2. **Non-Blocking Index Operations**: Create and drop indexes on live tables using `CREATE INDEX CONCURRENTLY` / `DROP INDEX CONCURRENTLY` **outside** any transaction block (e.g., `disable_ddl_transaction!` in Rails, no `BEGIN`/`COMMIT` wrapper in raw SQL).
+3. **Non-Blocking Foreign Keys**: On populated tables, add foreign keys as `NOT VALID` first, then run `ALTER TABLE ... VALIDATE CONSTRAINT` in a separate step.
+4. **Expand-Migrate-Contract**: Never drop, rename, or tighten a column type in a single deployment.
+   - **Expand**: Add the new column as nullable or with a constant non-volatile `DEFAULT` (volatile defaults like `now()` or `random()` rewrite tables—backfill those separately).
+   - **Migrate**: Dual-write in application code, backfill existing rows in cursor-based batches (`WHERE id > $last_id ORDER BY id ASC LIMIT 1000`) with throttling, then switch readers.
+   - **Contract**: Drop legacy columns/constraints only after all running instances use the new schema.
+5. **No I/O Inside Transactions**: Never perform HTTP requests, webhooks, email dispatches, or unbounded scans inside an open DB transaction.
+6. **Composite Index Ordering**: Put equality predicates before range/sort columns (`WHERE tenant_id = $1 AND created_at > $2` → index `(tenant_id, created_at)`). Use covering indexes (`INCLUDE (...)`) on hot read paths where appropriate.
+7. **Strict Parameterization & Tenancy**: Use parameterized queries exclusively (zero SQL string interpolation). Every read/update/delete on multi-tenant tables must filter by the authenticated `tenant_id`.

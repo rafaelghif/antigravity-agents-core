@@ -1,44 +1,42 @@
 # Master Skill Routing Directory
 
-Operational taxonomy, trigger conditions, and quality gates for the 16 committed skills in this repository. Every claim here is verified by `tests/aac.test.mjs` (skill set, frontmatter, and relative-link integrity).
+Operational taxonomy, trigger conditions, and quality gates for the 17 skills in this repository. Verified by `tests/aac.test.mjs` (skill set, frontmatter, rule size caps, and relative-link integrity).
 
-Platform contract (verified against `https://antigravity.google/docs/skills/`):
+Platform contract:
 - Skills load from `.agents/skills/<skill-folder>/SKILL.md` (one level deep) and `~/.gemini/config/skills/`.
-- `name` and `description` frontmatter are what the agent sees during progressive disclosure; `description` must stay under 1,024 characters.
-- Skills are auto-selected from the description. Users can also invoke `/<skill-name>` explicitly.
+- `name` and `description` frontmatter drive progressive disclosure; `description` must stay under 1,024 characters.
 
 ---
 
-## 1. Quality-First Engineering Invariants
+## 1. Core LLM Execution Invariants
 
-Quality is a precondition of every code modification, not a cleanup phase:
-
-1. **Clarify Before Code**: When requirements, schemas, credentials, or edge cases are ambiguous, stop and ask (`ask_question` or `/grill-me`). Never invent throwaway assumptions.
-2. **Production-Grade by Default (Anti-MVP)**: Every artifact is production-bound unless the user explicitly labels it a throwaway spike. "MVP" means the smallest complete, deployable, production-safe slice—never permission to omit validation, authorization, tests, observability, migrations, or rollback. Throwaway spikes are quarantined outside production paths and never merged.
-3. **Zero Production Fakes**: No placeholder stubs, dummy IDs/tokens, or deferred `TODO` implementations in production paths. Genuine drivers read configuration from the environment. Fakes belong in test code only (`tests/`, `__tests__/`, `fixtures/`, `mocks/`, `*.test.*`, `*.spec.*`).
-4. **Automated Proof**: Non-trivial changes leave a runnable regression test behind, and the verification command is executed before completion is reported.
-5. **Deep Modules**: Small public interfaces hide substantial implementation; domain cores stay free of framework and driver imports.
-6. **Strict DRY**: Intention-revealing names, guard clauses instead of nesting, and one canonical source of truth for validation and domain constants.
-7. **Provenance Before Prose**: Every requirement, number, schema, error code, and verification command in a spec, ticket, ADR, or `CONTEXT.md` cites a stable ID (`DEC-###`, `REQ-###`, `INV-###`, `NFR-###`, `SEC-###`, `ERR-###`), a repository `path:line`, or a live primary source. An unsourced unknown is written `OPEN`, never invented.
+1. **Anti-Yes-Man & Ambiguity Stop**: When a prompt, PRD, or ticket has missing behaviors, undefined UI states, unclear auth rules, or conflicts with existing code, stop and call `ask_question`. Never invent defaults.
+2. **Index Before Coding**: Populate or read `CONTEXT.md` (`/index-project`) and verify existing UI primitives, helpers, schemas, and commands before editing.
+3. **Zero Duplicate Code / Shared UI**: Always search existing directories first; follow `Reuse → Extend → Compose → Create`.
+4. **Production-Grade by Default**: No mock stores, dummy tokens, fake data, or deferred `TODO`s in production paths.
+5. **Closed-Loop Proof**: Run the real build/typecheck/lint/test suite via `run_command` after the final edit (`exit 0`) with zero test tampering.
 
 ---
 
 ## 2. Routing Flow
 
-```
-User Request
+```text
+User Request / PRD / Ticket
    │
-   ├─ Ambiguous / architectural decision ──────────► grill-me
-   │                                                  ├─► docs/discovery/<slug>.md (DDR)
-   │                                                  ├─► domain-modeling (CONTEXT.md + ADR)
+   ├─ Unindexed repo / stale CONTEXT.md ───────────► index-project (populates CONTEXT.md)
+   │
+   ├─ Ambiguous requirements / architecture ───────► discover (DDR: DEC / OQ / ASM; pairs with /grill-me)
+   │                                                  ├─► domain-modeling (CONTEXT.md §6-7 + ADR)
    │                                                  └─► codebase-design (seams, Design It Twice)
    │
-   ├─ Multi-session feature ───────────────────────► to-spec (reads DDR)
-   │                                                  └─► to-tickets (reads spec + DDR) ─► implement (per ticket)
+   ├─ Multi-session feature / PRD ─────────────────► to-spec (audits PRD/DDR -> specs/<slug>.md)
+   │                                                  └─► to-tickets -> implement (per ticket)
    │
-   ├─ Bug / regression ────────────────────────────► diagnosing-bugs ─► tdd / safe-refactor
+   ├─ Ticket / single slice ───────────────────────► implement (Phase 0 Ambiguity Gate -> Reuse -> TDD)
    │
-   ├─ Documentation / API / 2026 best-practice research ──► research
+   ├─ Bug / regression ────────────────────────────► diagnosing-bugs -> tdd / safe-refactor
+   │
+   ├─ External API / 2026 best-practice research ──► research
    │
    ├─ Schema or API contract change ───────────────► database-migration
    │
@@ -57,43 +55,34 @@ User Request
 
 ## 3. Skill Catalog
 
-### Discovery, design, and planning
+### Discovery, Indexing & Architecture
 
 | Skill | Use when | Primary artifact |
 | :--- | :--- | :--- |
-| [`grill-me`](../../.agents/skills/grill-me/SKILL.md) | Architecture, stack, requirements, or the production quality frontier are undecided; a plan needs 6-Pillar stress-testing | Confirmed `docs/discovery/<slug>.md` Discovery Decision Record with stable `DEC/OQ/ASM` IDs |
-| [`domain-modeling`](../../.agents/skills/domain-modeling/SKILL.md) | Domain terms, bounded contexts, invariants, state machines, or a hard-to-reverse decision need recording; the DDR and `CONTEXT.md` disagree | `CONTEXT.md`, `docs/adr/NNNN-*.md`, propagation report |
-| [`codebase-design`](../../.agents/skills/codebase-design/SKILL.md) | Module interfaces, interface depth, or public test seams need design | Design-It-Twice comparison |
-| [`research`](../../.agents/skills/research/SKILL.md) | Technical investigation, official docs, library APIs, or 2026 best practices need research | `.scratch/research/<topic>.md` |
-| [`to-spec`](../../.agents/skills/to-spec/SKILL.md) | A confirmed DDR must become an enterprise-grade specification with measurable NFRs, security/failure contracts, explicit seams, provenance, and traceability | `specs/<slug>.md` with a readiness verdict |
+| [`index-project`](../../.agents/skills/index-project/SKILL.md) | Repo is unindexed or `CONTEXT.md` is still a template | Grounded `CONTEXT.md` (stack, commands, shared UI, shared utils, seams) |
+| [`discover`](../../.agents/skills/discover/SKILL.md) | Requirements, PRDs, UI states, or architecture are incomplete or need stress-testing (pairs with built-in `/grill-me`) | Confirmed `docs/discovery/<slug>.md` with `DEC/OQ/ASM` IDs |
+| [`domain-modeling`](../../.agents/skills/domain-modeling/SKILL.md) | Domain terms, invariants, state machines, or 3-Gate ADRs need recording/reconciliation | `CONTEXT.md` §6–7, `docs/adr/NNNN-*.md` |
+| [`codebase-design`](../../.agents/skills/codebase-design/SKILL.md) | Module interfaces, depth, or public test seams need design | Design-It-Twice comparison |
+| [`research`](../../.agents/skills/research/SKILL.md) | External docs, library APIs, or current best practices need live verification | Verified primary-source synthesis |
+| [`to-spec`](../../.agents/skills/to-spec/SKILL.md) | Confirmed DDR or PRD must become an unambiguous, repo-grounded spec | `specs/<slug>.md` with readiness verdict |
 
 ### Execution
 
 | Skill | Use when | Primary artifact |
 | :--- | :--- | :--- |
-| [`to-tickets`](../../.agents/skills/to-tickets/SKILL.md) | A readiness-passed spec and its DDR need production-grade vertical slices with source provenance, traceability, quality gates, and dependency edges | `docs/sprint/SPRINT.md`, `docs/sprint/tickets/<NN>-<slug>.md` |
-| [`implement`](../../.agents/skills/implement/SKILL.md) | One unblocked ticket or vertical slice is ready to build end-to-end | Code, tests, atomic commit (when the user authorizes it), ticket completion log |
-| [`tdd`](../../.agents/skills/tdd/SKILL.md) | A behavioral increment should be built test-first at a public seam | Failing test → smallest complete production behavior → refactor |
-| [`safe-refactor`](../../.agents/skills/safe-refactor/SKILL.md) | Structure must change without changing external behavior | Characterization tests + atomic transformations |
-| [`database-migration`](../../.agents/skills/database-migration/SKILL.md) | Schema, index, or versioned API contract changes are required | Expand → Migrate → Contract plan with rollback proof |
-| [`office`](../../.agents/skills/office/SKILL.md) | Office documents (.docx, .xlsx, .pptx), spreadsheets, or PDFs need processing or generation | Extracted dataset / formatted document (.docx/.xlsx) |
+| [`to-tickets`](../../.agents/skills/to-tickets/SKILL.md) | Readiness-passed spec needs repo-grounded vertical slices and a Wave DAG | `docs/sprint/SPRINT.md`, `docs/sprint/tickets/<NN>-<slug>.md` |
+| [`implement`](../../.agents/skills/implement/SKILL.md) | Ticket or feature slice is ready for ambiguity audit, reuse mapping, TDD, and delivery | Tested production code, synced ticket/board |
+| [`tdd`](../../.agents/skills/tdd/SKILL.md) | Behavioral increment built test-first at a public seam | Failing test → complete production code → refactor |
+| [`safe-refactor`](../../.agents/skills/safe-refactor/SKILL.md) | Deduplicating or restructuring code without changing behavior | Characterization tests + atomic steps |
+| [`database-migration`](../../.agents/skills/database-migration/SKILL.md) | Zero-downtime schema, index, or contract migrations | Expand → Migrate → Contract with rollback check |
+| [`office`](../../.agents/skills/office/SKILL.md) | Processing or generating `.docx`, `.xlsx`, `.pptx`, or `.pdf` | Extracted dataset / formatted document |
 
-### Verification and continuity
+### Verification & Continuity
 
 | Skill | Use when | Primary artifact |
 | :--- | :--- | :--- |
-| [`browsing`](../../.agents/skills/browsing/SKILL.md) | Web automation, live UI verification, responsive testing, or visual proof are needed | Browser runner script + screenshot/video artifacts |
-| [`code-review`](../../.agents/skills/code-review/SKILL.md) | A diff, branch, or pull request needs spec-fidelity and standards review | Ranked findings + verdict |
-| [`pr`](../../.agents/skills/pr/SKILL.md) | A pull request description is needed | Summary, blast radius, door reversibility, evidence |
-| [`diagnosing-bugs`](../../.agents/skills/diagnosing-bugs/SKILL.md) | A failure or performance regression needs a root cause before a patch | Reproduction loop + falsified hypotheses |
-| [`handoff`](../../.agents/skills/handoff/SKILL.md) | A session is ending, switching context, or handing off to a fresh session | `.scratch/handoff.md` + synced sprint board |
-
-Unlisted commands such as `/grill-me`, `/plan`, `/agents`, `/teamwork`, and `/browser` are Antigravity built-ins. This repository does not re-implement them; the `grill-me` skill adds the 6-Pillar stress-test protocol on top of the built-in interview behavior, and the `browsing` skill standardizes live UI verification and Playwright automation alongside the `/browser` subagent.
-
----
-
-## 4. Cross-Session Resumption
-
-1. Read `.scratch/handoff.md` first (written by `handoff`), then `docs/sprint/SPRINT.md`.
-2. Resume exactly one unblocked ticket with `/implement docs/sprint/tickets/<NN>-<slug>.md`.
-3. Never re-plan a settled decision; check `docs/discovery/`, `docs/adr/`, and `CONTEXT.md` before proposing alternatives.
+| [`browsing`](../../.agents/skills/browsing/SKILL.md) | Live UI verification, E2E journeys, or visual layout checks | Browser runner script + screenshot/video proof |
+| [`code-review`](../../.agents/skills/code-review/SKILL.md) | Diff, branch, or PR audit (spec fidelity, shared UI/DRY, security, test integrity) | Ranked findings + verdict |
+| [`pr`](../../.agents/skills/pr/SKILL.md) | Writing a structured pull request description | Visual summary, door reversibility, test evidence |
+| [`diagnosing-bugs`](../../.agents/skills/diagnosing-bugs/SKILL.md) | Reproducing bugs/regressions and isolating shared root cause | Reproduction loop + root-cause fix |
+| [`handoff`](../../.agents/skills/handoff/SKILL.md) | Ending or switching a session mid-sprint | `.scratch/handoff.md` + synced sprint board |

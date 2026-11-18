@@ -1,45 +1,16 @@
 ---
 trigger: model_decision
-description: "User-defined dynamic architecture (interview-first), deep modules, narrow boundary seams, and end-to-end blast-radius mapping when designing or modifying system topology."
+description: "Apply when designing or modifying system topology, module boundaries, external integrations, or shared interfaces."
 ---
 
-# Dynamic Architecture & Resilient Flow (World-Class Systems Architecture)
+# Architecture, Module Seams & Resilience
 
-## 1. Dynamic Discovery & User-Defined Architecture
-
-* **Zero Static Dogma**: Never impose rigid folder hierarchies, pre-baked layer structures, or assumed framework dogma. The user defines their system topology, stack, and module layout.
-* **Discovery Before Action (Anti-Presumptive Scaffolding)**: Always inspect existing workspace manifests, configs, and `@CONTEXT.md` first. When system topology, folder structure, or stack boundaries are open-ended (e.g. requests to "create monorepo", "scaffold backend", or "organize project"), never assume a complex setup or generate opinionated directory trees silently. Interview the user first via `ask_question` (with `(Recommended)` on the minimal path) or `/grill-me`.
-* **Presumption-Free Topology & Plain-Import Simplicity**:
-  * **Precondition Check**: When scaffolding or restructuring without explicit tooling requirements:
-    * **Action**: Do not unilaterally introduce monorepo build orchestrators (Turborepo, Nx, Lerna), scoped package hierarchies (`@repo/*`, `@apps/*`), or TypeScript path aliases (`@/*`).
-    * **Resolution Protocol**: Clarify the desired simplicity tier first via `ask_question`, offering transparent choices:
-      1. Minimal & Flat (Standard directories, plain relative imports `./`, zero build-step magic).
-      2. Native Workspace (Standard package manager workspaces without third-party orchestrators).
-      3. Enterprise Monorepo (Dedicated orchestrators and scoped packages, only when explicitly requested).
-  * **Default Import Seam**: Unless the user explicitly requests path aliasing (`@/*`), default to plain relative imports (`./`, `../`). Plain imports preserve runtime portability, prevent module-resolution breakage across CLI/test runners, and provide zero cognitive friction for developers tracing files on disk.
-* **Critical 6-Pillar Stress-Testing**: Rigorously critique architectural proposals against real-world production failure modes (circular dependencies, lock contention, cascading outages, vendor lock-in) before finalizing designs.
-
-## 2. Deep Modules & Narrow Boundary Seams (Ousterhout & Feathers)
-
-* **Deep Modules Over Shallow Wrappers**:
-  * Design modules with small, simple public interfaces that hide extensive domain complexity, edge-case management, and state coordination behind them.
-  * Eliminate shallow pass-through classes, anemic services, and boilerplates that merely forward calls without adding leverage.
-* **Seams at Genuine Boundaries Only**:
-  * Introduce abstract test seams (interfaces/traits) exclusively at true I/O, external network, filesystem, database, or time boundaries to enable hermetic testing and painless swappability.
-  * Never create 1:1 `IFoo` interfaces for single-implementation internal classes.
-
-## 3. Resilience Engineering & Boundary Protection
-
-* **Bounded Failure & Graceful Degradation**:
-  * Every external call — network service, third-party API, queue, or database — gets an explicit timeout plus a bounded retry policy with backoff and jitter. This part is mandatory.
-  * Add a **Circuit Breaker** (Closed, Open, Half-Open) when the dependency is high-volume, user-facing, or capable of amplifying one failure across the request path. For low-volume or batch-only calls, a timeout and retry ceiling is enough; do not add a breaker just to look production-ready.
-  * Define explicit fallback or degradation behavior for every dependency whose outage would otherwise take down a primary workflow.
-* **Consistency Boundaries & Saga Patterns**:
-  * Respect architectural consistency limits: enforce **Strong Consistency** within a single database transactional boundary; use the **Transactional Outbox Pattern** or **Saga Pattern** with compensating actions when coordinating state mutations across distributed services or message queues.
-
-## 4. End-to-End Data & Blast-Radius Traceability
-
-* **Complete Flow Traceability**:
-  * Trace every data payload end-to-end from ingress validation → domain state machine → atomic persistence → egress serialization. Internal entity models and sensitive fields must never leak across public API boundaries.
-* **Blast-Radius Caller Mapping**:
-  * Before modifying any shared function, type, or database contract, map **every single caller and downstream consumer across the codebase via `grep_search`**. Never patch a single call-site while leaving sibling consumers broken.
+1. **Discovery Before Topology Changes**: Inspect existing manifests, `tsconfig.json`, and `CONTEXT.md` first. Never impose rigid folder templates, monorepo tools (Turborepo, Nx, Lerna), scoped `@repo/*` packages, or `@/*` path aliases unless already used in the repo or explicitly approved via `ask_question`. Default to plain relative imports (`./`, `../`) for greenfield projects.
+2. **Deep Modules Over Shallow Wrappers**: Expose small, stable public interfaces that encapsulate validation, edge cases, and state coordination internally. Do not create 1:1 `IFoo` interfaces or pass-through service/repository wrappers that add indirection without leverage. Place abstract interfaces/seams only at true external I/O boundaries (DB, HTTP, filesystem, queue, clock).
+3. **Resilience & Consistency**:
+   - Every external dependency call requires an explicit timeout and bounded retry policy with exponential backoff and jitter.
+   - Add a Circuit Breaker only where dependency failure can amplify across high-volume/user-facing request paths.
+   - Define explicit fallback or fail-fast degradation behavior. Use single-DB transactions for strong consistency and Transactional Outbox / Saga patterns across distributed boundaries.
+4. **End-to-End Traceability & Blast-Radius Mapping**:
+   - Trace payloads from ingress parsing → domain state transition → persistence → egress DTO (never leak internal entity fields).
+   - Before changing any shared function, component prop, type, or schema, search every caller across the codebase (`rg -n` via `run_command` or search tool) and verify all sibling consumers remain compatible.

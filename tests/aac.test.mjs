@@ -85,7 +85,7 @@ test('P0-1 & P2-7: CLI init, idempotency, non-destructive upgrade, conflict back
     // 3. Modify AGENTS.md, a rule, CONTEXT.md, and add a custom hook + toggle enabled: false
     const agentsPath = path.join(tmpDir, 'AGENTS.md');
     fs.appendFileSync(agentsPath, '\n<!-- Custom User Constitution Line -->\n');
-    const rulePath = path.join(tmpDir, '.agents', 'rules', 'ponytail.md');
+    const rulePath = path.join(tmpDir, '.agents', 'rules', 'ui-and-dry.md');
     fs.appendFileSync(rulePath, '\n<!-- Custom Rule Tweak -->\n');
     const contextPath = path.join(tmpDir, 'CONTEXT.md');
     fs.writeFileSync(contextPath, '# Custom User Context\n');
@@ -373,13 +373,13 @@ test('P0-4: Hook contract & full Git + Mock bypass corpus verification', () => {
   }
 });
 
-test('P0-7: quality-gate-stop-sensor blocks premature completion when working tree has regressions', () => {
+test('P0-7: quality-gate-stop-sensor blocks premature completion on NO_TOOL_CALL and protects against continuation loops', () => {
   const hooks = JSON.parse(fs.readFileSync(hooksJsonPath, 'utf8'));
   const stopHookCmd = hooks['quality-gate-stop-sensor'].Stop[0].command;
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-stop-test-'));
   try {
-    // 1. Clean tree or non-model_stop returns allow
-    const cleanOut = runHook(stopHookCmd, { terminationReason: 'user_stop', workspacePaths: [tmpDir] }, repoRoot);
+    // 1. Clean tree or non-agent-end terminationReason returns allow
+    const cleanOut = runHook(stopHookCmd, { terminationReason: 'USER_CANCELED', workspacePaths: [tmpDir] }, repoRoot);
     assert.equal(cleanOut.decision, 'allow');
 
     // 2. Initialize a git repo with a failing package test and modified files
@@ -397,20 +397,24 @@ test('P0-7: quality-gate-stop-sensor blocks premature completion when working tr
     // Modify file so working tree is dirty
     fs.writeFileSync(path.join(tmpDir, 'tracked.txt'), 'modified\n');
 
-    const dirtyFailingOut = runHook(stopHookCmd, { terminationReason: 'model_stop', workspacePaths: [tmpDir] }, repoRoot);
+    const dirtyFailingOut = runHook(stopHookCmd, { terminationReason: 'NO_TOOL_CALL', continuationActive: false, workspacePaths: [tmpDir] }, repoRoot);
     assert.equal(dirtyFailingOut.decision, 'continue', 'Stop hook must return continue when tests fail on dirty working tree');
     assert.match(dirtyFailingOut.reason, /Quality Gate Sensor Failed/i);
+
+    // 2b. When continuationActive is true, allow stop so the hook does not trigger an infinite loop
+    const loopGuardOut = runHook(stopHookCmd, { terminationReason: 'NO_TOOL_CALL', continuationActive: true, workspacePaths: [tmpDir] }, repoRoot);
+    assert.equal(loopGuardOut.decision, 'allow', 'Stop hook must allow stop when continuationActive is true to prevent infinite loops');
 
     // 3. When tests pass, allow stop
     fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({
       scripts: { test: 'node -e "process.exit(0)"' }
     }));
-    const dirtyPassingOut = runHook(stopHookCmd, { terminationReason: 'model_stop', workspacePaths: [tmpDir] }, repoRoot);
+    const dirtyPassingOut = runHook(stopHookCmd, { terminationReason: 'NO_TOOL_CALL', continuationActive: false, workspacePaths: [tmpDir] }, repoRoot);
     assert.equal(dirtyPassingOut.decision, 'allow', 'Stop hook must allow stop when tests pass');
 
     // 4. When tests pass exit code 0, BUT git diff introduces test skipping (.skip / xit / etc.), reject stop
     fs.writeFileSync(path.join(tmpDir, 'service.test.js'), 'it.skip("bypassed test", () => {});\n');
-    const tamperedOut = runHook(stopHookCmd, { terminationReason: 'model_stop', workspacePaths: [tmpDir] }, repoRoot);
+    const tamperedOut = runHook(stopHookCmd, { terminationReason: 'NO_TOOL_CALL', continuationActive: false, workspacePaths: [tmpDir] }, repoRoot);
     assert.equal(tamperedOut.decision, 'continue', 'Stop hook must return continue when test tampering is detected in git diff');
     assert.match(tamperedOut.reason, /Test tampering \/ skipping detected/i);
   } finally {
@@ -435,13 +439,18 @@ test('P1-1: SessionStart hook resolves workspacePaths from stdin instead of proc
 
     const contextOnlyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-session-context-'));
     try {
-      fs.writeFileSync(path.join(contextOnlyDir, 'CONTEXT.md'), '# Context\n');
+      fs.writeFileSync(path.join(contextOnlyDir, 'CONTEXT.md'), '# Context\n- **Primary Purpose**: _[To be indexed]_\n');
+      const ctxTemplateOut = runHook(sessionHookCmd, { workspacePaths: [contextOnlyDir] }, repoRoot);
+      const ctxTemplateMsg = JSON.stringify(ctxTemplateOut);
+      assert.match(ctxTemplateMsg, /\/index-project/, 'Unindexed template CONTEXT.md must advise running /index-project');
+
+      fs.writeFileSync(path.join(contextOnlyDir, 'CONTEXT.md'), '# Context\n- **Primary Purpose**: Billing API\n');
       const ctxOut = runHook(sessionHookCmd, { workspacePaths: [contextOnlyDir] }, repoRoot);
       const ctxMsg = JSON.stringify(ctxOut);
       assert.match(ctxMsg, /CONTEXT\.md/);
       assert.doesNotMatch(ctxMsg, /handoff\.md/);
       assert.doesNotMatch(ctxMsg, /SPRINT\.md/);
-      assert.match(ctxMsg, /domain terminology/);
+      assert.match(ctxMsg, /codebase index/i);
     } finally {
       fs.rmSync(contextOnlyDir, { recursive: true, force: true });
     }
@@ -474,7 +483,7 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
   const ruleFiles = fs.readdirSync(rulesDir).filter((f) => f.endsWith('.md'));
   assert.deepEqual(
     ruleFiles.map((f) => f.replace(/\.md$/, '')).sort(),
-    ['architecture-and-flow', 'caveman', 'coding-standards', 'database-migrations', 'git-and-context', 'ponytail', 'release-audit', 'security-and-auth', 'testing'],
+    ['architecture-and-flow', 'coding-standards', 'database-migrations', 'git-and-context', 'release-audit', 'security-and-auth', 'testing', 'ui-and-dry'],
     'Rule set drifted from the documented progressive-disclosure catalog',
   );
   for (const file of ruleFiles) {
@@ -482,14 +491,21 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
     const trigger = frontmatterValue(frontmatter, 'trigger');
     assert.match(trigger, /^(always_on|model_decision|glob|manual)$/, `Invalid trigger in ${file}`);
     if (trigger === 'glob') {
-      assert.ok(frontmatterValue(frontmatter, 'globs'), `glob rule ${file} must declare globs`);
+      const globs = frontmatterValue(frontmatter, 'globs');
+      assert.ok(globs, `glob rule ${file} must declare globs`);
+      assert.doesNotMatch(globs, /[{}]/, `glob rule ${file} must not use brace syntax`);
     }
     assert.ok(frontmatterValue(frontmatter, 'description'), `Rule ${file} should declare a description (used as fallback context)`);
     assert.ok(fs.statSync(path.join(rulesDir, file)).size < 24000, `Rule ${file} exceeds the Antigravity 24 KB per-file limit`);
   }
 
-  // AGENTS.md must index every rule it ships and reference no phantom rule file.
-  const agentsContent = fs.readFileSync(path.join(repoRoot, 'AGENTS.md'), 'utf8');
+  // AGENTS.md must stay well below Antigravity's 24 KB cap so it is never truncated,
+  // and must index every shipped rule without phantom references.
+  const agentsPath = path.join(repoRoot, 'AGENTS.md');
+  const agentsSize = fs.statSync(agentsPath).size;
+  assert.ok(agentsSize < 24000, `AGENTS.md (${agentsSize} bytes) exceeds Antigravity 24,000-byte cap and would be truncated`);
+  assert.ok(agentsSize < 14000, `AGENTS.md (${agentsSize} bytes) should stay concise (<14 KB) to prevent LLM instruction dilution`);
+  const agentsContent = fs.readFileSync(agentsPath, 'utf8');
   for (const file of ruleFiles) {
     assert.ok(agentsContent.includes(file), `AGENTS.md rule index is missing ${file} (silent progressive-disclosure drift)`);
   }
@@ -497,45 +513,47 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
     assert.equal(fs.existsSync(path.join(rulesDir, match[1])), true, `AGENTS.md references missing rule ${match[1]}`);
   }
 
-  // Temporal fidelity: ensure AGENTS.md strictly forbids regressing years to training cutoff defaults.
-  assert.match(agentsContent, /Zero Temporal Regressive Bias/i, 'AGENTS.md must mandate zero temporal regressive bias');
+  // Core LLM invariants in AGENTS.md
+  assert.match(agentsContent, /Anti-Yes-Man & Mandatory Ambiguity Gate/i);
+  assert.match(agentsContent, /ask_question/i);
+  assert.match(agentsContent, /Read-Before-Cite & Verify-Before-Import/i);
+  assert.match(agentsContent, /Pre-Creation DRY Gate/i);
+  assert.match(agentsContent, /Live Search & Temporal Fidelity/i);
+  assert.match(agentsContent, /Zero Production Fakes/i);
+  assert.match(agentsContent, /Zero Test Tampering & Closed-Loop Verification/i);
+  assert.match(agentsContent, /Anti-Looping Circuit Breaker/i);
 
-  // Exhaustive reading & anti-skimming: ensure AGENTS.md strictly mandates exhaustive reading and forbids title-only skimming / unverified assumptions.
-  assert.match(agentsContent, /Zero Skimming & Mandatory Exhaustive Reading/i, 'AGENTS.md must mandate exhaustive reading and forbid shallow skimming');
-  assert.match(agentsContent, /Engineering Pushback ≠ Operational Insubordination/i, 'AGENTS.md must enforce operational obedience to explicit user directives');
+  // Glob-triggered everyday rules must auto-activate on matching files
+  for (const globRule of ['ui-and-dry.md', 'coding-standards.md', 'database-migrations.md', 'testing.md']) {
+    const fm = readFrontmatter(path.join(rulesDir, globRule));
+    assert.equal(frontmatterValue(fm, 'trigger'), 'glob', `${globRule} must use trigger: glob so it auto-loads on matching files`);
+  }
 
-  // Live research & 2024 cutoff alarm: ensure AGENTS.md mandates live search and strictly forbids 2024 parametric assumptions.
-  assert.match(agentsContent, /2024 Training Cutoff Alarm/i, 'AGENTS.md must alert on 2024 training cutoff');
-  assert.match(agentsContent, /Mandatory Live Search/i, 'AGENTS.md must mandate live web search on search directives');
-  assert.match(agentsContent, /Strict Negative Constraints/i, 'AGENTS.md must declare explicit strict negative constraints');
-
-  // Anti-looping & anti-premature completion: ensure AGENTS.md enforces circuit-breakers and zero-mudah-puas.
-  assert.match(agentsContent, /Zero Polite Loops|Anti-Looping Circuit Breaker/i, 'AGENTS.md must mandate anti-looping circuit breaker');
-  assert.match(agentsContent, /Zero Mudah Puas/i, 'AGENTS.md must mandate zero mudah puas validation proof');
-  assert.match(agentsContent, /Anti-Test-Tampering/i, 'AGENTS.md must mandate anti-test-tampering');
+  const uiRule = fs.readFileSync(path.join(rulesDir, 'ui-and-dry.md'), 'utf8');
+  assert.match(uiRule, /Reuse First/i);
+  assert.match(uiRule, /Mandatory UI State/i);
 
   const testingRule = fs.readFileSync(path.join(rulesDir, 'testing.md'), 'utf8');
-  assert.match(testingRule, /Zero Mudah Puas/i, 'testing.md must mandate anti-premature completion proof');
-  assert.match(testingRule, /Anti-Test-Tampering/i, 'testing.md must mandate anti-test-tampering');
+  assert.match(testingRule, /Anti-Test-Tampering/i);
 
   const codingRule = fs.readFileSync(path.join(rulesDir, 'coding-standards.md'), 'utf8');
-  assert.match(codingRule, /Exhaustive Reading/i, 'coding-standards.md must mandate exhaustive reading');
-  assert.match(codingRule, /Mandatory Live Research/i, 'coding-standards.md must mandate live research');
-  assert.match(codingRule, /Behavioral Contract Inviolability/i, 'coding-standards.md must mandate contract inviolability');
+  assert.match(codingRule, /DRY & Reuse Before Authoring/i);
+  assert.match(codingRule, /Parse, Don't Validate/i);
 
   // Security-rule regression: never document a non-existent constant-time API.
   const securityRule = fs.readFileSync(path.join(rulesDir, 'security-and-auth.md'), 'utf8');
   assert.doesNotMatch(securityRule, /subtle\.timingSafeEqual/, 'security-and-auth.md must not cite the non-existent crypto.subtle.timingSafeEqual');
   assert.match(securityRule, /crypto\.timingSafeEqual/, 'security-and-auth.md must document constant-time comparison');
 
-  // 3. Skills validation against the agentskills.io spec + Antigravity best practice
+  // 3. Skills validation against the agentskills.io spec + Antigravity best practice (no built-in collisions)
   const skillsDir = path.join(repoRoot, '.agents', 'skills');
   const skillDirs = fs.readdirSync(skillsDir);
   assert.deepEqual(
     skillDirs.sort(),
-    ['browsing', 'code-review', 'codebase-design', 'database-migration', 'diagnosing-bugs', 'domain-modeling', 'grill-me', 'handoff', 'implement', 'office', 'pr', 'research', 'safe-refactor', 'tdd', 'to-spec', 'to-tickets'],
+    ['browsing', 'code-review', 'codebase-design', 'database-migration', 'diagnosing-bugs', 'discover', 'domain-modeling', 'handoff', 'implement', 'index-project', 'office', 'pr', 'research', 'safe-refactor', 'tdd', 'to-spec', 'to-tickets'],
     'Skill set drifted from the documented catalog',
   );
+  assert.equal(skillDirs.includes('grill-me'), false, 'Custom skill must not collide with built-in /grill-me slash command');
   for (const dir of skillDirs) {
     assert.match(dir, /^[a-z0-9]+(-[a-z0-9]+)*$/, `Invalid skill directory name: ${dir}`);
     const skillMd = path.join(skillsDir, dir, 'SKILL.md');
@@ -548,7 +566,7 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
     assert.match(skillBody, /## Decision tree/, `Missing '## Decision tree' in ${dir}`);
     const descLine = (frontmatter.match(/^description:(.*)$/m) || [])[1] || '';
     assert.doesNotMatch(descLine, /:\s/, `Unquoted colon-space in ${dir} description breaks YAML parsing`);
-    const builtinSlash = new Set(['plan', 'compact', 'agents', 'teamwork', 'browser']);
+    const builtinSlash = new Set(['plan', 'compact', 'agents', 'teamwork', 'browser', 'grill-me']);
     for (const ref of skillBody.matchAll(/(?:^|[\s(`])\/([a-z][a-z-]+)\b/g)) {
       if (builtinSlash.has(ref[1])) continue;
       assert.equal(fs.existsSync(path.join(skillsDir, ref[1], 'SKILL.md')), true, `${dir} routes to unknown skill /${ref[1]}`);
@@ -557,11 +575,11 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
   assert.equal(fs.existsSync(path.join(skillsDir, 'to-tickets', 'resources', 'sprint-board-template.md')), true);
   assert.equal(fs.existsSync(path.join(skillsDir, 'to-tickets', 'resources', 'ticket-template.md')), true);
 
-  // 4. Subagents validation (official tool names, execution policy, model tier, skills/<name> paths)
+  // 4. Subagents validation (native Antigravity tool names, sandbox policy, model tier, skills/<name> paths)
   const officialTools = new Set([
-    'view_file', 'write_to_file', 'replace_file_content', 'multi_replace_file_content', 'list_dir', 'find_by_name',
-    'grep_search', 'search_web', 'read_url_content', 'run_command', 'manage_task', 'schedule', 'list_permissions',
-    'ask_permission', 'invoke_subagent', 'define_subagent', 'send_message', 'manage_subagents', 'ask_question', 'generate_image',
+    'read_file', 'edit_file', 'write_file', 'run_command', 'manage_task', 'search_web',
+    'ask_question', 'invoke_subagent', 'define_subagent', 'send_message', 'manage_subagents',
+    'schedule', 'run_workflow', 'swarm', 'generate_image',
   ]);
   const agentsDir = path.join(repoRoot, '.agents', 'agents');
   const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith('.md'));
@@ -614,100 +632,72 @@ test('P1-7: Managed markdown links resolve (no stale catalog references)', () =>
   assert.deepEqual(broken, [], `Broken relative markdown links:\n${broken.join('\n')}`);
 });
 
-test('P1-8: Production-grade anti-MVP contract is encoded across specs, tickets, domain model, and execution skills', () => {
+test('P1-8: LLM-native anti-yes-man, codebase indexing, DRY reuse, and provenance contracts', () => {
   const read = (relPath) => fs.readFileSync(path.join(repoRoot, relPath), 'utf8');
   const skillsRoot = '.agents/skills';
 
-  // Global constitution and coding standard must define the default quality tier.
-  assert.match(read('AGENTS.md'), /Production-Grade by Default \(Anti-MVP Quarantine\)/);
-  assert.match(read('AGENTS.md'), /DO NOT\*\* treat "MVP" or "prototype" as permission/);
-  assert.match(read('.agents/rules/coding-standards.md'), /Production-Grade by Default \(Anti-MVP\)/);
+  // CONTEXT.md must index shared UI, shared utils, and verification commands alongside domain invariants.
+  const contextMd = read('CONTEXT.md');
+  assert.match(contextMd, /Shared UI, Design System & Frontend Inventory/);
+  assert.match(contextMd, /Shared Utilities, Hooks, API Clients & Schemas/);
 
-  // grill-me must end in a durable Discovery Decision Record with stable IDs and anti-hallucination rules.
-  const grillMe = read(`${skillsRoot}/grill-me/SKILL.md`);
-  assert.match(grillMe, /Discovery Decision Record \(DDR\)/);
-  assert.match(grillMe, /docs\/discovery\/<feature-slug>\.md/);
-  assert.match(grillMe, /`DEC-###`/);
-  assert.match(grillMe, /`OQ-###`/);
-  assert.match(grillMe, /`ASM-###`/);
-  assert.match(grillMe, /## Anti-hallucination rules/);
-  const discoveryTemplate = read(`${skillsRoot}/grill-me/resources/discovery-record-template.md`);
-  assert.match(discoveryTemplate, /How to fill this record \(LLM rules\)/);
-  assert.match(discoveryTemplate, /Discovery Completeness Gate/);
-  assert.match(discoveryTemplate, /Blocking rule/);
+  // index-project must populate CONTEXT.md with verified repo paths and symbols.
+  const indexProject = read(`${skillsRoot}/index-project/SKILL.md`);
+  assert.match(indexProject, /CONTEXT\.md/);
+  assert.match(indexProject, /Shared UI/i);
 
-  // to-spec: a spec without a DDR is unsourced guessing; provenance and readiness gates are mandatory.
+  // discover must resolve ambiguities without inventing facts and write a DDR.
+  const discover = read(`${skillsRoot}/discover/SKILL.md`);
+  assert.match(discover, /docs\/discovery\/<feature-slug>\.md/);
+  assert.match(discover, /`DEC-###`/);
+  assert.match(discover, /`OQ-###`/);
+  assert.match(discover, /`ASM-###`/);
+  assert.match(discover, /ask_question/);
+  const discoveryTemplate = read(`${skillsRoot}/discover/resources/discovery-record-template.md`);
+  assert.match(discoveryTemplate, /Existing Codebase Reuse/);
+  assert.match(discoveryTemplate, /Completeness Gate/);
+
+  // to-spec: audits ambiguous PRDs/DDRs, grounds reuse in repo, and gates ticket readiness.
   const toSpec = read(`${skillsRoot}/to-spec/SKILL.md`);
-  assert.match(toSpec, /## Input \/ Output Contract/);
-  assert.match(toSpec, /## Source Priority \(highest wins\)/);
-  assert.match(toSpec, /Step 1 — Build the Fact Ledger before writing prose/);
-  assert.match(toSpec, /## Step 4 — Anti-hallucination rules \(non-negotiable\)/);
+  assert.match(toSpec, /Anti-Yes-Man Gate/);
+  assert.match(toSpec, /Reusable Codebase/i);
   assert.match(toSpec, /READY FOR TICKETS/);
-  assert.match(toSpec, /Anti-MVP rule/);
-  assert.match(toSpec, /NFR-###/);
   assert.match(toSpec, /resources\/spec-example\.md/);
   const specTemplate = read(`${skillsRoot}/to-spec/resources/spec-template.md`);
-  assert.match(specTemplate, /How to fill this template \(LLM rules\)/);
   assert.match(specTemplate, /Quality Bar\*\*: `production`/);
+  assert.match(specTemplate, /Reusable Codebase Assets/);
   assert.match(specTemplate, /\| ID \| Requirement \| Given \/ When \/ Then \| Priority \| Source \|/);
-  assert.match(specTemplate, /Non-Functional Requirements \(Measurable\)/);
   assert.match(specTemplate, /Traceability Matrix/);
-  assert.match(specTemplate, /Production Readiness Definition/);
-  const specExample = read(`${skillsRoot}/to-spec/resources/spec-example.md`);
-  assert.match(specExample, /Illustrative Only/);
-  assert.match(specExample, /Do not copy these domain facts/);
-  assert.match(specExample, /`DEC-003`/);
-  assert.match(specExample, /Readiness verdict: NOT READY/);
 
-  // to-tickets: every ticket carries source provenance, production quality gates, and cannot defer hardening.
+  // to-tickets: grounds every vertical slice in reusable codebase assets and provenance.
   const toTickets = read(`${skillsRoot}/to-tickets/SKILL.md`);
-  assert.match(toTickets, /## Input \/ Output Contract/);
-  assert.match(toTickets, /## Source Priority \(highest wins\)/);
-  assert.match(toTickets, /coverage ledger/);
-  assert.match(toTickets, /## Anti-hallucination rules \(non-negotiable\)/);
-  assert.match(toTickets, /## Output validation gates/);
-  assert.match(toTickets, /Production Quality Contract/);
-  assert.match(toTickets, /No deferred hardening/);
-  assert.match(toTickets, /Ticket Hygiene/);
+  assert.match(toTickets, /Reusable Assets/);
+  assert.match(toTickets, /Coverage Ledger/i);
+  assert.match(toTickets, /Anti-hallucination/i);
   const ticketTemplate = read(`${skillsRoot}/to-tickets/resources/ticket-template.md`);
-  assert.match(ticketTemplate, /How to fill this ticket \(LLM rules\)/);
   assert.match(ticketTemplate, /Quality Tier\*\*: `production`/);
+  assert.match(ticketTemplate, /Reusable Codebase Assets & Touchpoints/);
   assert.match(ticketTemplate, /Source Requirements\*\*/);
   assert.match(ticketTemplate, /Source Decisions\*\*/);
-  assert.match(ticketTemplate, /Production Quality Checklist/);
-  assert.match(ticketTemplate, /Mutation Falsifiability/);
-  assert.match(ticketTemplate, /Definition of Done \(Enterprise\)/);
   const sprintTemplate = read(`${skillsRoot}/to-tickets/resources/sprint-board-template.md`);
-  assert.match(sprintTemplate, /How to fill this board \(LLM rules\)/);
-  assert.match(sprintTemplate, /Source Lineage/);
   assert.match(sprintTemplate, /Traceability Matrix/);
   assert.match(sprintTemplate, /Wave Exit Gate/);
-  assert.match(sprintTemplate, /Board Hygiene & Change Control/);
 
-  // domain-modeling: reconciles DDR/CONTEXT/spec conflicts, propagates changes, and refuses invented domain facts.
+  // domain-modeling: reconciles conflicts via ask_question and preserves 3-Gate ADRs.
   const domainModeling = read(`${skillsRoot}/domain-modeling/SKILL.md`);
-  assert.match(domainModeling, /## Input \/ Output Contract/);
-  assert.match(domainModeling, /docs\/discovery\/<feature-slug>\.md/);
-  assert.match(domainModeling, /## Source Priority \(highest wins\)/);
   assert.match(domainModeling, /3 ADR Gates/);
-  assert.match(domainModeling, /Make invariants testable/);
-  assert.match(domainModeling, /Record measurable quality attributes/);
-  assert.match(domainModeling, /propagation report/);
-  assert.match(domainModeling, /## Anti-hallucination rules \(non-negotiable\)/);
-  assert.match(domainModeling, /## Validation gates/);
+  assert.match(domainModeling, /ask_question/);
   const adrTemplate = read(`${skillsRoot}/domain-modeling/resources/adr-template.md`);
-  assert.match(adrTemplate, /How to fill this ADR \(LLM rules\)/);
   assert.match(adrTemplate, /DDR Source\*\*/);
   assert.match(adrTemplate, /Reversibility\*\*/);
-  assert.match(adrTemplate, /Decision Drivers \(6 Pillars\)/);
-  assert.match(adrTemplate, /Data Migration & Rollback/);
-  assert.match(adrTemplate, /Invariant Impact/);
 
-  // Execution and review skills cannot silently downgrade "minimal" to a happy-path prototype, nor accept unsourced inventions.
-  assert.match(read(`${skillsRoot}/implement/SKILL.md`), /smallest complete production behavior/);
-  assert.match(read(`${skillsRoot}/implement/SKILL.md`), /Zero-Debt Audit/);
-  assert.match(read(`${skillsRoot}/implement/SKILL.md`), /Source Requirements/);
-  assert.match(read(`${skillsRoot}/tdd/SKILL.md`), /Smallest complete production behavior/);
-  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /MVP \/ Prototype Debt Audit/);
-  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /without a cited `DEC-###`/);
+  // implement, tdd, and code-review enforce ambiguity stop, reuse, complete production code, and zero test tampering.
+  const implement = read(`${skillsRoot}/implement/SKILL.md`);
+  assert.match(implement, /Phase 0: Mandatory Ticket \/ PRD Ambiguity Audit/);
+  assert.match(implement, /Phase 1: Codebase Reuse & Touchpoint Plan/);
+  assert.match(implement, /ask_question/);
+  assert.match(implement, /smallest complete production slice/);
+  assert.match(read(`${skillsRoot}/tdd/SKILL.md`), /complete production behavior/);
+  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /Shared UI & DRY Audit/);
+  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /Test Tampering Audit/);
 });

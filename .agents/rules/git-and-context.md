@@ -1,16 +1,13 @@
 ---
 trigger: model_decision
-description: "Apply these guidelines whenever creating git commits, managing branches or worktrees, updating CONTEXT.md or ADRs, or handing off session state."
+description: "Apply whenever creating git commits, managing branches or worktrees, updating CONTEXT.md or ADRs, or writing session handoffs."
 ---
 
-# Git & Context Rules
+# Git, CONTEXT.md & Artifact Rules
 
-1. Use Conventional Commit prefixes (`feat:`, `fix:`, `refactor:`, `perf:`, `test:`, `docs:`, `chore:`) with an imperative English summary. All commit messages, branch names, PR descriptions, and repository documentation must strictly be in English.
-2. Keep every commit atomic and bisectable: one logical change per commit, never mixing structural refactoring or formatting noise with behavioral changes.
-3. Create commits only when the user asked for a commit in this session. Otherwise finish with a green tree and propose the exact commit message and file list instead of committing on their behalf.
-4. Never push directly to protected `main` or `master` branches (`git push origin main`, `git push -f origin main`) without explicit user confirmation. `.agents/hooks.json` enforces this guard with an interactive `ask` decision, while allowing local development operations (`checkout`, `commit`, `stash`, feature pushes) without friction.
-5. Never commit `.env` files, secrets, temporary debug scripts, or `.scratch/` ephemeral files.
-6. Keep `@CONTEXT.md` strictly as a living domain glossary and user-defined module boundary map—track active Sprint execution in `docs/sprint/SPRINT.md` and never dump raw task checklists into `@CONTEXT.md`.
-7. Record Architectural Decision Records in `docs/adr/NNNN-<slug>.md` only when a decision is hard to reverse, surprising without context, and the result of a genuine trade-off.
-8. Store cross-session handoff state in `.scratch/handoff.md` with a single runnable immediate next action.
-9. Keep Discovery Decision Records in `docs/discovery/<feature-slug>.md`. Every `DEC-###` is a confirmed, sourced decision; specs, tickets, and ADRs cite it instead of restating it from memory or inventing a replacement.
+1. **Conventional Commits (English Only)**: Use `feat:`, `fix:`, `refactor:`, `perf:`, `test:`, `docs:`, `chore:` with imperative English summaries. Keep commits atomic and bisectable (do not mix behavior changes with unrelated refactors).
+2. **Explicit Consent**: Create commits only when requested in this session; otherwise leave a green working tree and propose the exact commit message and file list. Never push directly to `main`/`master` without explicit confirmation (enforced by `.agents/git-guard.cjs`).
+3. **Secrets & Ephemeral Exclusions**: Never commit `.env`, `.agents/mcp.env`, credentials, or `.scratch/` files.
+4. **Keep `CONTEXT.md` Operational**: Maintain `CONTEXT.md` as the concrete Codebase Index (stack, commands, shared UI, shared utils, seams) + Domain Invariant Registry. Track Sprint execution in `docs/sprint/SPRINT.md`, never in `CONTEXT.md`.
+5. **ADRs & DDRs**: Record ADRs in `docs/adr/NNNN-<slug>.md` only when a decision is costly to reverse, non-obvious without context, and resolves a real trade-off. Keep Discovery Decision Records in `docs/discovery/<feature-slug>.md` (`DEC-###`).
+6. **Session Handoff**: Store cross-session handover state in `.scratch/handoff.md` with one concrete next action.

@@ -1,42 +1,26 @@
 ---
 trigger: glob
 globs: "*.test.*, *.spec.*, **/*.test.*, **/*.spec.*, **/*_test.go, **/*_test.py, **/test_*.py, **/tests/**, **/__tests__/**, **/fixtures/**, **/mocks/**"
-description: "Public-seam testing, hermetic execution, and boundary coverage rules."
+description: "Public-seam testing, hermetic execution, boundary coverage, and anti-test-tampering rules."
 ---
 
-# Testing Conventions (World-Class Reliability & Hermetic Verification)
+# Testing Rules
 
-1. **Test Observable Behavior at Public Seams**:
-   - Test behavior exclusively through a module's public interface (**seam**). Never assert on private methods, internal state variables, or internal helper invocation counts. Tests that mirror internal implementation details create brittle test suites that break during refactoring.
-2. **Deterministic & Hermetic Isolation**:
-   - Tests must run independently and in parallel without cross-test state leakage or execution-order dependencies.
-   - Use dynamic tenant IDs and ephemeral database fixtures per test case (`tenantId = randomUUID()`) to prevent shared-state collisions.
-   - Ban wall-clock sleep delays (`sleep(1000)`); use deterministic virtual clock advancement (`fakeTimers`) or polling with exponential backoff on asynchronous conditions.
-3. **Seam-Level Fakes Over Fine-Grained Mocks**:
-   - Never mock internal domain calculations or value objects. Restrict test doubles exclusively to outer I/O boundaries (third-party payment gateways, external webhooks, physical network calls).
-   - Prefer in-memory fakes implementing the full public seam interface over brittle call-by-call function mocks.
-4. **Boundary Invariants & Mutation Coverage**:
-   - Every public seam test suite must rigorously exercise edge cases:
-     - Boundary thresholds (`N - 1`, `N`, `N + 1`).
-     - Empty, nil, and maximum-length boundary payloads.
-     - Unauthorized cross-tenant access attempts (asserting `403`/`404`).
-     - Duplicate requests presenting identical idempotency keys (asserting identical cached response and zero duplicated side-effects).
-5. **Mutation Test Validity**:
-   - Ensure tests are falsifiable: if any line of core domain logic or authorization check is commented out, at least one test must turn **red**.
-6. **Anti-Premature Completion & Closed-Loop Exit Proof ("Zero Mudah Puas")**:
-   - Never declare testing complete or stop execution until the entire test suite and compiler pass with exit code 0.
-   - The harness quality gate (`quality-gate-stop-sensor`) rejects termination if uncommitted modifications fail the test runner.
-   - Inspect `git status --porcelain` to verify working tree cleanliness and ensure no dangling temporary fixtures or broken sibling tests remain.
-7. **Anti-Test-Tampering & Contract Inviolability ("Fix Logic, Never Cheat Tests")**:
-   - **Behavioral Contract Sanctity**: Existing unit tests are behavioral specifications and regression locks. When a test fails during development or debugging, it proves a defect in production logic—never an excuse to modify, weaken, or bypass the test.
-   - **Strict Prohibition of Test Bypassing**:
-     - Never add test-disabling flags or modifiers: `.skip`, `.only`, `xit`, `xdescribe`, `it.skip`, `test.skip`, `describe.skip`, `@pytest.mark.skip`, `@pytest.mark.xfail`, `@unittest.skip`, or `t.Skip()`.
-     - Never comment out failing assertions or test suites (`// expect(...)`, `/* it(...) */`, `# assert`).
-     - Never catch assertion exceptions inside test blocks to suppress failures (`try { ... } catch (e) {}`).
-   - **Zero Assertion Dilution & Tautological Checks**:
-     - Never replace specific value assertions with trivial existential checks (`expect(res.amount).toBe(100)` -> `expect(res).toBeDefined()`).
-     - Never write tautological assertions (`expect(true).toBe(true)`, `assert.ok(true)`).
-   - **Zero System-Under-Test (SUT) Mocking**:
-     - Never mock, stub, or spy-override the actual function, class, or module being tested. Test doubles belong strictly at outer boundary seams (network, database, clock).
-   - **Specification Conflict Protocol**:
-     - If an existing test has a provable bug that directly contradicts an explicit user requirement or updated PRD, do NOT silently edit the test. Document the exact contradiction with line numbers, propose the correction, and obtain explicit user authorization via `ask_question` before modifying test expectations.
+1. **Test Observable Behavior at Public Seams**: Exercise modules through their exported/public interface (API route, CLI command, exported function, rendered UI role/text). Never assert on private methods, internal state fields, or internal helper call counts.
+2. **Hermetic & Deterministic Isolation**:
+   - Tests must pass in any execution order and in parallel with zero shared mutable state (`tenantId = randomUUID()` / isolated fixtures per test).
+   - Never use wall-clock `sleep(1000)` delays; use virtual timers (`fakeTimers`) or bounded condition polling.
+3. **Seam-Level Fakes Over SUT Mocking**:
+   - Never mock or spy-stub the System-Under-Test (SUT) or pure domain logic. Restrict test doubles strictly to outer I/O boundaries (third-party HTTP APIs, mailers, clock, physical network).
+4. **Required Edge & Security Matrix**:
+   - Happy path + `N-1`, `N`, `N+1` boundary thresholds.
+   - Empty, `null`/`nil`, malformed, and max-length inputs.
+   - Unauthorized / cross-tenant access (`401`/`403`/`404` with zero data leakage).
+   - Duplicate idempotency keys (same response, zero duplicate side effects).
+   - At least one injected dependency failure mode.
+5. **Mutation Falsifiability**: Removing or breaking a core domain invariant or auth check must turn at least one test red.
+6. **Anti-Test-Tampering & Closed-Loop Exit Proof**:
+   - Existing tests are sacred contracts. When a test fails, fix production code—never edit assertions to make a broken implementation pass.
+   - Strictly banned: `.skip`, `.only`, `xit`, `xdescribe`, `@pytest.mark.skip`, `@pytest.mark.xfail`, `@unittest.skip`, `t.Skip()`, commenting out assertions, empty `try/catch` swallowing assertions, or tautological assertions (`expect(true).toBe(true)`, `assert.ok(true)`, `toBeDefined()`).
+   - **Specification Conflict Protocol**: If an existing test genuinely contradicts an updated spec or user requirement, STOP, cite `file:line`, explain the conflict, and obtain explicit user approval via `ask_question` before changing the test.
+   - Run the full test suite via `run_command` after the final edit and verify exit code `0`.

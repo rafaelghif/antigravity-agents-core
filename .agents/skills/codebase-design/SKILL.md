@@ -1,32 +1,28 @@
 ---
 name: codebase-design
-description: Designs deep modules with narrow public interfaces and explicit test seams tailored to the user's chosen architecture using the Design-It-Twice method. Use when designing module interfaces, choosing where to place test seams, or refactoring shallow modules.
+description: Designs deep modules with narrow public interfaces and explicit test seams tailored to the repository's chosen architecture using Design It Twice. Use when designing new module interfaces, choosing test seam boundaries, or collapsing shallow wrappers.
 ---
 
 # Codebase Design (Deep Modules, Seams & 6 Pillars)
 
-Design module interfaces within the **user's chosen architecture** that maximize **depth** (high internal capability behind a small, stable interface), place **seams** only at genuine boundaries, and uphold the **6 Engineering Pillars** (*Future-Proof, Scalable, Maintainable, Secure, High-Performance, Upgradeable*).
+Design module interfaces within the repository's existing (or user-approved) topology that maximize implementation depth behind narrow, stable public interfaces.
 
 ## Decision tree
 
-1. **Has the user defined their preferred project architecture and module layout yet?**
-   - **No** → Do not impose a static folder hierarchy! Interview the user first via `ask_question` or `/grill-me` to agree on the project's module topology.
+1. **Is the project topology/module layout already established or explicitly defined by the user?**
+   - **No** → Inspect `CONTEXT.md` and manifests first; if greenfield/undecided, call `ask_question` (putting the simplest flat layout with plain relative imports as `(Recommended)`). Never impose an unrequested monorepo or alias structure.
    - **Yes** → Proceed to step 2.
-2. **Can the new capability live inside an existing module without widening its public interface?**
-   - **Yes** → Extend the existing module internally. Do not create a new file, wrapper class, or pass-through layer.
+2. **Can this capability live inside an existing module/component without bloating its public interface?**
+   - **Yes** → Extend the existing module internally. Do not create a new file, pass-through wrapper, or parallel component.
    - **No** → Proceed to step 3.
-3. **Does the module cross an external I/O or third-party boundary (database, external API, queue, filesystem, clock)?**
-   - **Yes** → Define a narrow **seam** at the boundary so callers stay **Upgradeable** (easy to swap providers) and deterministically testable without live infrastructure.
-   - **No (internal logic)** → Expose concrete functions or types directly; do not create 1:1 `IFoo` interfaces for single-implementation internal code.
-4. **Is the interface non-trivial?**
-   - **Yes** → Run **Design It Twice** below before writing implementation code.
+3. **Does the module cross an external I/O boundary (DB, HTTP, filesystem, queue, clock)?**
+   - **Yes** → Define a narrow boundary seam for swappability and hermetic testing.
+   - **No (pure internal domain logic)** → Export concrete functions/types directly; do not create 1:1 `IFoo` interfaces.
+4. **Is the interface non-trivial or shared across multiple callers?**
+   - **Yes** → Run **Design It Twice** below before editing.
 
 ## Design workflow
 
-1. **Design It Twice**:
-   - Sketch **Design A** (minimal evolutionary extension) and **Design B** (a deeper module hiding more policy, concurrency safety, and edge cases behind fewer exported functions).
-   - Compare both across the **6 Engineering Pillars**: *Future-Proof, Scalable, Maintainable, Secure, High-Performance, Upgradeable*.
-2. **Minimize the interface**:
-   - Ask for every exported function/method: *Can I reduce the number of methods? Can I simplify the parameters? Can I pull configuration defaults or edge-case handling inside the module?*
-3. **Verify locality & upgradeability**:
-   - Ensure a single business rule change or dependency upgrade requires editing only this module rather than scattering edits across callers.
+1. **Design It Twice**: Sketch **Design A** (minimal extension) vs **Design B** (deeper interface hiding policy, validation, concurrency safety, and edge cases). Compare across *Future-Proof, Scalable, Maintainable, Secure, High-Performance, Upgradeable*.
+2. **Minimize Surface Area**: Pull defaults, invariant checks, and edge-case normalization inside the module so callers stay thin.
+3. **Verify Blast Radius**: Check existing callers via `rg -n` (or search tool) so rule/dependency changes stay localized to one module.

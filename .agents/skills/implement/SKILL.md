@@ -1,53 +1,69 @@
 ---
 name: implement
-description: Builds a single Scrum Sprint ticket or specification slice end-to-end with production-grade quality gates, from Definition of Ready through the TDD seam loop to an enterprise Definition of Done, atomic commit when authorized, and Sprint Board handover. Use when implementing a ticket, building a feature slice, or when the user invokes /implement, even if the request sounds small enough for an MVP.
+description: Audits a ticket, PRD, or feature slice for ambiguity and codebase feasibility, maps reusable shared UI and helpers, and executes test-first production implementation through full verification. Use when implementing any ticket, GitHub issue, Jira task, or feature slice, even if small.
 ---
 
-# Implement (Scrum Ticket Execution & DoR/DoD Loop)
+# Implement (Anti-Yes-Man Ticket Audit → Reuse Map → TDD → Verify)
 
-Build **one unblocked Scrum ticket or vertical specification slice** into production code, test-first, from Definition of Ready (DoR) to Definition of Done (DoD) and Sprint Board synchronization. A green test is necessary but not sufficient: the slice must be deployable to production without a later hardening phase.
-
-## Production Quality Contract (Fast-Path and Ticketed Runs)
-
-1. **Complete behavior, not a happy-path stub**: boundary parsing, authorization, transactions, idempotency, error mapping, and failure behavior are part of the slice.
-2. **Traceability**: satisfy the ticket's `REQ-###`, `INV-###`, `NFR-###`, `SEC-###`, and `ERR-###`; if the request has no ticket, state the requirement and seam before coding.
-3. **Zero production fakes**: no mock stores, dummy tokens, fake data, artificial delays, or deferred `TODO` in `src/`.
-4. **Observability**: structured logs with trace context, required metrics, and alert-worthy failure signals.
-5. **Performance**: meet the measurable budget for latency-, throughput-, or memory-sensitive seams.
-6. **Migration safety**: schema/contract changes use expand-migrate-contract with a rehearsed rollback.
-7. **Test proof**: happy path, `N-1`/`N`/`N+1` boundaries, unauthorized access, duplicate idempotency, and at least one failure mode.
-8. **Prototype quarantine**: throwaway spikes live outside production paths, are explicitly labeled, and never merge.
+Execute **one ticket or vertical slice** from strict ambiguity & feasibility auditing through codebase reuse mapping, test-first production implementation, and closed-loop verification.
 
 ## Decision tree
 
-1. **Is this a single focused feature slice or bugfix without multi-session sprint tickets?**
-   - **Yes** → Execute the **Fast-Path Implementation**: Lock focus on the public seam, read relevant context end-to-end, execute the TDD inner loop (sub-tasks at the seam), apply the **Production Quality Contract**, run full verification, and present the atomic diff. Skip sprint board paperwork, never production safeguards.
-   - **No** → Proceed to step 2 for Scrum Sprint ticket workflows.
-2. **Were multiple tickets passed or is the spec still unsplit for a multi-session build?**
-   - **Yes** → Implement **only one unblocked ticket** per run (check `docs/sprint/SPRINT.md` for the next `ready` ticket in the active Wave). If the spec is too large for one session and has no Sprint Board yet, recommend `/to-tickets` first.
+1. **Does the ticket/PRD/request pass the Ambiguity & Feasibility Audit (Phase 0)?**
+   - **No (missing rules, unclear UI states, missing auth/validation/error behavior, or conflict with existing code)** → **STOP. Do NOT write code and do NOT invent defaults.** Call `ask_question` with the exact gaps and proposed `(Recommended)` options.
+   - **Yes** → Proceed to step 2.
+2. **Is the ticket blocked by an unfinished dependency (`Blocked by` in `docs/sprint/SPRINT.md`)?**
+   - **Yes** → Stop and report the blocking ticket to the user.
    - **No** → Proceed to step 3.
-3. **Does the ticket pass Definition of Ready (all `Blocked by` tickets are `done` and public seams are confirmed)?**
-   - **No** → If blocked by an unfinished ticket, alert the user and point to the blocking ticket first. If the public seam is unconfirmed, propose the seam signature and confirm with the user before coding.
-   - **Yes** → Execute the 4 implementation steps below.
+3. **Is `CONTEXT.md` populated for the target area of the repo?**
+   - **No** → Run `/index-project` reconnaissance on the relevant directories first so you know exact existing components, helpers, and commands.
+   - **Yes** → Proceed to Phase 1.
 
-## Implementation workflow
+---
 
-1. **Start Ticket & Lock Focus**:
-   - Read `@CONTEXT.md`, `docs/sprint/SPRINT.md` (if present), and the target ticket (`docs/sprint/tickets/<NN>-<slug>.md`), including any `Downstream Handover Notes` from parent tickets.
-   - Read the ticket's `Source Requirements`, `Source Decisions`, `Public Seam`, `Error Mapping`, and exact verification command end-to-end. If the ticket cites a source ID that does not exist in the spec or DDR, stop and fix the ticket before writing code.
-   - Mark the ticket status as `in-progress` and restate the exact `In-Scope` behavior, public seam, and source IDs you are building.
-2. **Execute Sub-Tasks at the Seam (Fast TDD Inner Loop)**:
-   - Search existing directories (`components/`, `utils/`, `lib/`, `hooks/`) via `grep_search` before creating code; reuse or extend existing components and templates instead of authoring duplicate boilerplate.
-   - Follow the ticket's `## 5. Execution Plan (Red → Green → Harden → Refactor)` and the `tdd` skill.
-   - Implement the **smallest complete production behavior** that satisfies the acceptance criteria—never a happy-path stub. Include boundary parsing, authorization, transactional integrity, idempotency, error mapping, and observability for the behavior exactly as specified.
-   - Run the **single test file** and **typechecker** repeatedly during implementation to keep feedback under a few seconds.
-3. **Definition of Done (DoD) Verification Gate**:
-   - When all acceptance criteria for the slice pass in the single test file, run the **full test suite**, typechecker, and linter via `run_command`.
-   - **Production Gate Audit**: Verify authorization/tenancy, idempotency, failure behavior, observability, migration/rollback, and performance budget from the ticket's `## 6. Production Quality Checklist` (or the **Production Quality Contract** on a fast-path run).
-   - **Test Integrity Audit**: Inspect `git diff` to ensure zero skipped tests (`.skip`, `xit`), zero weakened assertions, and verify that all behavioral changes reside in genuine production code.
-   - **Zero-Debt Audit**: Inspect the diff for production mocks, stubs, fake data, artificial delays, `TODO` placeholders, and swallowed errors.
-4. **Atomic Commit & Cross-Session Sprint Sync**:
-   - Check off completed sub-tasks, acceptance criteria (`[x]`), and production quality gates in the ticket file.
-   - If the user authorized commits in this session, create a single atomic Conventional Commit (`feat(scope): ... (#NN)`) containing only this vertical slice. Otherwise leave the tree green and record the proposed commit message and file list in the ticket log; do not commit on the user's behalf.
-   - Record the commit SHA (or `pending user authorization`), verification status, production gates verified, and `Downstream Handover Notes` in the ticket's `## 9. Session Handover & Completion Log`.
-   - Update `docs/sprint/SPRINT.md`: set this ticket to `done` (with the commit SHA, or `pending user authorization`), promote newly unblocked downstream tickets from `blocked` to `ready`, and state the next recommended ticket for the next session.
+## Phase 0: Mandatory Ticket / PRD Ambiguity Audit (Anti-Yes-Man Gate)
+
+Never blindly implement an incomplete ticket (whether from Jira, Linear, GitHub Issue, chat prompt, or `docs/sprint/tickets/`). Audit these 7 checks against the actual repository:
+
+1. **Scope & Acceptance Criteria**: Is the observable outcome unambiguous and testable?
+2. **Actors & Authorization**: Who can access/mutate this? What happens on unauthenticated (`401`) or unauthorized/cross-tenant (`403`/`404`) requests?
+3. **Inputs, Validation & Boundaries**: Required vs optional fields, min/max lengths, numeric precision, empty/duplicate handling?
+4. **Data & API Contract**: Exact request/response fields, status codes, schema changes—and do the referenced endpoints/tables/types actually exist in the repo?
+5. **UI / UX States (if UI)**: Loading, empty, validation error, server error, success feedback, disabled/in-flight state, responsive layout?
+6. **Failure & Concurrency**: External API timeouts/retries, race conditions, idempotency?
+7. **Codebase Contradictions**: Does the ticket contradict `CONTEXT.md`, existing types, or current behavior?
+
+**If any behavior-changing detail is unclear or contradicts the repo:** stop, cite `ticket/PRD` vs `file:line`, and ask the user via `ask_question`.
+
+---
+
+## Phase 1: Codebase Reuse & Touchpoint Plan (Zero Duplication)
+
+Before editing or creating any file:
+1. Search existing directories (`components/`, `ui/`, `shared/`, `lib/`, `utils/`, `hooks/`, `schemas/`, `api/`) for reusable UI primitives, hooks, validators, formatters, and API clients.
+2. Read every target file and shared primitive/helper you plan to call so imports, props, and types are 100% verified.
+3. Search all callers of any shared function/type/component you plan to modify (`rg -n` via `run_command` or search tool).
+4. Lock the **Touchpoint & Reuse Plan**:
+   - Exact existing primitives/helpers to **reuse or extend** (never duplicate).
+   - Exact files to modify (and justification if a new file is strictly required).
+   - Exact public seam & test file to run.
+
+---
+
+## Phase 2: Execute TDD & Complete Production Implementation
+
+1. Follow `/tdd`: write failing tests at the public seam covering happy path, boundary cases (`N-1`/`N`/`N+1`, empty/malformed), auth/permission failure, idempotency/concurrency (where applicable), and failure handling.
+2. Implement the **smallest complete production slice**—never a happy-path stub. Include real boundary parsing, auth checks, error wrapping, UI states, and observability.
+3. Keep production code free of mock stores, dummy tokens, simulated delays, and `TODO` stubs.
+4. Run the focused test file and typechecker after each increment.
+
+---
+
+## Phase 3: Definition of Done & Sync
+
+1. Run the **full verification command** (typecheck, linter, build, and test suite) via `run_command` after your final edit and verify exit code `0`.
+2. Inspect `git diff` to verify:
+   - Zero test tampering (`.skip`, weakened assertions, SUT mocking).
+   - Zero duplicate UI components, parallel utilities, hardcoded theme colors, or unrequested file churn.
+   - All sibling callers of modified exports still work.
+3. If `docs/sprint/SPRINT.md` and ticket files exist: check off `[x]` criteria, record verification output and `Downstream Handover Notes` in the ticket's completion log, and update `SPRINT.md` (proposing a commit only if authorized).
