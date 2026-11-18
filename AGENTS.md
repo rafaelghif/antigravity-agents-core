@@ -64,9 +64,9 @@ Before writing code, reason through these 6 mandatory engineering dimensions (an
    - Never `.skip`, `.only`, `xit`, weaken assertions (`expect(true).toBe(true)`), or mock the System-Under-Test. Fix production code to satisfy tests.
    - Run the real build, static analyzer/typecheck, linter, and test suite via `run_command` **after the final edit** and confirm exit code `0`.
 2. **Mandatory Post-Ticket Re-Check & Review**:
-   - After finishing 1 ticket: (a) re-verify every requirement and acceptance criterion line-by-line, (b) run the full verification command, (c) run `/code-review` (`adversarial-reviewer`) on the diff to catch hardcoded values, secret leaks, DRY violations, or performance flaws.
-3. **Cross-Session & Cross-Machine Handover Commit**:
-   - After 1 ticket passes review, update the ticket log, `CONTEXT.md` (if new seams/primitives were added), `docs/sprint/SPRINT.md`, and `docs/sprint/HANDOFF.md` (plus `.scratch/handoff.md`) with exact resume state, and create/propose an atomic Conventional Commit (committing/pushing only with user authorization).
+   - After finishing 1 ticket: re-verify every requirement line-by-line, run the full verification suite (`exit 0`), and run `/code-review` (`adversarial-reviewer`, plus `security-auditor`/`architecture-planner` when auth/secrets/schemas/seams change) against [`.agents/skills/code-review/references/review-rubric.md`](.agents/skills/code-review/references/review-rubric.md).
+3. **Real-Time Ticket Lifecycle, Unblocking & Cross-Session & Cross-Machine Handover**:
+   - Flip target ticket `Status` (`ready` → `in-progress`) before coding; immediately flip to `done` after review, **immediately unblock** downstream `blocked` → `ready` tickets, update `CONTEXT.md` (or `docs/domains/<domain>.md`), distill durable lessons via `/self-learn` (`docs/learnings/LESSONS.md`), and run `/handoff` (`docs/sprint/HANDOFF.md` + `.scratch/handoff.md`) after **every 1 ticket**. Propose/create atomic Conventional Commits only with user authorization.
 4. **Circuit Breaker & Language Standard**:
    - **2-Strike Pivot**: After 2 failures on the same issue, stop patching blindly and trace root cause across all callers.
    - **3-Strike Revert & Escalate**: After 3 failures, undo only your speculative edits and ask via `ask_question`.
@@ -74,19 +74,20 @@ Before writing code, reason through these 6 mandatory engineering dimensions (an
 
 ---
 
-## 5. Progressive Rules & Skills Index
+## 5. Progressive Rules, Skills & Subagents Index
 
 ### Modular Rules (`.agents/rules/`)
-- [`ui-and-dry.md`](.agents/rules/ui-and-dry.md) (`glob` — web & mobile UI files: React/Vue/Svelte/CSS/**Dart/Flutter**): shared UI discovery, `Reuse→Extend→Compose→Create`, design tokens, UI state matrix, controller/widget lifecycle & rebuild performance.
-- [`coding-standards.md`](.agents/rules/coding-standards.md) (`glob` — all code files incl. TS/JS/**Dart**/Go/Python/Rust/Kotlin/Swift): configurability, structured logging, performance optimization, boundary parsing, error wrapping, precision.
-- [`database-migrations.md`](.agents/rules/database-migrations.md) (`glob` — SQL/migrations/schemas): lock timeouts, `CONCURRENTLY`, `NOT VALID` FKs, Expand-Migrate-Contract, tenant-safe SQL.
-- [`testing.md`](.agents/rules/testing.md) (`glob` — test files incl. `*_test.dart`, `integration_test/`): public seams, hermeticity, boundary matrix, anti-test-tampering.
-- [`security-and-auth.md`](.agents/rules/security-and-auth.md) (`model_decision`): BOLA/IDOR, constant-time secrets, proto-pollution, atomic locks, fencing tokens, SSRF, path canonicalization, credential hygiene.
+- [`ui-and-dry.md`](.agents/rules/ui-and-dry.md) (`glob`): UI discovery, `Reuse→Extend→Compose→Create`, design tokens, UI states, `dispose()` & rebuild optimization.
+- [`coding-standards.md`](.agents/rules/coding-standards.md) (`glob`): startup config, structured logging (`<REDACTED>`), N+1/memory/CPU optimization, boundary parsing, precision.
+- [`database-migrations.md`](.agents/rules/database-migrations.md) (`glob`): lock timeouts, `CONCURRENTLY`, `NOT VALID` FKs, Expand-Migrate-Contract, tenant-safe SQL.
+- [`testing.md`](.agents/rules/testing.md) (`glob`): public seams, hermetic isolation, boundary matrix, anti-test-tampering.
+- [`security-and-auth.md`](.agents/rules/security-and-auth.md) (`model_decision`): BOLA/IDOR, constant-time secrets, proto-pollution, atomic locks, SSRF, path canonicalization.
 - [`architecture-and-flow.md`](.agents/rules/architecture-and-flow.md) (`model_decision`): topology discovery, deep modules & DI seams, resilience, blast-radius caller mapping.
-- [`git-and-context.md`](.agents/rules/git-and-context.md) (`model_decision`): Conventional Commits, consent, `CONTEXT.md`, ADRs, DDRs, cross-machine `docs/sprint/HANDOFF.md`.
-- [`release-audit.md`](.agents/rules/release-audit.md) (`manual`): pre-release industrial audit rubric.
+- [`git-and-context.md`](.agents/rules/git-and-context.md) (`model_decision`): Conventional Commits, consent, `CONTEXT.md`, `docs/domains/`, ADRs, DDRs, `docs/sprint/HANDOFF.md`.
+- [`release-audit.md`](.agents/rules/release-audit.md) (`manual`): pre-release industrial audit, SBOM/gitleaks, OpenAPI & Runbook rubric.
 
-### Core Skills (`.agents/skills/`)
-- **Indexing & Discovery**: `/index-project`, `/discover` (live research + ambiguity interview → DDR; pairs with `/grill-me`), `/domain-modeling`, `/codebase-design`, `/research`.
-- **Planning & Execution**: `/to-spec`, `/to-tickets`, `/implement` (Ambiguity Audit → Pre-Code Design & Reuse → TDD → Post-Ticket Review & Handover), `/tdd`, `/safe-refactor`, `/diagnosing-bugs`, `/database-migration`.
-- **Verification & Handover**: `/code-review`, `/pr`, `/handoff`, `/browsing`, `/office`.
+### Core Skills & Read-Only Reviewers (`.agents/skills/`, `.agents/agents/`)
+- **Indexing & Design**: `/index-project`, `/discover` (pairs with `/grill-me`), `/domain-modeling`, `/codebase-design`, `/research`.
+- **Planning & Execution**: `/to-spec`, `/to-tickets`, `/implement`, `/wave-execute` (parallel Wave `swarm`/`run_workflow` with `workspace: "share"`), `/tdd`, `/safe-refactor`, `/diagnosing-bugs`, `/database-migration`.
+- **Verification & Handover**: `/code-review`, `/perf-audit`, `/pr`, `/handoff`, `/self-learn` (pairs with built-in `/learn`), `/browsing`, `/office`.
+- **Subagents**: `codebase-investigator` (`flash`), `verification-runner` (`flash`), and read-only `adversarial-reviewer`, `security-auditor`, `architecture-planner` (`inherit`).

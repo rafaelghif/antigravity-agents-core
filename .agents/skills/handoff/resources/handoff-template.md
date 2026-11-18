@@ -13,26 +13,34 @@
 - **Completed in This Session**: <concise bullet list with exact `path:symbol`>
 - **Verification Command Run**: `<exact command>` → `PASS (exit 0)` | `WIP (<summary>)`
 - **Post-Ticket `/code-review` Verdict**: `APPROVE` | `N/A (WIP)`
-- **Uncommitted / Pending Files**: `<clean tree after commit | exact modified files>`
+- **Unblocked Ready Queue**: `<#KK, #LL promoted from blocked -> ready | None>`
 
-## 2. Downstream Seam, Config & Shared-Asset Notes
+## 2. Git Working Tree Snapshot & Resume Files
+
+- **Working Tree (`git status -sb`)**: `<clean tree after commit | modified/untracked file list>`
+- **Diff Stat (`git diff --stat`)**: `<summary of touched modules>`
+
+## 3. Environment & Toolchain Preconditions (Machine-Portable)
+
+- **Runtime / Toolchain Versions**: `<e.g., Node >= 22, Flutter 3.x, Go 1.2x>`
+- **Required Env Vars (names only, zero values)**: `<KEY_NAME>`
+- **Active Services / DB Migrations / Ports**: `<migrated to NNNN | local DB required | N/A>`
+
+## 4. Downstream Seam, Config & Shared-Asset Notes
 
 - **New / Updated Public Seams**: `<exact file:symbol and signature>`
 - **New Config Keys / Env Vars (names only, zero values)**: `<KEY_NAME>`
 - **New Shared UI Primitives / Helpers Added to `CONTEXT.md`**: `<exact path:symbol>`
 
-## 3. Falsified Approaches (Do Not Repeat)
+## 5. Falsified Approaches & Distilled Learnings (`docs/learnings/LESSONS.md`)
 
-- <dead end or rejected pattern + why it failed>
+- **Falsified Approaches (Do Not Repeat)**: <dead end or rejected pattern + why it failed>
+- **New Lessons Added**: `<L-### in docs/learnings/LESSONS.md | None>`
 
-## 4. Machine-Portable Resume Checklist
+## 6. Immediate Next Session Action
 
-1. Pull latest branch (`git pull`) and verify toolchain/env vars match `CONTEXT.md` §1–2.
-2. Read `CONTEXT.md`, `docs/sprint/SPRINT.md`, and the target ticket below.
-
-## 5. Immediate Next Session Action
-
-Run exactly one command or skill invocation to continue:
+1. Pull latest branch (`git pull`) and verify toolchain/env vars match §3 and `CONTEXT.md` §1–2.
+2. Read `CONTEXT.md`, `docs/learnings/LESSONS.md`, `docs/sprint/SPRINT.md`, and run exactly one command below:
 
 ```text
 /implement docs/sprint/tickets/<MM>-<slug>.md

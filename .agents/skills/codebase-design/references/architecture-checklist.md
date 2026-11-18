@@ -2,9 +2,10 @@
 
 Audit every non-trivial design against these 6 dimensions before writing code:
 
-1. **Modularity & Deep Interfaces**:
+1. **Modularity, Deep Interfaces & Diagrams**:
    - Public interface is smaller than the complexity it hides (validation, normalization, retries, error mapping stay internal).
    - Domain layer imports zero HTTP clients, SQL drivers, or UI frameworks (`flutter/material.dart`, React).
+   - Visualize non-trivial component boundaries and cross-service flows with Mermaid `C4Container` / `sequenceDiagram`.
 2. **Maintainability & Upgradeability**:
    - Dependency inversion exists strictly at external I/O boundaries (payment provider, storage, HTTP, clock, push notifications) so SDK major upgrades touch 1 adapter file.
    - Zero duplicate helpers, formatters, or UI primitives (`CONTEXT.md` checked first).

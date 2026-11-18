@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.4.0] - 2026-11-18
+
+### Added
+
+- **Monorepo Workspace Recon & Hub+Spoke Domain Context (`#01`)**:
+  - Upgraded `.agents/skills/index-project/scripts/scan-repo.mjs` with bounded recursive workspace discovery (`maxDepth = 5`, `<= 100` workspaces), per-workspace stack/command extraction, `layoutMode` (`single-context` vs `hub-and-spoke`), and fail-closed missing `--root` validation.
+  - Documented Hub+Spoke domain indexing (`CONTEXT.md` router + `docs/domains/<domain>.md`) in `/index-project` and `docs/agents/domain.md` while keeping single-package `single-context` backward-compatible.
+- **Parallel `/wave-execute` (Blackboard + Bounded Critic Loop) & Read-Only Specialist Subagents (`#05`)**:
+  - Added `.agents/skills/wave-execute/SKILL.md` implementing `ST-002` parallel Wave orchestration via `swarm`/`run_workflow` (`workspace: "share"`), shared Blackboard state (`SPRINT.md`/`HANDOFF.md`/`LESSONS.md`), and a Bounded Critic Loop (`max 2` fix rounds).
+  - Added read-only `.agents/agents/security-auditor.md` and `.agents/agents/architecture-planner.md`, and restricted `.agents/agents/adversarial-reviewer.md` to read-only tools (`INV-006`).
+- **Self-Learning Procedural Memory (`/self-learn`) & `PostToolUse` Back-Pressure**:
+  - Added `.agents/skills/self-learn/SKILL.md` and git-tracked `docs/learnings/LESSONS.md` (distilling rules from `human-feedback`, `web-research`, `browsing`, `code-review`, and `test-failure` sources with a `50`-entry cap, surfaced via `SessionStart`).
+  - Added `post-edit-backpressure` (`PostToolUse`) hook in `.agents/hooks.json` running immediate `JSON.parse` / `node --check` validation on written `.json`/`.js`/`.mjs`/`.cjs` files.
+- **Anti-Hallucination Ticketing, Real-Time Lifecycle & Upgraded Handover**:
+  - Upgraded `ticket-template.md`, `to-tickets/SKILL.md`, and `validate-board.mjs` to enforce **Exact File Touchpoints** (`CREATE`/`MODIFY`/`DELETE`), **Data, Schema & Error Matrix**, and **Do-Not-Invent** guards on `ready`/`in-progress` tickets.
+  - Enforced real-time ticket transitions (`in-progress` before coding, `done` immediately on completion), immediate downstream unblocking (`blocked` → `ready`), and mandatory per-1-ticket `/handoff` (`handoff-template.md` expanded with machine-portable preconditions, working tree snapshot, and unblocked queue).
+- **Evergreen Brand Identity (`assets/banner.png`, `assets/logo.svg`)**:
+  - Replaced version-locked `AAC v6.3` banner with a minimalist dark obsidian wide lockup PNG (`assets/banner.png`) and scalable vector icon (`assets/logo.svg`).
+- **Mandatory Mermaid Design Diagrams & Enterprise Ops / Perf / Tracker Docs (`#06`, `#07`)**:
+  - Added Mermaid `C4Container`, `erDiagram`, `sequenceDiagram`, and `stateDiagram-v2` gates across `/to-spec` (`spec-template.md`), `/domain-modeling`, and `/codebase-design`.
+  - Added `/perf-audit` (`.agents/skills/perf-audit/SKILL.md`), API Contract (`OpenAPI`/`AsyncAPI`), Rollout/Canary/Feature-Flag & Rollback SOP, and Observability SLI/SLO & Runbook sections to `spec-template.md`, CI `gitleaks`/SBOM/Runbook checks to `release-audit.md`, and Jira/Linear/GitLab integration guides to `docs/agents/issue-tracker.md`.
+
+### Changed
+
+- **Enterprise Strict Configurable Guardrails (`#02`, `#03`, `#04`)**:
+  - Upgraded `quality-gate-stop-sensor` in `.agents/hooks.json` to map modified/untracked files (`-uall`) to their nearest monorepo workspace manifest and execute `typecheck`, `lint`, and `test` sequentially (`AAC_STOP_TEST_TIMEOUT_MS` default `60000`, `AAC_STOP_RUN_TYPECHECK`, `AAC_STOP_RUN_LINT`).
+  - Upgraded `.agents/git-guard.cjs` (`docs/adr/0005-enterprise-strict-git-and-stop-guards.md`, superseding ADR-0004 guard scope) to protect `main`/`master`/`release/*`/`production`/`staging` pushes plus `reset --hard`, `clean -fd`, and raw `--force`/`-f` pushes (`--force-with-lease` on feature branches allowed; `AAC_GIT_GUARD_MODE=legacy` fallback).
+  - Expanded OWASP/Gitleaks-aligned non-echoing secret scanning (`aws-key`, `github-token`, `slack-token`, `gcp-key`, `stripe-key`, `db-uri-password`, `jwt-literal`, `private-key`) across `production-no-mock-guard` and `audit-diff.mjs`.
+- **Strict Traceability Validators & Token Optimization (`#08`)**:
+  - Upgraded `validate-spec.mjs` to enforce 100% `REQ`/`NFR`/`SEC` traceability coverage in §9 and Mermaid/API/Rollout/Observability contract presence on `READY FOR TICKETS` specs.
+  - Upgraded `validate-board.mjs` to reject `ready` or `in-progress` tickets blocked by unfinished dependencies.
+  - Deduplicated checklists across `AGENTS.md` and `ticket-template.md` into canonical references to `review-rubric.md`.
+
+### Fixed
+
+- **Self-Hosting Hook Hermeticity & Untracked Directory Scanning**:
+  - Isolated `runHook`/`runHookRaw` in `tests/aac.test.mjs` via `cleanHookEnv()` so `P0-7` passes when `npm test` runs inside `quality-gate-stop-sensor`.
+  - Fixed `audit-diff.mjs` and `quality-gate-stop-sensor` to use `git status --porcelain -uall` so files inside newly created untracked directories are never skipped.
+
 ## [6.3.0] - 2026-11-18
 
 ### Added

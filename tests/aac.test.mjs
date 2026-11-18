@@ -11,6 +11,13 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const cliPath = path.join(repoRoot, 'bin', 'cli.mjs');
 const hooksJsonPath = path.join(repoRoot, '.agents', 'hooks.json');
 
+function cleanHookEnv(extraEnv = {}) {
+  const childEnv = { ...process.env };
+  delete childEnv.AAC_QUALITY_GATE_RUNNING;
+  delete childEnv.AAC_SKIP_STOP_TEST;
+  return { ...childEnv, ...extraEnv };
+}
+
 function runHook(command, stdinJson, cwd = repoRoot, env = {}) {
   const res = spawnSync(command, {
     shell: true,
@@ -18,7 +25,7 @@ function runHook(command, stdinJson, cwd = repoRoot, env = {}) {
     input: JSON.stringify(stdinJson),
     encoding: 'utf8',
     timeout: 5000,
-    env: { ...process.env, ...env },
+    env: cleanHookEnv(env),
   });
   assert.equal(res.status, 0, `Hook failed: ${res.stderr}`);
   return JSON.parse(res.stdout.trim());
@@ -31,6 +38,7 @@ function runHookRaw(command, rawInput, cwd = repoRoot) {
     input: rawInput,
     encoding: 'utf8',
     timeout: 5000,
+    env: cleanHookEnv(),
   });
   assert.equal(res.status, 0, `Hook failed: ${res.stderr}`);
   return JSON.parse(res.stdout.trim());
@@ -69,6 +77,10 @@ test('P0-1 & P2-7: CLI init, idempotency, non-destructive upgrade, conflict back
     assert.equal(fs.existsSync(path.join(tmpDir, 'AGENTS.md')), true);
     assert.equal(fs.existsSync(path.join(tmpDir, 'CONTEXT.md')), true);
     assert.equal(fs.existsSync(path.join(tmpDir, '.agents', '.aac-manifest.json')), true);
+    assert.equal(fs.existsSync(path.join(tmpDir, '.agents', 'skills', 'wave-execute', 'SKILL.md')), true);
+    assert.equal(fs.existsSync(path.join(tmpDir, '.agents', 'skills', 'perf-audit', 'SKILL.md')), true);
+    assert.equal(fs.existsSync(path.join(tmpDir, '.agents', 'agents', 'security-auditor.md')), true);
+    assert.equal(fs.existsSync(path.join(tmpDir, '.agents', 'agents', 'architecture-planner.md')), true);
     assert.equal(fs.existsSync(path.join(tmpDir, 'package.json')), false);
 
     // 2b. The MCP templates referenced by SECURITY.md and docs/agents/issue-tracker.md must actually ship.
@@ -177,6 +189,9 @@ test('P0-5: Uninstall rejects unsafe manifest paths (traversal, non-managed file
     fs.writeFileSync(managed, 'managed\n');
     const victim = path.join(tmpDir, 'victim.txt');
     fs.writeFileSync(victim, 'user file\n');
+    const domainDoc = path.join(tmpDir, 'docs', 'domains', 'auth.md');
+    fs.mkdirSync(path.dirname(domainDoc), { recursive: true });
+    fs.writeFileSync(domainDoc, '# Auth Domain\n');
     const outside = path.join(outsideDir, 'outside.txt');
     fs.writeFileSync(outside, 'outside file\n');
     const escape = path.relative(tmpDir, outside).replace(/\\/g, '/');
@@ -186,6 +201,7 @@ test('P0-5: Uninstall rejects unsafe manifest paths (traversal, non-managed file
       files: {
         '.agents/rules/coding-standards.md': sha(managed),
         'victim.txt': sha(victim),
+        'docs/domains/auth.md': sha(domainDoc),
         [escape]: sha(outside),
         '.agents/rules/../../victim.txt': sha(victim),
         '.agents/rules': sha(managed),
@@ -196,6 +212,7 @@ test('P0-5: Uninstall rejects unsafe manifest paths (traversal, non-managed file
     assert.equal(out.status, 0, out.stderr);
     assert.equal(fs.existsSync(managed), false, 'managed file should still be removed');
     assert.equal(fs.existsSync(victim), true, 'non-managed file inside the repo must not be deleted');
+    assert.equal(fs.existsSync(domainDoc), true, 'Hub+Spoke docs/domains/ file must not be deleted by uninstall');
     assert.equal(fs.existsSync(outside), true, 'path traversal outside the target must not delete anything');
     assert.match(out.stderr, /Skipped unsafe manifest entry/);
   } finally {
@@ -275,11 +292,32 @@ test('P0-4: Hook contract & full Git + Mock bypass corpus verification', () => {
     assert.equal(out.decision, 'ask', `Expected 'ask' for push to main: ${cmd}`);
   }
 
+  const strictBlockedGitCorpus = [
+    'git push origin release/v1.0',
+    'git push origin production',
+    'git push origin staging',
+    'git push origin feat/new-branch --force',
+    'git push -f origin feat/new-branch',
+    'git push --force-with-lease -f origin feat/new-branch',
+    'echo --force-with-lease && git push -f origin feat/new-branch',
+    'git reset --hard',
+    'git clean -fd',
+    'git clean -fdx',
+    'git clean -f -d',
+  ];
+
+  for (const cmd of strictBlockedGitCorpus) {
+    const out = runHook(gitHookCmd, { toolCall: { args: { CommandLine: cmd } } });
+    assert.equal(out.decision, 'ask', `Expected 'ask' in strict mode for: ${cmd}`);
+    const legacyOut = runHook(gitHookCmd, { toolCall: { args: { CommandLine: cmd } } }, repoRoot, { AAC_GIT_GUARD_MODE: 'legacy' });
+    const expectedLegacy = /\bpush\b.*?\b(release\/|production|staging)\b/i.test(cmd) ? 'ask' : 'allow';
+    assert.equal(legacyOut.decision, expectedLegacy, `Expected '${expectedLegacy}' in legacy mode for: ${cmd}`);
+  }
+
   const safeGitCorpus = [
     'git status -sb',
     'git push origin feat/new-branch',
-    'git push origin feat/new-branch --force',
-    'git push -f origin feat/new-branch',
+    'git push --force-with-lease origin feat/new-branch',
     'git push origin dev',
     'git checkout -b feat/new-branch',
     'git checkout main',
@@ -288,9 +326,6 @@ test('P0-4: Hook contract & full Git + Mock bypass corpus verification', () => {
     'git log -1 --oneline',
     'git stash list',
     'git stash',
-    'git reset --hard',
-    'git clean -fd',
-    'git restore .',
     'git worktree list',
     'git -C /repo status',
     'git remote -v',
@@ -392,17 +427,56 @@ test('P0-4: Hook contract & full Git + Mock bypass corpus verification', () => {
   assert.equal(dartTamper.decision, 'ask', 'Dart skip flag must be intercepted by Anti-Test-Tampering Guard');
   assert.match(dartTamper.reason, /Anti-Test-Tampering Guard/i);
 
-  // Hardcoded secret / credential literal guard in production paths
-  const fakeStripe = 'sk_' + 'live_' + '1234567890abcdef1234';
-  const secretLeak = runHook(mockHookCmd, { toolCall: { args: { Path: 'lib/config/env.dart', Content: `const stripeKey = '${fakeStripe}';` } } });
-  assert.equal(secretLeak.decision, 'ask', 'Secret Leak Guard must block hardcoded credential literals');
-  assert.match(secretLeak.reason, /Secret Leak Guard/i);
+  // Hardcoded secret / credential literal guard (expanded OWASP/Gitleaks corpus, non-echoing)
+  const syntheticSecrets = [
+    ['stripe-key', 'sk_' + 'live_' + '1234567890abcdef1234'],
+    ['stripe-test', 'sk_' + 'test_' + '1234567890abcdef1234'],
+    ['aws-key', 'AS' + 'IA' + 'IOSFODNN7EXAMPLE12'],
+    ['github-token', 'gh' + 'o_' + '1234567890abcdefghij123456'],
+    ['slack-token', 'xo' + 'xb-' + '123456789012-123456789012-abcd'],
+    ['gcp-key', 'AI' + 'za' + 'SyDaGmWKa4JsXZ-1234567890abcdef12345'],
+    ['db-uri-password', 'postgres://' + 'admin:Sup3rS3cretPass@db.internal:5432/prod'],
+    ['jwt-literal', 'const tok = "' + 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"'],
+  ];
+  for (const [label, secretVal] of syntheticSecrets) {
+    const secretLeak = runHook(mockHookCmd, { toolCall: { args: { Path: 'lib/config/env.dart', Content: `const val = '${secretVal}';` } } });
+    assert.equal(secretLeak.decision, 'ask', `Secret Leak Guard must block ${label}`);
+    assert.match(secretLeak.reason, /Secret Leak Guard/i);
+    assert.equal(secretLeak.reason.includes(secretVal), false, `Secret Leak Guard must never echo raw ${label}`);
+  }
+  const safeTemplateUri = runHook(mockHookCmd, { toolCall: { args: { Path: 'src/config/db.ts', Content: 'const dsn = `postgres://${process.env.DB_USER}:${process.env.DB_PASS}@localhost:5432/app`;' } } });
+  assert.equal(safeTemplateUri.decision, 'allow', 'Parameterized env DB URI must not trigger Secret Leak Guard');
+  const webhookJsonLeak = runHook(mockHookCmd, { toolCall: { args: { Path: 'src/webhooks.json', Content: `{"token":"${'gh' + 'p_' + '1234567890abcdefghij123456'}"}` } } });
+  assert.equal(webhookJsonLeak.decision, 'ask', 'Only root/named hooks.json/package.json are exempt, never src/webhooks.json');
 
   // Guard payloads that cannot be parsed must fail closed (ask), never silently allow.
   for (const [name, cmd] of [['git-destructive-guard', gitHookCmd], ['production-no-mock-guard', mockHookCmd]]) {
     const out = runHookRaw(cmd, '{ this is not json');
     assert.equal(out.decision, 'ask', `${name} must fail closed on malformed stdin, not allow`);
     assert.match(out.reason, /fail-closed/i, `${name} must explain the fail-closed decision`);
+  }
+
+  // PostToolUse back-pressure hook catches broken JSON and JS/ESM syntax immediately after edit
+  const postHookCmd = hooks['post-edit-backpressure'].PostToolUse[0].hooks[0].command;
+  const tmpPostDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-post-hook-'));
+  try {
+    const badJsonPath = path.join(tmpPostDir, 'bad.json');
+    fs.writeFileSync(badJsonPath, '{ broken json ');
+    const badJsonOut = runHook(postHookCmd, { workspacePaths: [tmpPostDir], toolCall: { args: { TargetFile: badJsonPath } } }, tmpPostDir);
+    assert.equal(badJsonOut.decision, 'block', 'PostToolUse must block on malformed JSON write');
+    assert.equal(badJsonOut.hookSpecificOutput?.hookEventName, 'PostToolUse');
+
+    const badJsPath = path.join(tmpPostDir, 'bad.mjs');
+    fs.writeFileSync(badJsPath, 'export function broken( { return 1; }\n');
+    const badJsOut = runHook(postHookCmd, { workspacePaths: [tmpPostDir], toolCall: { args: { Path: badJsPath } } }, tmpPostDir);
+    assert.equal(badJsOut.decision, 'block', 'PostToolUse must block on JS/ESM syntax error');
+
+    const goodJsPath = path.join(tmpPostDir, 'good.mjs');
+    fs.writeFileSync(goodJsPath, 'export const ok = 1;\n');
+    const goodJsOut = runHook(postHookCmd, { workspacePaths: [tmpPostDir], toolCall: { args: { Path: goodJsPath } } }, tmpPostDir);
+    assert.equal(goodJsOut.decision, 'allow', 'PostToolUse must allow syntactically valid JS/ESM');
+  } finally {
+    fs.rmSync(tmpPostDir, { recursive: true, force: true });
   }
 });
 
@@ -458,6 +532,41 @@ test('P0-7: quality-gate-stop-sensor blocks premature completion on NO_TOOL_CALL
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
+
+  // 5. Monorepo workspace scoping: typecheck + lint + test on changed workspace only, plus opt-out & timeout guard
+  const tmpMono = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-stop-mono-'));
+  try {
+    spawnSync('git', ['init'], { cwd: tmpMono });
+    fs.mkdirSync(path.join(tmpMono, 'apps', 'web', 'src'), { recursive: true });
+    fs.mkdirSync(path.join(tmpMono, 'apps', 'untouched', 'src'), { recursive: true });
+    fs.writeFileSync(path.join(tmpMono, 'apps', 'web', 'package.json'), JSON.stringify({
+      scripts: {
+        typecheck: 'node -e "process.exit(1)"',
+        lint: 'node -e "process.exit(0)"',
+        test: 'node -e "process.exit(0)"',
+      },
+    }));
+    fs.writeFileSync(path.join(tmpMono, 'apps', 'untouched', 'package.json'), JSON.stringify({
+      scripts: { test: 'node -e "process.exit(1)"' },
+    }));
+    fs.writeFileSync(path.join(tmpMono, 'apps', 'web', 'src', 'index.ts'), 'export const a = 1;\n');
+    fs.writeFileSync(path.join(tmpMono, 'apps', 'untouched', 'src', 'index.ts'), 'export const b = 1;\n');
+    spawnSync('git', ['add', '.'], { cwd: tmpMono });
+    spawnSync('git', ['commit', '-m', 'init'], {
+      cwd: tmpMono,
+      env: { ...process.env, GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@test.com', GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@test.com' },
+    });
+
+    fs.writeFileSync(path.join(tmpMono, 'apps', 'web', 'src', 'index.ts'), 'export const a = 2;\n');
+    const typecheckFail = runHook(stopHookCmd, { terminationReason: 'NO_TOOL_CALL', continuationActive: false, workspacePaths: [tmpMono] }, repoRoot);
+    assert.equal(typecheckFail.decision, 'continue', 'Stop hook must fail when changed monorepo workspace typecheck fails');
+    assert.match(typecheckFail.reason, /typecheck/i);
+
+    const optOutPass = runHook(stopHookCmd, { terminationReason: 'NO_TOOL_CALL', continuationActive: false, workspacePaths: [tmpMono] }, repoRoot, { AAC_STOP_RUN_TYPECHECK: '0', AAC_STOP_TEST_TIMEOUT_MS: 'invalid' });
+    assert.equal(optOutPass.decision, 'allow', 'Stop hook must allow when failing gate is opted out and ignore untouched failing sibling');
+  } finally {
+    fs.rmSync(tmpMono, { recursive: true, force: true });
+  }
 });
 
 test('P1-1: SessionStart hook resolves workspacePaths from stdin instead of process cwd', () => {
@@ -467,13 +576,16 @@ test('P1-1: SessionStart hook resolves workspacePaths from stdin instead of proc
   try {
     fs.mkdirSync(path.join(tmpDir, '.scratch'), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, 'docs', 'sprint'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, 'docs', 'learnings'), { recursive: true });
     fs.writeFileSync(path.join(tmpDir, '.scratch', 'handoff.md'), '# Handoff\n');
     fs.writeFileSync(path.join(tmpDir, 'docs', 'sprint', 'SPRINT.md'), '# Sprint\n');
+    fs.writeFileSync(path.join(tmpDir, 'docs', 'learnings', 'LESSONS.md'), '# Lessons\n');
 
     const out = runHook(sessionHookCmd, { workspacePaths: [tmpDir] }, repoRoot);
     const message = JSON.stringify(out);
     assert.match(message, /handoff\.md/);
     assert.match(message, /SPRINT\.md/);
+    assert.match(message, /LESSONS\.md/);
 
     const contextOnlyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-session-context-'));
     try {
@@ -595,10 +707,11 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
   const skillDirs = fs.readdirSync(skillsDir);
   assert.deepEqual(
     skillDirs.sort(),
-    ['browsing', 'code-review', 'codebase-design', 'database-migration', 'diagnosing-bugs', 'discover', 'domain-modeling', 'handoff', 'implement', 'index-project', 'office', 'pr', 'research', 'safe-refactor', 'tdd', 'to-spec', 'to-tickets'],
+    ['browsing', 'code-review', 'codebase-design', 'database-migration', 'diagnosing-bugs', 'discover', 'domain-modeling', 'handoff', 'implement', 'index-project', 'office', 'perf-audit', 'pr', 'research', 'safe-refactor', 'self-learn', 'tdd', 'to-spec', 'to-tickets', 'wave-execute'],
     'Skill set drifted from the documented catalog',
   );
   assert.equal(skillDirs.includes('grill-me'), false, 'Custom skill must not collide with built-in /grill-me slash command');
+  assert.equal(skillDirs.includes('learn'), false, 'Custom skill must not collide with built-in /learn slash command');
   for (const dir of skillDirs) {
     assert.match(dir, /^[a-z0-9]+(-[a-z0-9]+)*$/, `Invalid skill directory name: ${dir}`);
     const skillMd = path.join(skillsDir, dir, 'SKILL.md');
@@ -611,7 +724,7 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
     assert.match(skillBody, /## Decision tree/, `Missing '## Decision tree' in ${dir}`);
     const descLine = (frontmatter.match(/^description:(.*)$/m) || [])[1] || '';
     assert.doesNotMatch(descLine, /:\s/, `Unquoted colon-space in ${dir} description breaks YAML parsing`);
-    const builtinSlash = new Set(['plan', 'compact', 'agents', 'teamwork', 'browser', 'grill-me']);
+    const builtinSlash = new Set(['plan', 'compact', 'agents', 'teamwork', 'browser', 'grill-me', 'learn']);
     for (const ref of skillBody.matchAll(/(?:^|[\s(`])\/([a-z][a-z-]+)\b/g)) {
       if (builtinSlash.has(ref[1])) continue;
       assert.equal(fs.existsSync(path.join(skillsDir, ref[1], 'SKILL.md')), true, `${dir} routes to unknown skill /${ref[1]}`);
@@ -630,9 +743,10 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
   const agentFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith('.md'));
   assert.deepEqual(
     agentFiles.map((f) => f.replace(/\.md$/, '')).sort(),
-    ['adversarial-reviewer', 'codebase-investigator', 'verification-runner'],
+    ['adversarial-reviewer', 'architecture-planner', 'codebase-investigator', 'security-auditor', 'verification-runner'],
     'Subagent set drifted from the documented catalog',
   );
+  const readOnlyReviewers = new Set(['adversarial-reviewer.md', 'architecture-planner.md', 'security-auditor.md']);
   for (const file of agentFiles) {
     const content = fs.readFileSync(path.join(agentsDir, file), 'utf8');
     const frontmatter = readFrontmatter(path.join(agentsDir, file));
@@ -642,6 +756,9 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
     const toolMatches = [...frontmatter.matchAll(/^\s*-\s*([a-z_]+)\s*$/gm)].map((m) => m[1]);
     for (const tool of toolMatches) {
       assert.equal(officialTools.has(tool), true, `Subagent ${file} references unknown Antigravity tool '${tool}' (can hang the subagent)`);
+      if (readOnlyReviewers.has(file)) {
+        assert.equal(tool === 'write_file' || tool === 'edit_file', false, `Reviewer subagent ${file} must be read-only (INV-006): remove '${tool}'`);
+      }
     }
     const skillMatches = [...frontmatter.matchAll(/^\s*-\s*(skills\/[a-z0-9-]+)\s*$/gm)];
     for (const m of skillMatches) {
@@ -749,6 +866,44 @@ test('P1-8: LLM-native anti-yes-man, codebase indexing, DRY reuse, and provenanc
   assert.match(read(`${skillsRoot}/tdd/SKILL.md`), /complete production behavior/);
   assert.match(read(`${skillsRoot}/handoff/SKILL.md`), /docs\/sprint\/HANDOFF\.md/);
   assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /review-rubric\.md/);
+
+  // Enterprise diagrams, ops/rollout/API contracts, perf-audit, wave-execute, and multi-tracker docs
+  assert.match(specTemplate, /C4Container|C4Context/);
+  assert.match(specTemplate, /erDiagram/);
+  assert.match(specTemplate, /sequenceDiagram/);
+  assert.match(specTemplate, /stateDiagram-v2/);
+  assert.match(specTemplate, /API Contract/i);
+  assert.match(specTemplate, /Rollout|Canary|Feature-Flag/i);
+  assert.match(specTemplate, /Observability.*SLI\/SLO|Runbook/i);
+  assert.match(toSpec, /Mermaid/i);
+  assert.match(domainModeling, /stateDiagram-v2/);
+  assert.match(domainModeling, /erDiagram/);
+  assert.match(codebaseDesign, /C4Container|sequenceDiagram/);
+  assert.match(read(`${skillsRoot}/wave-execute/SKILL.md`), /workspace:\s*"share"|workspace: share/i);
+  assert.match(read(`${skillsRoot}/wave-execute/SKILL.md`), /Blackboard/i);
+  assert.match(read(`${skillsRoot}/wave-execute/SKILL.md`), /Critic Loop/i);
+  assert.match(read(`${skillsRoot}/perf-audit/SKILL.md`), /EXPLAIN ANALYZE/);
+  assert.match(ticketTemplate, /Exact File Touchpoints/i);
+  assert.match(ticketTemplate, /Data, Schema & Error Matrix/i);
+  assert.match(ticketTemplate, /Do-Not-Invent/i);
+  const handoffTemplate = read(`${skillsRoot}/handoff/resources/handoff-template.md`);
+  assert.match(handoffTemplate, /Environment & Toolchain Preconditions/i);
+  assert.match(handoffTemplate, /Git Working Tree Snapshot/i);
+  assert.match(handoffTemplate, /Unblocked Ready Queue/i);
+  assert.match(implement, /in-progress/i);
+  assert.match(implement, /unblock/i);
+  const selfLearn = read(`${skillsRoot}/self-learn/SKILL.md`);
+  assert.match(selfLearn, /human-feedback/i);
+  assert.match(selfLearn, /search_web/i);
+  assert.match(selfLearn, /browsing/i);
+  assert.match(selfLearn, /docs\/learnings\/LESSONS\.md/);
+  assert.equal(fs.existsSync(path.join(repoRoot, 'docs', 'learnings', 'LESSONS.md')), true);
+  const trackerDoc = read('docs/agents/issue-tracker.md');
+  assert.match(trackerDoc, /Jira/);
+  assert.match(trackerDoc, /Linear/);
+  assert.match(trackerDoc, /GitLab/);
+  const releaseAuditRule = read('.agents/rules/release-audit.md');
+  assert.match(releaseAuditRule, /gitleaks|SBOM/i);
 });
 
 test('P1-9: Black-box skill scripts support --help and validate multi-language repos, specs, boards, and diffs', () => {
@@ -774,33 +929,143 @@ test('P1-9: Black-box skill scripts support --help and validate multi-language r
     assert.ok(scanOut.commands.test.includes('flutter test'));
     assert.ok(scanOut.commands.analyze.includes('flutter analyze'));
     assert.ok(scanOut.directoryBuckets.ui.includes('lib/widgets'));
+    assert.equal(scanOut.layoutMode, 'single-context');
+    assert.equal(scanOut.workspaces.length, 1);
   } finally {
     fs.rmSync(tmpFlutter, { recursive: true, force: true });
   }
 
-  // validate-spec.mjs rejects READY FOR TICKETS spec containing vague qualifier / TBD
+  // scan-repo.mjs detects polyglot monorepo sub-manifests, inherits root lockfile, and recommends hub-and-spoke layout
+  const tmpMono = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-mono-scan-'));
+  try {
+    fs.writeFileSync(path.join(tmpMono, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\n');
+    fs.mkdirSync(path.join(tmpMono, 'apps', 'web'), { recursive: true });
+    fs.writeFileSync(path.join(tmpMono, 'apps', 'web', 'package.json'), JSON.stringify({
+      scripts: { test: 'vitest run', typecheck: 'tsc --noEmit', lint: 'eslint .' },
+    }));
+    fs.mkdirSync(path.join(tmpMono, 'services', 'billing'), { recursive: true });
+    fs.writeFileSync(path.join(tmpMono, 'services', 'billing', 'go.mod'), 'module example.com/billing\n');
+    // Depth > 5 must be bounded
+    fs.mkdirSync(path.join(tmpMono, 'a', 'b', 'c', 'd', 'e', 'f', 'deep'), { recursive: true });
+    fs.writeFileSync(path.join(tmpMono, 'a', 'b', 'c', 'd', 'e', 'f', 'deep', 'Cargo.toml'), '[package]\nname="deep"\n');
+
+    const t0 = Date.now();
+    const monoOut = JSON.parse(execFileSync(process.execPath, [path.join(repoRoot, scripts[0]), '--root', tmpMono, '--json'], { encoding: 'utf8' }));
+    assert.ok(Date.now() - t0 < 2000, 'scan-repo.mjs must complete within 2000ms (NFR-004)');
+    assert.equal(monoOut.layoutMode, 'hub-and-spoke');
+    assert.ok(monoOut.workspaces.some((w) => w.path === 'apps/web' && w.commands.analyze.includes('pnpm typecheck')));
+    assert.ok(monoOut.workspaces.some((w) => w.path === 'services/billing' && w.commands.test.includes('go test ./...')));
+    assert.equal(monoOut.workspaces.some((w) => w.path.includes('deep')), false, 'scan-repo.mjs must bound traversal depth <= 5');
+
+    const missingRoot = spawnSync(process.execPath, [path.join(repoRoot, scripts[0]), '--root', path.join(tmpMono, 'does-not-exist')], { encoding: 'utf8' });
+    assert.notEqual(missingRoot.status, 0, 'scan-repo.mjs must exit non-zero on missing --root');
+  } finally {
+    fs.rmSync(tmpMono, { recursive: true, force: true });
+  }
+
+  // validate-spec.mjs rejects READY FOR TICKETS spec containing vague qualifier / TBD or missing traceability
   const tmpSpecDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-spec-val-'));
   try {
     const badSpec = path.join(tmpSpecDir, 'bad.md');
     fs.writeFileSync(badSpec, '# Spec: X\n- **Readiness Verdict**: `READY FOR TICKETS`\n- **Verification Command**: `TBD`\n## 1. Problem, Scope & Non-Goals\nfast\n');
     const res = spawnSync(process.execPath, [path.join(repoRoot, scripts[1]), badSpec], { encoding: 'utf8' });
     assert.notEqual(res.status, 0, 'validate-spec.mjs must fail on incomplete READY spec');
+
+    const unmappedSpec = path.join(tmpSpecDir, 'unmapped.md');
+    fs.writeFileSync(unmappedSpec, [
+      '# Spec: Unmapped',
+      '- **Readiness Verdict**: `READY FOR TICKETS`',
+      '- **Verification Command**: `npm test`',
+      '## 1. Problem, Scope & Non-Goals',
+      'Scope',
+      '## 2. Reusable Codebase Assets',
+      '`N/A`',
+      '## 3. Domain Model',
+      '```mermaid\nC4Container\n```\n`N/A — no db`',
+      '## 4. Functional Requirements',
+      '| `REQ-001` | A | G/W/T | `must` | `DEC-001` |',
+      '| `REQ-002` | B | G/W/T | `must` | `DEC-001` |',
+      '## 5. Non-Functional',
+      '| `NFR-001` | Latency | 10ms | opt | bench | shed | `DEC-001` |',
+      '## 6. Security, Credential Hygiene',
+      '| `SEC-001` | Auth | rule | test | `DEC-001` |',
+      '## 7. Configurability, Logging',
+      '- **API Contract**: `N/A`',
+      '## 8. Resilience',
+      '- **Rollout**: `N/A`',
+      '- **Observability**: `N/A`',
+      '## 9. Traceability Matrix',
+      '| `REQ-001` | `SEC-001` | `#01` | `seam` | `test` |',
+    ].join('\n'));
+    const unmappedRes = spawnSync(process.execPath, [path.join(repoRoot, scripts[1]), unmappedSpec], { encoding: 'utf8' });
+    assert.notEqual(unmappedRes.status, 0, 'validate-spec.mjs must reject READY spec with unmapped REQ-002 / NFR-001 in §9');
+    assert.match(unmappedRes.stderr, /REQ-002/);
+
+    const noSec8Spec = path.join(tmpSpecDir, 'no-sec8.md');
+    fs.writeFileSync(noSec8Spec, [
+      '# Spec: NoSec8',
+      '- **Readiness Verdict**: `READY FOR TICKETS`',
+      '- **Verification Command**: `npm test`',
+      '## 1. Problem, Scope & Non-Goals',
+      '## 2. Reusable Codebase Assets',
+      '## 3. Domain Model',
+      '`N/A`',
+      '## 4. Functional Requirements',
+      '| `REQ-001` | A | G/W/T | `must` | `DEC-001` |',
+      '## 6. Security, Credential Hygiene',
+      '| `SEC-001` | Auth | rule | test | `DEC-001` |',
+      '## 7. Configurability, Logging',
+      '- **API Contract**: `N/A`',
+      '## 9. Traceability Matrix',
+      '| `REQ-001` | `SEC-001` | `#01` | `seam` | `test` |',
+    ].join('\n'));
+    const noSec8Res = spawnSync(process.execPath, [path.join(repoRoot, scripts[1]), noSec8Spec], { encoding: 'utf8' });
+    assert.notEqual(noSec8Res.status, 0, 'validate-spec.mjs must fail if §8 Resilience/Rollout/Observability is omitted');
+    assert.match(noSec8Res.stderr, /Rollout/);
   } finally {
     fs.rmSync(tmpSpecDir, { recursive: true, force: true });
   }
 
-  // validate-board.mjs detects circular Blocked by dependencies
+  // validate-board.mjs detects circular Blocked by dependencies and premature ready tickets
   const tmpBoardDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-board-val-'));
   try {
     fs.mkdirSync(path.join(tmpBoardDir, 'tickets'), { recursive: true });
     fs.writeFileSync(path.join(tmpBoardDir, 'SPRINT.md'), '| [`#01`](tickets/01-a.md) | A |\n| [`#02`](tickets/02-b.md) | B |\n');
-    const baseTicket = (id, blockedBy) => `# Ticket #${id}\n- **Status**: \`blocked\`\n- **Blocked by**: ${blockedBy}\n- **Source Requirements**: REQ-001\n- **Source Decisions**: DEC-001\n## Reusable Codebase Assets\n## Verification Command\n\`npm test\`\n`;
-    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '01-a.md'), baseTicket('01', '#02'));
-    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '02-b.md'), baseTicket('02', '#01'));
+    const baseTicket = (id, status, blockedBy) => `# Ticket #${id}\n- **Status**: \`${status}\`\n- **Blocked by**: ${blockedBy}\n- **Source Requirements**: REQ-001\n- **Source Decisions**: DEC-001\n## Reusable Codebase Assets\n## Exact File Touchpoints\n## Do-Not-Invent Guards\n## Verification Command\n\`npm test\`\n`;
+    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '01-a.md'), baseTicket('01', 'blocked', '#02'));
+    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '02-b.md'), baseTicket('02', 'blocked', '#01'));
     const res = spawnSync(process.execPath, [path.join(repoRoot, scripts[2]), path.join(tmpBoardDir, 'SPRINT.md')], { encoding: 'utf8' });
     assert.notEqual(res.status, 0, 'validate-board.mjs must reject cyclic Blocked by dependencies');
     assert.match(res.stderr, /Cycle detected/i);
+
+    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '01-a.md'), baseTicket('01', 'in-progress', 'None'));
+    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '02-b.md'), baseTicket('02', 'ready', '#01'));
+    const prematureRes = spawnSync(process.execPath, [path.join(repoRoot, scripts[2]), path.join(tmpBoardDir, 'SPRINT.md')], { encoding: 'utf8' });
+    assert.notEqual(prematureRes.status, 0, 'validate-board.mjs must reject ready ticket blocked by unfinished ticket');
+    assert.match(prematureRes.stderr, /#01/);
+
+    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '01-a.md'), '# Ticket #01\n- **Status**: `ready`\n- **Blocked by**: None\n- **Source Requirements**: REQ-001\n- **Source Decisions**: DEC-001\n## Reusable Codebase Assets\n## Verification Command\n`npm test`\n');
+    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '02-b.md'), baseTicket('02', 'blocked', '#01'));
+    const shallowRes = spawnSync(process.execPath, [path.join(repoRoot, scripts[2]), path.join(tmpBoardDir, 'SPRINT.md')], { encoding: 'utf8' });
+    assert.notEqual(shallowRes.status, 0, 'validate-board.mjs must reject ready ticket lacking Exact File Touchpoints or Do-Not-Invent Guards');
+    assert.match(shallowRes.stderr, /Exact File Touchpoints|Do-Not-Invent/i);
   } finally {
     fs.rmSync(tmpBoardDir, { recursive: true, force: true });
+  }
+
+  // audit-diff.mjs flags expanded secret patterns without echoing raw credential values
+  const tmpAuditDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-audit-diff-'));
+  try {
+    spawnSync('git', ['init'], { cwd: tmpAuditDir });
+    const fakeDsn = 'postgres://' + 'svc:R3alPassw0rd@db.prod.local:5432/app';
+    fs.mkdirSync(path.join(tmpAuditDir, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(tmpAuditDir, 'src', 'db.ts'), `export const dsn = "${fakeDsn}";\n`);
+    fs.writeFileSync(path.join(tmpAuditDir, '.env.example'), 'DATABASE_URL=postgres://${DB_USER}:${DB_PASS}@localhost:5432/app\n');
+    const res = spawnSync(process.execPath, [path.join(repoRoot, scripts[3]), '--root', tmpAuditDir], { encoding: 'utf8' });
+    assert.notEqual(res.status, 0, 'audit-diff.mjs must fail on embedded DB URI password');
+    assert.match(res.stderr, /db-uri-password/);
+    assert.equal(res.stderr.includes('R3alPassw0rd'), false, 'audit-diff.mjs must never echo matched secret substrings');
+  } finally {
+    fs.rmSync(tmpAuditDir, { recursive: true, force: true });
   }
 });

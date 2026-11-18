@@ -21,6 +21,14 @@ Configure the official GitHub MCP server ([`github/github-mcp-server`](https://g
 
 Credentials live in `.agents/mcp.env` (copy from `.agents/mcp.env.example`), keeping tokens out of process command lines and repository history via `npx -y @modelcontextprotocol/server-github` (or via official Docker container `ghcr.io/github/github-mcp-server` when Docker Desktop is active). The server exposes all GitHub repository, issue, and pull request tools directly to the agent.
 
+## Enterprise Trackers (Jira / Linear / GitLab)
+
+When enterprise teams track sprints outside GitHub:
+
+- **Jira (Atlassian MCP / CLI)**: Configure the official Atlassian MCP server in gitignored `.agents/mcp_config.json` with credentials in `.agents/mcp.env` (`ATLASSIAN_API_TOKEN`, `ATLASSIAN_EMAIL` — never in `args` or committed files). Map `docs/sprint/tickets/<NN>-<slug>.md` IDs to Jira keys (`PROJ-123`) in `docs/sprint/SPRINT.md`.
+- **Linear (Linear MCP / GraphQL)**: Read `LINEAR_API_KEY` from `.agents/mcp.env`; sync ticket `Status` (`blocked`, `ready`, `in-progress`, `in-review`, `done`) with Linear workflow states at Wave transitions.
+- **GitLab Issues (`glab` CLI / MCP)**: Use `glab issue view <id>` / `glab mr create` reading `GITLAB_TOKEN` from `.agents/mcp.env`.
+
 ## Offline / Local Fallback
 
 For local or solo development without network connectivity:

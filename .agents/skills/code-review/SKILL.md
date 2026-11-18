@@ -13,7 +13,7 @@ Audit the diff (`git diff` or branch diff) against **Specification Fidelity** an
    - **No** → Inspect `git status` and `git diff` via `run_command`, or ask the user for the base ref.
    - **Yes** → Proceed to step 2.
 2. **Are you reviewing your own ticket implementation or a multi-module diff?**
-   - **Yes** → Run `node .agents/skills/implement/scripts/audit-diff.mjs` first, then delegate an independent audit to `adversarial-reviewer` via `invoke_subagent`.
+   - **Yes** → Run `node .agents/skills/implement/scripts/audit-diff.mjs` first, then delegate read-only audits via `invoke_subagent` to `adversarial-reviewer` (and `security-auditor` / `architecture-planner` when auth, secrets, schemas, or module boundaries change).
    - **No** → Execute the review workflow below directly.
 
 ## Review workflow

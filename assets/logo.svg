@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" role="img" aria-label="Antigravity Agent Core Logo">
+  <defs>
+    <linearGradient id="aac-grad" x1="16" y1="20" x2="112" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#818CF8" />
+      <stop offset="55%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#F8FAFC" />
+    </linearGradient>
+    <linearGradient id="aac-orbit" x1="12" y1="88" x2="116" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+  </defs>
+  <!-- Outer Delta Frame -->
+  <path
+    d="M64 16L108 98H20L64 16Z"
+    stroke="url(#aac-grad)"
+    stroke-width="10"
+    stroke-linejoin="round"
+  />
+  <!-- Floating Isometric Core -->
+  <polygon
+    points="64,53 74,59 74,71 64,77 54,71 54,59"
+    fill="url(#aac-grad)"
+  />
+  <!-- Ascending Orbital Ring -->
+  <ellipse
+    cx="64"
+    cy="66"
+    rx="50"
+    ry="16"
+    transform="rotate(-24 64 66)"
+    stroke="url(#aac-orbit)"
+    stroke-width="6"
+    stroke-linecap="round"
+  />
+</svg>

@@ -1,11 +1,11 @@
 ---
 name: implement
-description: Audits any ticket or PRD for ambiguity, designs modular/configurable/optimized solutions reusing shared UI and utilities, executes test-first production code, runs post-ticket independent review, and checkpoints cross-machine handover commits. Use when implementing any ticket, issue, or feature slice.
+description: Audits any ticket or PRD for ambiguity, flips ticket status to in-progress in real time, designs modular/configurable/optimized solutions reusing shared UI and utilities, executes test-first production code, runs post-ticket independent review, immediately unblocks downstream tickets, and checkpoints per-ticket handover. Use when implementing any ticket, issue, or feature slice.
 ---
 
-# Implement (Ambiguity Audit → Pre-Code Design → TDD → Post-Ticket Review & Handover)
+# Implement (Real-Time Lifecycle → Ambiguity Audit → Design → TDD → Review → Unblock & Handover)
 
-Build **one ticket or vertical slice** to industrial production quality—never MVP stubs, hardcoded values, or unreviewed diffs.
+Build **one ticket or vertical slice** to industrial production quality—never MVP stubs, hardcoded values, deferred status updates, or unreviewed diffs.
 
 ## Decision tree
 
@@ -14,10 +14,10 @@ Build **one ticket or vertical slice** to industrial production quality—never 
    - **Yes** → Proceed to step 2.
 2. **Is the ticket blocked by an unfinished ticket (`Blocked by` in `docs/sprint/SPRINT.md`)?**
    - **Yes** → Stop and report the blocking ticket first.
-   - **No** → Proceed to step 3.
+   - **No** → If the active Wave has `>= 2` independent `ready` tickets with disjoint files, consider `/wave-execute` for parallel execution; otherwise proceed to step 3.
 3. **Is `CONTEXT.md` populated for the target area of the codebase?**
    - **No** → Run `/index-project` (including `scan-repo.mjs`) first so you know exact dependencies, UI primitives, config/logging seams, and verification commands.
-   - **Yes** → Execute Phases 1–3 below.
+   - **Yes** → Immediately flip ticket status to `in-progress` and execute Phases 1–3 below.
 
 ---
 
@@ -30,17 +30,17 @@ Audit Jira/GitHub/Linear/chat/Sprint tickets against these 7 checks before desig
 4. **Data & API Contract**: Exact fields, status/error codes, schema migrations—and do referenced tables/endpoints exist?
 5. **UI / UX States (if UI)**: Loading, empty, validation error, server/offline error, disabled/in-flight, responsive, disposal?
 6. **Config, Logging & Failures**: Env/config keys, timeouts/retries, offline/partial failure behavior?
-7. **Codebase Contradictions**: Does anything contradict `CONTEXT.md` or existing code?
+7. **Codebase Contradictions**: Does anything contradict `CONTEXT.md`, `docs/learnings/LESSONS.md`, or existing code?
 
 **Hard rule:** If any behavior-changing detail is missing or contradictory, stop, cite `ticket/PRD` vs `file:line`, and call `ask_question`.
 
 ---
 
-## Phase 1: Pre-Code Design, Config/Logging & Reuse Plan
+## Phase 1: Pre-Code Design, Config/Logging & Reuse Plan (After `in-progress` Flip)
 
-Before editing any file:
-1. **Reuse Search**: Search `components/`, `widgets/`, `ui/`, `shared/`, `lib/`, `utils/`, `hooks/`, `schemas/`, `api/` and read target primitives/helpers. Lock what you will **reuse or extend** (never duplicate).
-2. **Callers Check**: Search all callers (`rg -n`) of any shared symbol/component you plan to modify.
+Before editing any production or test file:
+1. **Immediate Status Transition**: Update `**Status**: in-progress` in both `docs/sprint/tickets/<NN>-*.md` and `docs/sprint/SPRINT.md` so concurrent sessions or teammates know this ticket is actively owned.
+2. **Reuse & Callers Search**: Search `components/`, `widgets/`, `ui/`, `shared/`, `lib/`, `utils/`, `hooks/`, `schemas/`, `api/`, read target primitives/helpers, and check all callers (`rg -n`) of any shared symbol you will modify.
 3. **Engineering Design Check** (invoke `/codebase-design` if non-trivial):
    - Modularity & narrow DI seam at external I/O boundaries.
    - Performance optimization: zero N+1, optimal data structures, cursor pagination/`ListView.builder`, isolate/worker offload for heavy CPU, `dispose()`/`close()` plan.
@@ -59,15 +59,16 @@ Before editing any file:
 
 ## Phase 3: Post-Ticket Re-Check, Independent Review & Handover Commit
 
-1. **Ticket Re-Check**: Re-read the ticket/PRD line-by-line and confirm every acceptance criterion, UI state, config key, log event, and edge case is implemented.
+1. **Ticket Re-Check**: Re-read the ticket/PRD line-by-line and confirm every acceptance criterion, touchpoint, UI state, config key, log event, and edge case is implemented.
 2. **Black-Box Diff Audit & Full Verification**:
    ```bash
    node .agents/skills/implement/scripts/audit-diff.mjs --help
    node .agents/skills/implement/scripts/audit-diff.mjs
    ```
    Then run the project's full test, static analysis, lint, and build commands via `run_command` and confirm exit code `0`.
-3. **Mandatory Post-Ticket Review**: Run `/code-review` (using `adversarial-reviewer` via `invoke_subagent` on multi-file diffs) to verify zero defects, zero secret leaks, zero DRY/UI duplication, and optimal performance.
-4. **Cross-Machine Handover & Commit**:
-   - Update `CONTEXT.md` if new shared UI, utilities, config vars, or seams were introduced.
-   - Update the ticket completion log, `docs/sprint/SPRINT.md` (promote newly unblocked tickets), and run `/handoff` to update `docs/sprint/HANDOFF.md` + `.scratch/handoff.md`.
-   - Create one atomic Conventional Commit (`feat(scope): ...`) containing this ticket + updated sprint/handover docs if commits were authorized in this session; otherwise present the verified file list and exact commit command/message for user approval.
+3. **Mandatory Post-Ticket Review**: Flip ticket status to `in-review` and run `/code-review` (using read-only `adversarial-reviewer`, plus `security-auditor` / `architecture-planner` as needed) via `invoke_subagent`.
+4. **Immediate Status Done, Downstream Unblock & Per-Ticket Handover**:
+   - Flip the completed ticket to `done` in `docs/sprint/tickets/<NN>-*.md` and `docs/sprint/SPRINT.md` immediately upon review approval.
+   - **Never delay unblocking**: immediately inspect every `blocked` ticket whose `Blocked by` list is now `100%` `done` and promote it to `ready` in both its ticket file and `SPRINT.md`.
+   - Update `CONTEXT.md` if new seams/primitives/config vars were added, and run `/self-learn` if any new insight emerged.
+   - **Mandatory Per-1-Ticket Handover**: Run `/handoff` immediately after finishing this ticket (`docs/sprint/HANDOFF.md` + `.scratch/handoff.md`), then create one atomic Conventional Commit (`feat(scope): ...`) if commits were authorized in this session (otherwise propose the exact commit command/message).

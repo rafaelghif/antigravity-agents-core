@@ -7,7 +7,7 @@
 **Rules, multi-language skills, sandboxed subagents, and lifecycle hooks for Google Antigravity.**
 
 <p align="center">
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.3.0-blue.svg?style=flat-square" alt="Version 6.3.0" /></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-6.4.0-blue.svg?style=flat-square" alt="Version 6.4.0" /></a>
   <a href="https://antigravity.google/docs"><img src="https://img.shields.io/badge/platform-Google_Antigravity-6366f1.svg?style=flat-square" alt="Platform: Google Antigravity" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=flat-square" alt="License: MIT" /></a>
 </p>
@@ -62,14 +62,14 @@ Both installers resolve `bin/cli.mjs` and delegate all file writes to it:
 
 ```bash
 # Linux / macOS (download, inspect, then run)
-curl -fsSL -o install.sh https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.3.0/install.sh
+curl -fsSL -o install.sh https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.4.0/install.sh
 less install.sh
 bash install.sh [target_dir] [--upgrade] [--dry-run]
 ```
 
 ```powershell
 # Windows PowerShell (download, inspect, then run)
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.3.0/install.ps1 -OutFile install.ps1
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/rafaelghif/antigravity-agents-core/v6.4.0/install.ps1 -OutFile install.ps1
 notepad install.ps1
 powershell -NoProfile -File .\install.ps1 [-TargetDir "C:\path\to\project"] [-Upgrade] [-DryRun]
 ```
@@ -113,8 +113,8 @@ flowchart LR
     Disc --> CD["/codebase-design\n(Seams + Design It Twice)"]
     Disc --> Spec["/to-spec\n(specs/<slug>.md)"]
     Spec --> Tickets["/to-tickets\n(SPRINT.md + Wave DAG)"]
-    Tickets --> Impl["/implement\n(Ambiguity Audit -> Reuse -> TDD)"]
-    Impl --> Review["/code-review\n(Spec + DRY + 6 Pillars)"]
+    Tickets --> Impl["/implement or /wave-execute\n(Ambiguity -> Reuse -> TDD)"]
+    Impl --> Review["/code-review & /perf-audit\n(Read-Only Reviewers + NFR)"]
     Review --> Handoff["/handoff\n(HANDOFF.md + Commit)"]
     Handoff --> PR["/pr"]
 ```
@@ -122,20 +122,23 @@ flowchart LR
 | Category | Skills | Helper Scripts (`--help`) |
 | :--- | :--- | :--- |
 | **Indexing & Discovery** | `/index-project`, `/discover` (pairs with built-in `/grill-me`), `/domain-modeling`, `/codebase-design`, `/research` | [`scan-repo.mjs`](.agents/skills/index-project/scripts/scan-repo.mjs) |
-| **Planning & Execution** | `/to-spec`, `/to-tickets`, `/implement`, `/tdd`, `/safe-refactor`, `/database-migration`, `/diagnosing-bugs` | [`validate-spec.mjs`](.agents/skills/to-spec/scripts/validate-spec.mjs), [`validate-board.mjs`](.agents/skills/to-tickets/scripts/validate-board.mjs), [`audit-diff.mjs`](.agents/skills/implement/scripts/audit-diff.mjs) |
-| **Review, Handover & Automation** | `/code-review`, `/handoff`, `/pr`, `/browsing`, `/office` | [`run-browser.mjs`](.agents/skills/browsing/scripts/run-browser.mjs), [`extract-office.py`](.agents/skills/office/scripts/extract-office.py) |
+| **Planning & Execution** | `/to-spec`, `/to-tickets`, `/implement`, `/wave-execute`, `/tdd`, `/safe-refactor`, `/database-migration`, `/diagnosing-bugs` | [`validate-spec.mjs`](.agents/skills/to-spec/scripts/validate-spec.mjs), [`validate-board.mjs`](.agents/skills/to-tickets/scripts/validate-board.mjs), [`audit-diff.mjs`](.agents/skills/implement/scripts/audit-diff.mjs) |
+| **Review, Perf & Automation** | `/code-review`, `/perf-audit`, `/handoff`, `/self-learn`, `/pr`, `/browsing`, `/office` | [`run-browser.mjs`](.agents/skills/browsing/scripts/run-browser.mjs), [`extract-office.py`](.agents/skills/office/scripts/extract-office.py) |
 
 ### 4. Subagents (`.agents/agents/`) & Lifecycle Hooks (`.agents/hooks.json`)
 
 - **Subagents** (`commandExecutionPolicy: sandbox`):
   - `codebase-investigator` (`flash`): Maps tech stacks, shared UI/utilities, execution flows, and callers.
-  - `adversarial-reviewer` (`inherit`): Audits diffs for spec fidelity, DRY/UI reuse, security, performance, and test integrity.
   - `verification-runner` (`flash`): Executes build, typecheck, lint, and test suites and returns compact failure traces.
+  - `adversarial-reviewer` (`inherit`, read-only): Audits diffs for spec fidelity, DRY/UI reuse, security, performance, and test integrity.
+  - `security-auditor` (`inherit`, read-only): Audits BOLA/IDOR, secrets, SSRF/path guards, boundary parsing, and concurrency locks.
+  - `architecture-planner` (`inherit`, read-only): Audits deep modules, Mermaid C4/ERD/sequence/state diagrams, scaling, and ADRs.
 - **Lifecycle Hooks** (cross-platform Node commands; documented threat model in [SECURITY.md](SECURITY.md)):
-  - `SessionStart`: Surfaces `.scratch/handoff.md`, `docs/sprint/HANDOFF.md`, `docs/sprint/SPRINT.md`, or `CONTEXT.md` (prompting `/index-project` if `CONTEXT.md` is still a template), and supports `AAC_PERSONA=neutral`.
-  - `PreToolUse` (`run_command`): Intercepts direct pushes to `main`/`master` via `.agents/git-guard.cjs` (`decision: "ask"`).
-  - `PreToolUse` (file writes): Intercepts mock/dummy/TODO placeholders and credential literals in production paths, plus test-skipping/tautological assertions in test files (`decision: "ask"`).
-  - `Stop` (`NO_TOOL_CALL` / `MAX_INVOCATIONS`, guarded by `continuationActive`): Checks modified/untracked test files for test tampering and runs the detected project test command (`package.json`, `pubspec.yaml`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `Package.swift`, `mix.exs`) before allowing completion.
+  - `SessionStart`: Surfaces `.scratch/handoff.md`, `docs/sprint/HANDOFF.md`, `docs/sprint/SPRINT.md`, `CONTEXT.md`, and `docs/learnings/LESSONS.md`, and supports `AAC_PERSONA=neutral`.
+  - `PreToolUse` (`run_command`): Intercepts protected-branch pushes (`main`/`master`/`release/*`/`production`/`staging`), `reset --hard`, `clean -fd`/`-fdx`, and raw `--force` pushes via `.agents/git-guard.cjs` (`AAC_GIT_GUARD_MODE=legacy` fallback; `--force-with-lease` on feature branches allowed).
+  - `PreToolUse` (file writes): Intercepts mock/dummy/TODO placeholders, expanded OWASP/Gitleaks secret patterns (non-echoing `<REDACTED>`), and test tampering (`decision: "ask"`).
+  - `PostToolUse` (file writes): Runs immediate syntax/JSON back-pressure checks (`JSON.parse` / `node --check`), returning `decision: "block"` + `additionalContext` on syntax errors.
+  - `Stop` (`NO_TOOL_CALL` / `MAX_INVOCATIONS`, guarded by `continuationActive`): Audits changed test files for tampering, maps uncommitted files to their nearest monorepo workspace manifest, and runs `typecheck`, `lint`, and `test` gates sequentially (`AAC_STOP_TEST_TIMEOUT_MS` default `60000`ms).
 
 ---
 

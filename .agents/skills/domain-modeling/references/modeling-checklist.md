@@ -3,8 +3,8 @@
 1. **Aggregate & Tenant Ownership**:
    - Name the owning principal (`tenant_id`, `organization_id`, `user_id`) for every aggregate.
    - Specify what cross-tenant reads/mutations must return (`404` vs `403`, zero existence leakage).
-2. **State Machine Precision**:
-   - List every state, valid transition `(from, trigger, guard) -> to`, and explicitly forbidden transitions.
+2. **State Machine Precision & Diagrams**:
+   - List every state, valid transition `(from, trigger, guard) -> to`, and explicitly forbidden transitions, and document them via Mermaid `stateDiagram-v2` (explicit `[*]`) and scoped `erDiagram` (`PK`/`FK`, bounded context only).
    - Enforce sum types / sealed classes per stack:
      - **TypeScript**: `type OrderState = { kind: 'draft' } | { kind: 'paid'; paidAtMs: number; receiptId: string }`
      - **Dart 3**: `sealed class OrderState {}` with exhaustive `switch`

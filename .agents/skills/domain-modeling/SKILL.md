@@ -26,7 +26,7 @@ Keep domain rules unambiguous, falsifiable, and impossible to violate across spe
 
 1. **Read Upstream Sources End-to-End**: `CONTEXT.md`, `docs/discovery/<slug>.md`, `specs/<slug>.md`, `docs/adr/`, and relevant domain models.
 2. **Eliminate Vague Nouns**: Replace overloaded terms (`item`, `data`, `status`, `account`) with bounded domain types (`InvoiceLineItem`, `TenantMember`).
-3. **Make Illegal States Unrepresentable**: Collapse flag clusters into language-native sum types (TS discriminated unions, Dart 3 `sealed class`, Rust `enum`, Python `Literal` union, Go typed state interface).
+3. **Make Illegal States Unrepresentable**: Collapse flag clusters into language-native sum types (TS discriminated unions, Dart 3 `sealed class`, Rust `enum`, Python `Literal` union, Go typed state interface) and visualize transitions with Mermaid `stateDiagram-v2` (entry/exit `[*]`) plus scoped bounded-context `erDiagram` (`PK`/`FK`) when entities or schemas change.
 4. **Keep Invariants Falsifiable**: Every `INV-###` must specify the exact illegal state it forbids and the boundary/forbidden-transition test that catches regressions.
 5. **Propagate Explicitly**: Emit a short propagation table (`Changed ID`, `Affected File`, `Required Action`, `Status`) before finishing.
 

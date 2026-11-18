@@ -25,8 +25,9 @@ Convert a confirmed Discovery Decision Record (`docs/discovery/<slug>.md`) or PR
 2. **Classify Facts (`KNOWN` / `OPEN` / `ASSUMED` / `N/A`)**: Copy numbers, schemas, and commands verbatim. Inapplicable sections get `N/A — <reason>`, never silent omission or fake metrics.
 3. **Specify Industrial Contracts**:
    - Functional `REQ-###` (Given/When/Then), `INV-###` / `ST-###`, and UI state matrix (`loading`, `empty`, `validation error`, `server/offline error`, `disabled`, disposal).
+   - **Architecture & Design Diagrams (Mermaid)**: `C4Context`/`C4Container` (component & trust boundaries), `erDiagram` (scoped tables with `PK`/`FK`), `sequenceDiagram` (auth/payment/distributed flows), and `stateDiagram-v2` (from `[*]`). Mark inapplicable diagrams `N/A — <reason>`.
    - Security & credential hygiene (`SEC-###`: auth/BOLA, strict parsing, idempotency, secret isolation).
-   - Configurability (typed startup-validated keys), structured logging (`traceId`, `<REDACTED>`), and performance/complexity budgets (`NFR-###`: N+1 prevention, pagination/virtualization, isolate/worker offload).
+   - Configurability (typed startup-validated keys), structured logging (`traceId`, `<REDACTED>`), API Contract (`OpenAPI`/`AsyncAPI`), Rollout/Canary & Rollback SOP, Observability SLI/SLO & Runbook, and performance/complexity budgets (`NFR-###`, verified via `/perf-audit`).
    - Traceability Matrix mapping every requirement to a public seam and automated test.
 4. **Validate via Black-Box Script**:
    ```bash

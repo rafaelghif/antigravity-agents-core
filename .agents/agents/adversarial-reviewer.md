@@ -3,8 +3,6 @@ name: adversarial-reviewer
 description: Independent Red-Team Staff Reviewer that audits diffs and plans across specification fidelity, shared UI and DRY reuse, test integrity, security, and architecture without confirmation bias.
 tools:
   - read_file
-  - write_file
-  - edit_file
   - run_command
   - search_web
 subagent: true

@@ -1,6 +1,6 @@
 # Master Skill Routing Directory
 
-Operational taxonomy, trigger conditions, and quality gates for the 17 skills in this repository. Verified by `tests/aac.test.mjs` (skill set, frontmatter, rule size caps, and relative-link integrity).
+Operational taxonomy, trigger conditions, and quality gates for the 20 skills in this repository. Verified by `tests/aac.test.mjs` (skill set, frontmatter, rule size caps, and relative-link integrity).
 
 Platform contract:
 - Skills load from `.agents/skills/<skill-folder>/SKILL.md` (one level deep) and `~/.gemini/config/skills/`.
@@ -72,6 +72,7 @@ User Request / PRD / Ticket
 | :--- | :--- | :--- |
 | [`to-tickets`](../../.agents/skills/to-tickets/SKILL.md) | Readiness-passed spec needs repo-grounded vertical slices and a Wave DAG | `docs/sprint/SPRINT.md`, `docs/sprint/tickets/<NN>-<slug>.md` |
 | [`implement`](../../.agents/skills/implement/SKILL.md) | Ticket or feature slice is ready for ambiguity audit, reuse mapping, TDD, and delivery | Tested production code, synced ticket/board |
+| [`wave-execute`](../../.agents/skills/wave-execute/SKILL.md) | Active Wave has `>= 2` independent `ready` tickets with disjoint files | Parallel worktree execution + integrated review |
 | [`tdd`](../../.agents/skills/tdd/SKILL.md) | Behavioral increment built test-first at a public seam | Failing test → complete production code → refactor |
 | [`safe-refactor`](../../.agents/skills/safe-refactor/SKILL.md) | Deduplicating or restructuring code without changing behavior | Characterization tests + atomic steps |
 | [`database-migration`](../../.agents/skills/database-migration/SKILL.md) | Zero-downtime schema, index, or contract migrations | Expand → Migrate → Contract with rollback check |
@@ -82,7 +83,9 @@ User Request / PRD / Ticket
 | Skill | Use when | Primary artifact |
 | :--- | :--- | :--- |
 | [`browsing`](../../.agents/skills/browsing/SKILL.md) | Live UI verification, E2E journeys, or visual layout checks | Browser runner script + screenshot/video proof |
+| [`perf-audit`](../../.agents/skills/perf-audit/SKILL.md) | Verifying `NFR-###` latency, `EXPLAIN ANALYZE`, load, bundle, or UI FPS budgets | Measured benchmark + optimization proof |
 | [`code-review`](../../.agents/skills/code-review/SKILL.md) | Diff, branch, or PR audit (spec fidelity, shared UI/DRY, security, test integrity) | Ranked findings + verdict |
 | [`pr`](../../.agents/skills/pr/SKILL.md) | Writing a structured pull request description | Visual summary, door reversibility, test evidence |
 | [`diagnosing-bugs`](../../.agents/skills/diagnosing-bugs/SKILL.md) | Reproducing bugs/regressions and isolating shared root cause | Reproduction loop + root-cause fix |
 | [`handoff`](../../.agents/skills/handoff/SKILL.md) | Ending or switching a session mid-sprint | `.scratch/handoff.md` + synced sprint board |
+| [`self-learn`](../../.agents/skills/self-learn/SKILL.md) | Distilling lessons from human feedback, `search_web`, `/browsing`, reviews, or failures | Verified procedural rules in `docs/learnings/LESSONS.md` |

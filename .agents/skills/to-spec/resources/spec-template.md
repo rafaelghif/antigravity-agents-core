@@ -21,7 +21,29 @@
 - **Shared Utils / Hooks / State Holders / Schemas / API Clients**: <exact `path:symbol`>
 - **Target Modules & Sibling Callers**: <exact files verified via search>
 
-## 3. Domain Model, Invariants & State Machine
+## 3. Domain Model, Invariants, State Machine & Design Diagrams
+
+> Include Mermaid blocks (`C4Context`/`C4Container`, `erDiagram` with `PK`/`FK`, `sequenceDiagram`, `stateDiagram-v2` with `[*]`) or mark inapplicable diagrams `N/A — <reason>`. Avoid raw HTML tags or `{}` inside Mermaid comments.
+
+```mermaid
+C4Container
+    title <Feature Component & Trust Boundaries (or N/A — reason)>
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> <InitialState>
+```
+
+```mermaid
+erDiagram
+    %% Bounded-context tables (PK/FK) or N/A — no schema change
+```
+
+```mermaid
+sequenceDiagram
+    %% Key auth / mutation / distributed flow or N/A — pure local logic
+```
 
 | ID | Invariant | Forbidden State / Transition | Enforced By | Source |
 | :--- | :--- | :--- | :--- | :--- |
@@ -53,10 +75,11 @@
 | `SEC-002` | Boundary Parsing / Replay | <strict schema parse, payload bounds, idempotency> | <malformed + duplicate test> | `DEC-###` |
 | `SEC-003` | Credential & Secret Hygiene | <zero hardcoded secrets; server-only secret storage; `<REDACTED>` logs> | <diff + log scan> | `DEC-###` |
 
-## 7. Configurability, Logging, Data Contracts & Persistence
+## 7. Configurability, Logging, API Contract & Persistence
 
 - **Config Contract (Zero Hardcoded Values)**: <env/`--dart-define`/config keys, types, startup fail-fast rule> (`Source: DEC-###`)
 - **Logging & Audit Contract**: <structured logger seam, events logged, correlation `traceId`, PII/secret redaction> (`Source: DEC-###`)
+- **API Contract & Schema Compatibility**: <`OpenAPI` / `AsyncAPI` / GraphQL / Protobuf spec path + backward-compatibility rule, or `N/A — internal module only`> (`Source: DEC-###`)
 - **Entry Signatures / Schemas**: <exact types/endpoints> (`Source: DEC-###`)
 - **Persistence & Migrations**: <expand-migrate-contract + rollback or `N/A — no schema change`>
 
@@ -64,9 +87,11 @@
 | :--- | :--- | :--- | :--- | :--- |
 | `ERR-001` | <condition> | `<status/code>` | <fail fast / retry / rollback> | `DEC-###` |
 
-## 8. Resilience & Test Strategy
+## 8. Resilience, Rollout, Observability & Test Strategy
 
 - **Failure Modes**: <timeouts, bounded retries with jitter, fallback or `N/A — pure local logic`>
+- **Rollout, Feature-Flag, Canary & Rollback SOP**: <feature flag key, canary percentage/gate, immediate rollback trigger & procedure, or `N/A — non-deployed library`>
+- **Observability (SLI/SLO & Runbook)**: <metrics, alert thresholds, dashboard/runbook link `docs/runbooks/<slug>.md`, or `N/A — no runtime service`>
 - **Public Seams & Test Matrix**: happy path, `N-1`/`N`/`N+1`, empty/nil/max, unauthorized (`401`/`403`/`404`), duplicate idempotency, failure injection, mutation falsifiability.
 
 ## 9. Traceability Matrix

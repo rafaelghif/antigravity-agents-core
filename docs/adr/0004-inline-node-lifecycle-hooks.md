@@ -1,7 +1,7 @@
 # 4. Inline Node Lifecycle Hooks and File-Based Task Memory
 
 Date: 2026-11-01
-Status: Accepted
+Status: Accepted (guard strictness and Stop scope superseded by [ADR 0005](0005-enterprise-strict-git-and-stop-guards.md))
 
 ## Context
 

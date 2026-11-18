@@ -1,6 +1,6 @@
 {
   "name": "@rafaelghif/aac-core",
-  "version": "6.3.0",
+  "version": "6.4.0",
   "description": "LLM-native engineering rules, multi-language skills, sandboxed subagents, and lifecycle hooks for Google Antigravity",
   "publishConfig": {
     "access": "public"

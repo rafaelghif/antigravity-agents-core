@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) {
-  console.log(`scan-repo.mjs - Multi-language repository reconnaissance for CONTEXT.md indexing.
+  console.log(`scan-repo.mjs - Multi-language & monorepo reconnaissance for CONTEXT.md indexing.
 
 Usage:
   node .agents/skills/index-project/scripts/scan-repo.mjs [--root <dir>] [--json]
@@ -21,10 +21,24 @@ const asJson = args.includes('--json');
 const rootIdx = args.indexOf('--root');
 if (rootIdx !== -1 && args[rootIdx + 1]) rootDir = path.resolve(args[rootIdx + 1]);
 
+if (!fs.existsSync(rootDir) || !fs.statSync(rootDir).isDirectory()) {
+  console.error(`FAIL: Root directory not found: ${rootDir}`);
+  process.exit(1);
+}
+
+const MAX_DEPTH = 5;
+const MAX_WORKSPACES = 100;
+const MAX_DIRS_VISITED = 5000;
 const IGNORE_DIRS = new Set([
   '.git', 'node_modules', '.dart_tool', 'build', 'dist', '.next', '.nuxt',
   'target', 'vendor', '__pycache__', '.venv', 'venv', '.idea', '.scratch', 'coverage',
 ]);
+
+const MANIFEST_CANDIDATES = [
+  'package.json', 'tsconfig.json', 'pubspec.yaml', 'analysis_options.yaml',
+  'go.mod', 'Cargo.toml', 'pyproject.toml', 'requirements.txt',
+  'build.gradle', 'build.gradle.kts', 'pom.xml', 'Package.swift', 'mix.exs',
+];
 
 function readSafe(filePath) {
   try {
@@ -34,59 +48,72 @@ function readSafe(filePath) {
   }
 }
 
-function walkDirs(dir, maxDepth = 3, depth = 0, out = []) {
-  if (depth > maxDepth) return out;
+function walkTree(dir, depth = 0, state = { dirs: [], fileCount: 0, truncated: false }) {
+  if (depth > MAX_DEPTH || state.dirs.length >= MAX_DIRS_VISITED) {
+    state.truncated = true;
+    return state;
+  }
   let entries = [];
   try {
     entries = fs.readdirSync(dir, { withFileTypes: true });
   } catch {
-    return out;
+    return state;
   }
   for (const entry of entries) {
-    if (!entry.isDirectory() || IGNORE_DIRS.has(entry.name)) continue;
-    const full = path.join(dir, entry.name);
-    const rel = path.relative(rootDir, full).replace(/\\/g, '/');
-    out.push(rel);
-    walkDirs(full, maxDepth, depth + 1, out);
+    if (entry.isDirectory()) {
+      if (IGNORE_DIRS.has(entry.name)) continue;
+      if (state.dirs.length >= MAX_DIRS_VISITED) {
+        state.truncated = true;
+        break;
+      }
+      const full = path.join(dir, entry.name);
+      const rel = path.relative(rootDir, full).replace(/\\/g, '/');
+      state.dirs.push(rel);
+      walkTree(full, depth + 1, state);
+    } else {
+      state.fileCount += 1;
+    }
   }
-  return out;
+  return state;
 }
 
-function detectManifests() {
-  const candidates = [
-    'package.json', 'tsconfig.json', 'pubspec.yaml', 'analysis_options.yaml',
-    'go.mod', 'Cargo.toml', 'pyproject.toml', 'requirements.txt',
-    'build.gradle', 'build.gradle.kts', 'pom.xml', 'Package.swift', 'mix.exs',
-  ];
-  return candidates.filter((f) => fs.existsSync(path.join(rootDir, f)));
+function detectManifests(dirPath) {
+  return MANIFEST_CANDIDATES.filter((f) => fs.existsSync(path.join(dirPath, f)));
 }
 
-function extractCommandsAndStacks(manifests) {
+function detectNodePackageManager(dirPath) {
+  for (const dir of [dirPath, rootDir]) {
+    if (fs.existsSync(path.join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
+    if (fs.existsSync(path.join(dir, 'yarn.lock'))) return 'yarn';
+    if (fs.existsSync(path.join(dir, 'bun.lockb')) || fs.existsSync(path.join(dir, 'bun.lock'))) return 'bun';
+  }
+  return 'npm';
+}
+
+function extractCommandsAndStacks(manifests, dirPath) {
   const stacks = [];
   const commands = { test: [], analyze: [], lint: [], build: [] };
   const dependencies = [];
 
   if (manifests.includes('package.json')) {
-    const raw = readSafe(path.join(rootDir, 'package.json'));
+    const raw = readSafe(path.join(dirPath, 'package.json'));
     try {
       const pkg = JSON.parse(raw || '{}');
-      const pm = fs.existsSync(path.join(rootDir, 'pnpm-lock.yaml')) ? 'pnpm'
-        : fs.existsSync(path.join(rootDir, 'yarn.lock')) ? 'yarn'
-        : (fs.existsSync(path.join(rootDir, 'bun.lockb')) || fs.existsSync(path.join(rootDir, 'bun.lock'))) ? 'bun'
-        : 'npm';
+      const pm = detectNodePackageManager(dirPath);
       stacks.push(`Node/JS (${pm})`);
       const s = pkg.scripts || {};
+      const runPrefix = pm === 'npm' ? 'npm run' : pm;
       if (s.test && !s.test.includes('no test specified')) commands.test.push(`${pm} test`);
-      if (s.typecheck) commands.analyze.push(`${pm} run typecheck`);
-      if (s.lint) commands.lint.push(`${pm} run lint`);
-      if (s.build) commands.build.push(`${pm} run build`);
+      if (s.typecheck) commands.analyze.push(`${runPrefix} typecheck`);
+      if (s.lint) commands.lint.push(`${runPrefix} lint`);
+      if (s.build) commands.build.push(`${runPrefix} build`);
       const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
       for (const [k, v] of Object.entries(deps)) dependencies.push(`${k}@${v}`);
     } catch { /* ignore invalid json */ }
   }
 
   if (manifests.includes('pubspec.yaml')) {
-    const pub = readSafe(path.join(rootDir, 'pubspec.yaml')) || '';
+    const pub = readSafe(path.join(dirPath, 'pubspec.yaml')) || '';
     const isFlutter = /\bflutter:\s*$/m.test(pub) || /sdk:\s*flutter/i.test(pub);
     stacks.push(isFlutter ? 'Dart / Flutter' : 'Dart');
     commands.test.push(isFlutter ? 'flutter test' : 'dart test');
@@ -146,19 +173,48 @@ function classifyDirs(dirs) {
   return buckets;
 }
 
-const manifests = detectManifests();
-const { stacks, commands, dependencies } = extractCommandsAndStacks(manifests);
-const dirs = walkDirs(rootDir, 3);
-const buckets = classifyDirs(dirs);
+const uniq = (arr) => [...new Set(arr)];
+const tree = walkTree(rootDir);
+const rootManifests = detectManifests(rootDir);
+const rootInfo = extractCommandsAndStacks(rootManifests, rootDir);
+
+const workspaces = [];
+if (rootManifests.length) {
+  workspaces.push({ path: '.', manifests: rootManifests, stacks: rootInfo.stacks, commands: rootInfo.commands });
+}
+for (const relDir of tree.dirs) {
+  if (workspaces.length >= MAX_WORKSPACES) {
+    tree.truncated = true;
+    break;
+  }
+  const absDir = path.join(rootDir, relDir);
+  const subManifests = detectManifests(absDir);
+  if (!subManifests.length) continue;
+  const subInfo = extractCommandsAndStacks(subManifests, absDir);
+  workspaces.push({ path: relDir, manifests: subManifests, stacks: subInfo.stacks, commands: subInfo.commands });
+}
+
+const allStacks = uniq([...rootInfo.stacks, ...workspaces.flatMap((w) => w.stacks)]);
+const allCommands = {
+  test: uniq([...rootInfo.commands.test, ...workspaces.flatMap((w) => w.commands.test)]),
+  analyze: uniq([...rootInfo.commands.analyze, ...workspaces.flatMap((w) => w.commands.analyze)]),
+  lint: uniq([...rootInfo.commands.lint, ...workspaces.flatMap((w) => w.commands.lint)]),
+  build: uniq([...rootInfo.commands.build, ...workspaces.flatMap((w) => w.commands.build)]),
+};
+const buckets = classifyDirs(tree.dirs);
+const layoutMode = workspaces.length > 1 || tree.fileCount > 100 ? 'hub-and-spoke' : 'single-context';
 
 const report = {
   rootDir,
-  manifests,
-  stacks,
-  commands,
-  dependencies,
+  manifests: rootManifests,
+  workspaces,
+  layoutMode,
+  truncated: tree.truncated,
+  stacks: allStacks,
+  commands: allCommands,
+  dependencies: rootInfo.dependencies,
   directoryBuckets: buckets,
-  topLevelDirs: dirs.filter((d) => !d.includes('/')),
+  topLevelDirs: tree.dirs.filter((d) => !d.includes('/')),
 };
 
 if (asJson) {
@@ -167,16 +223,18 @@ if (asJson) {
 }
 
 console.log(`# Repo Scan Summary (${path.basename(rootDir)})`);
-console.log(`- **Stacks**: ${stacks.join(', ') || 'Unknown / inspect manually'}`);
-console.log(`- **Manifests**: ${manifests.join(', ') || 'None detected at root'}`);
-console.log(`- **Test Commands**: ${commands.test.join(' | ') || 'None detected'}`);
-console.log(`- **Analyze/Typecheck**: ${commands.analyze.join(' | ') || 'None detected'}`);
-console.log(`- **Lint / Build**: ${[...commands.lint, ...commands.build].join(' | ') || 'None detected'}`);
+console.log(`- **Layout Mode**: ${layoutMode}`);
+console.log(`- **Stacks**: ${allStacks.join(', ') || 'Unknown / inspect manually'}`);
+console.log(`- **Root Manifests**: ${rootManifests.join(', ') || 'None detected at root'}`);
+console.log(`- **Workspaces (${workspaces.length})**: ${workspaces.map((w) => w.path).join(', ') || 'None'}`);
+console.log(`- **Test Commands**: ${allCommands.test.join(' | ') || 'None detected'}`);
+console.log(`- **Analyze/Typecheck**: ${allCommands.analyze.join(' | ') || 'None detected'}`);
+console.log(`- **Lint / Build**: ${[...allCommands.lint, ...allCommands.build].join(' | ') || 'None detected'}`);
 console.log(`- **UI / Widget Dirs**: ${buckets.ui.join(', ') || 'None detected'}`);
 console.log(`- **Shared / Utils / State Dirs**: ${buckets.shared.join(', ') || 'None detected'}`);
 console.log(`- **Config / Data / API Dirs**: ${[...buckets.config, ...buckets.data].join(', ') || 'None detected'}`);
 console.log(`- **Feature / Module Dirs**: ${buckets.features.join(', ') || 'None detected'}`);
 console.log(`- **Test Dirs**: ${buckets.tests.join(', ') || 'None detected'}`);
-if (dependencies.length) {
-  console.log(`- **Key Dependencies (sample)**: ${dependencies.join(', ')}`);
+if (rootInfo.dependencies.length) {
+  console.log(`- **Key Dependencies (sample)**: ${rootInfo.dependencies.join(', ')}`);
 }

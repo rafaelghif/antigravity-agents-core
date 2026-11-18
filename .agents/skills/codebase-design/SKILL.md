@@ -23,8 +23,9 @@ Think through **modularity, maintainability, scaling, upgradeability, configurab
 
 ## Design workflow
 
-1. **Design It Twice**:
+1. **Design It Twice & Diagram Boundaries**:
    - Sketch **Design A** (minimal extension) vs **Design B** (deeper module hiding validation, config defaults, retry/timeout policy, concurrency guards, and state transitions behind a narrow interface).
+   - For non-trivial multi-module or external I/O flows, produce a Mermaid `C4Container` (explicit technology + trust boundaries) and/or `sequenceDiagram` before coding.
    - Compare across all 6 Pillars: *Maintainability, Scalability, Modularity/Future-Proofing, Security/Secret Hygiene, Performance Optimization, Upgradeability*.
 2. **Pre-Code Performance & Resource Audit**:
    - Verify O(n) / O(1) data structures, zero N+1 queries, bounded pagination/virtualization (`ListView.builder` / cursor pagination), non-blocking UI/event threads (Isolates / workers), explicit timeouts, and deterministic resource disposal (`dispose()`, `close()`, `defer`).

@@ -32,6 +32,7 @@ Populate `CONTEXT.md` strictly with verified file paths, exported symbols, confi
    - Record **exact file paths, exported symbols, and key props/variants**.
 4. **Inspect Shared Utilities, API Clients, Schemas & State Holders**:
    - Read existing HTTP/API clients, auth/session guards, boundary validators, formatters, and shared hooks/providers/BLoCs.
-5. **Write `CONTEXT.md` & Verify Every Path**:
+5. **Write `CONTEXT.md` (and Optional Hub+Spoke Domain Files) & Verify Every Path**:
    - Populate Sections 1–5 of `CONTEXT.md` using only observed paths/symbols; preserve domain invariants in Sections 6–7.
+   - When `scan-repo.mjs` reports `layoutMode: hub-and-spoke` (`> 1` workspace or `> 100` files), keep `CONTEXT.md` concise as the **Index Hub** (linking per-workspace/domain spokes at `docs/domains/<domain>.md`) so root context stays token-efficient. Single-package repos keep `single-context` inside `CONTEXT.md`.
    - Confirm every file path cited in `CONTEXT.md` exists on disk.
