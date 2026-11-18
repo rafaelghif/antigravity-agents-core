@@ -1,26 +1,26 @@
 ---
 trigger: glob
-globs: "*.test.*, *.spec.*, **/*.test.*, **/*.spec.*, **/*_test.go, **/*_test.py, **/test_*.py, **/tests/**, **/__tests__/**, **/fixtures/**, **/mocks/**"
-description: "Public-seam testing, hermetic execution, boundary coverage, and anti-test-tampering rules."
+globs: "*.test.*, *.spec.*, **/*.test.*, **/*.spec.*, **/*_test.dart, **/*_test.go, **/*_test.py, **/test_*.py, **/*Test.kt, **/*Test.java, **/*Tests.swift, **/test/**, **/tests/**, **/integration_test/**, **/__tests__/**, **/fixtures/**, **/mocks/**"
+description: "Multi-language public-seam testing, hermetic execution, boundary coverage, and anti-test-tampering rules."
 ---
 
-# Testing Rules
+# Testing Rules (Multi-Language)
 
-1. **Test Observable Behavior at Public Seams**: Exercise modules through their exported/public interface (API route, CLI command, exported function, rendered UI role/text). Never assert on private methods, internal state fields, or internal helper call counts.
+1. **Test Observable Behavior at Public Seams**: Assert against public interfaces (HTTP routes, CLI commands, exported functions/use-cases, rendered widgets/UI via semantic locators or `find.byType`/`find.text`). Never test private methods or internal helper call counts.
 2. **Hermetic & Deterministic Isolation**:
-   - Tests must pass in any execution order and in parallel with zero shared mutable state (`tenantId = randomUUID()` / isolated fixtures per test).
-   - Never use wall-clock `sleep(1000)` delays; use virtual timers (`fakeTimers`) or bounded condition polling.
-3. **Seam-Level Fakes Over SUT Mocking**:
-   - Never mock or spy-stub the System-Under-Test (SUT) or pure domain logic. Restrict test doubles strictly to outer I/O boundaries (third-party HTTP APIs, mailers, clock, physical network).
-4. **Required Edge & Security Matrix**:
+   - Each test must run independently and in parallel with zero shared mutable state (unique IDs/tenants per test, fresh dependency container/ProviderScope).
+   - Ban arbitrary wall-clock `sleep` calls; use fake timers/clocks (`fakeTimers`, `fake_async`, `pumpAndSettle` with bounded duration) or deterministic async synchronization.
+3. **Outer-Boundary Doubles Only (Never Mock the SUT)**:
+   - Never mock or stub the class/function/widget under test. Restrict fakes/mocks (`mocktail`, `vi.fn`, HTTP fakes) strictly to outer I/O boundaries (network, DB, clock, device plugins).
+4. **Mandatory Coverage Matrix**:
    - Happy path + `N-1`, `N`, `N+1` boundary thresholds.
-   - Empty, `null`/`nil`, malformed, and max-length inputs.
+   - Empty, `null`, malformed, and max-length inputs.
    - Unauthorized / cross-tenant access (`401`/`403`/`404` with zero data leakage).
-   - Duplicate idempotency keys (same response, zero duplicate side effects).
-   - At least one injected dependency failure mode.
-5. **Mutation Falsifiability**: Removing or breaking a core domain invariant or auth check must turn at least one test red.
-6. **Anti-Test-Tampering & Closed-Loop Exit Proof**:
-   - Existing tests are sacred contracts. When a test fails, fix production code—never edit assertions to make a broken implementation pass.
-   - Strictly banned: `.skip`, `.only`, `xit`, `xdescribe`, `@pytest.mark.skip`, `@pytest.mark.xfail`, `@unittest.skip`, `t.Skip()`, commenting out assertions, empty `try/catch` swallowing assertions, or tautological assertions (`expect(true).toBe(true)`, `assert.ok(true)`, `toBeDefined()`).
-   - **Specification Conflict Protocol**: If an existing test genuinely contradicts an updated spec or user requirement, STOP, cite `file:line`, explain the conflict, and obtain explicit user approval via `ask_question` before changing the test.
-   - Run the full test suite via `run_command` after the final edit and verify exit code `0`.
+   - Duplicate idempotency keys (identical output, zero duplicate side effects).
+   - Injected external failure / timeout / offline mode.
+5. **Mutation Falsifiability**: Removing or inverting a core domain rule or auth check must break at least one test.
+6. **Anti-Test-Tampering & Closed-Loop Verification**:
+   - Fix production code when tests fail—never weaken assertions, catch assertion failures, or add skip directives (`.skip`, `.only`, `xit`, `skip: true` in Dart `test(..., skip: ...)`, `@pytest.mark.skip`, `t.Skip()`, `@Ignore`).
+   - Ban tautological checks (`expect(true).toBe(true)`, `expect(true, isTrue)`, `assert.ok(true)`).
+   - If an existing test genuinely contradicts an updated spec, STOP, cite `file:line`, and get explicit user approval via `ask_question` before changing it.
+   - Run the full real verification suite (`npm test` / `flutter test` / `dart test` / `go test ./...` / `pytest` / `cargo test`) after the final edit and confirm exit code `0`.

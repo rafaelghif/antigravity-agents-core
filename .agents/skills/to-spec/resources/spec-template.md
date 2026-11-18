@@ -3,7 +3,7 @@
 - **Status**: `draft` | `ready-for-tickets` | `accepted` | `superseded by <spec>`
 - **Feature Slug**: `<feature-slug>`
 - **DDR / PRD Source**: `docs/discovery/<feature-slug>.md` (or PRD link)
-- **Quality Bar**: `production` (MVP/prototype shortcuts forbidden; inapplicable gates marked `N/A — <reason>`)
+- **Quality Bar**: `production` (industrial standard; MVP/stub/hardcoded shortcuts forbidden; inapplicable gates marked `N/A — <reason>`)
 - **Verification Command**: `<exact command verified from repo>`
 - **Readiness Verdict**: `NOT READY` | `READY FOR TICKETS`
 
@@ -17,9 +17,9 @@
 
 ## 2. Reusable Codebase Assets & Touchpoints (`CONTEXT.md`)
 
-- **Shared UI & Tokens to Reuse/Extend**: <exact `path:symbol` or `N/A — no UI`>
-- **Shared Utils / Hooks / Schemas / API Clients**: <exact `path:symbol`>
-- **Target Modules / Existing Callers**: <exact files and sibling callers verified via search>
+- **Shared UI / Widgets & Tokens to Reuse/Extend**: <exact `path:symbol` or `N/A — no UI`>
+- **Shared Utils / Hooks / State Holders / Schemas / API Clients**: <exact `path:symbol`>
+- **Target Modules & Sibling Callers**: <exact files verified via search>
 
 ## 3. Domain Model, Invariants & State Machine
 
@@ -31,7 +31,7 @@
 | :--- | :--- | :--- | :--- |
 | `<state>` | `<next states>` | `<illegal states>` | `<guard>` (`Source: ST-###`) |
 
-- **UI States (if UI)**: loading, empty, validation error, server error, disabled/in-flight, responsive (`N/A — no UI` if backend/CLI).
+- **UI States (if UI)**: loading, empty, validation error, server/offline error, disabled/in-flight, responsive, controller disposal (`N/A — no UI`).
 
 ## 4. Functional Requirements & Acceptance Criteria
 
@@ -39,21 +39,24 @@
 | :--- | :--- | :--- | :---: | :--- |
 | `REQ-001` | <behavior> | **Given** `<pre>`, **when** `<action>`, **then** `<outcome>` | `must` | `DEC-###` |
 
-## 5. Non-Functional Requirements (Measurable)
+## 5. Non-Functional & Performance Optimization Budgets
 
-| ID | Attribute | Budget / Target | Measurement Method | Behavior When Exceeded | Source |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `NFR-001` | <latency/throughput/durability or `N/A`> | `<exact target + unit>` | <benchmark/metric> | <degradation/alert> | `DEC-###` |
+| ID | Attribute | Budget / Target | Optimization Strategy | Measurement Method | Behavior When Exceeded | Source |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `NFR-001` | <latency/memory/N+1/FPS> | `<exact target + unit>` | <batching/index/virtualization/isolate> | <benchmark/test> | <degradation/alert> | `DEC-###` |
 
-## 6. Security, Privacy & Abuse Cases
+## 6. Security, Credential Hygiene & Abuse Cases
 
 | ID | Threat / Control Area | Rule | Verification | Source |
 | :--- | :--- | :--- | :--- | :--- |
 | `SEC-001` | Auth / BOLA-IDOR | <owner/tenant check on every read & write> | <`401`/`403`/`404` test> | `DEC-###` |
-| `SEC-002` | Boundary Parsing / Replay | <strict schema parse, payload bounds, idempotency key> | <malformed + duplicate test> | `DEC-###` |
+| `SEC-002` | Boundary Parsing / Replay | <strict schema parse, payload bounds, idempotency> | <malformed + duplicate test> | `DEC-###` |
+| `SEC-003` | Credential & Secret Hygiene | <zero hardcoded secrets; server-only secret storage; `<REDACTED>` logs> | <diff + log scan> | `DEC-###` |
 
-## 7. Data Contracts, Error Mapping & Persistence
+## 7. Configurability, Logging, Data Contracts & Persistence
 
+- **Config Contract (Zero Hardcoded Values)**: <env/`--dart-define`/config keys, types, startup fail-fast rule> (`Source: DEC-###`)
+- **Logging & Audit Contract**: <structured logger seam, events logged, correlation `traceId`, PII/secret redaction> (`Source: DEC-###`)
 - **Entry Signatures / Schemas**: <exact types/endpoints> (`Source: DEC-###`)
 - **Persistence & Migrations**: <expand-migrate-contract + rollback or `N/A — no schema change`>
 
@@ -61,10 +64,9 @@
 | :--- | :--- | :--- | :--- | :--- |
 | `ERR-001` | <condition> | `<status/code>` | <fail fast / retry / rollback> | `DEC-###` |
 
-## 8. Resilience, Observability & Test Strategy
+## 8. Resilience & Test Strategy
 
-- **Failure Modes**: <timeouts, retries with jitter, fallback or `N/A — pure local logic`>
-- **Observability**: <structured logs, traceId, redaction, metrics/alerts or `N/A`>
+- **Failure Modes**: <timeouts, bounded retries with jitter, fallback or `N/A — pure local logic`>
 - **Public Seams & Test Matrix**: happy path, `N-1`/`N`/`N+1`, empty/nil/max, unauthorized (`401`/`403`/`404`), duplicate idempotency, failure injection, mutation falsifiability.
 
 ## 9. Traceability Matrix
@@ -75,7 +77,7 @@
 
 ## 10. Production Readiness Definition & Open Questions
 
-- [ ] Every requirement, invariant, NFR, security rule, and error code maps to a source, seam, and test.
+- [ ] Every requirement, invariant, NFR, security, config, and logging rule maps to a source, seam, and test.
 - [ ] Existing shared UI primitives, helpers, and sibling callers are mapped.
 - [ ] No blocking `OQ-###` remains (`Status: draft` if any is open).
 

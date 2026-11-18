@@ -1,33 +1,33 @@
 ---
 name: code-review
-description: Audits diffs, branches, or pull requests across specification fidelity, shared UI/DRY reuse, test integrity, security, and architecture. Use when reviewing code changes or checking diff quality.
+description: Audits diffs, branches, or completed tickets across specification fidelity, configurability, structured logging, security/credential hygiene, performance optimization, shared UI/DRY reuse, modularity, and test integrity. Use after implementing a ticket or reviewing a PR.
 ---
 
-# Code Review (Spec Fidelity, DRY/UI Reuse & 6-Pillar Audit)
+# Code Review (Industrial 2-Axis & Post-Ticket Audit)
 
-Review changes between `HEAD` and a base ref across **Specification & Reuse Fidelity** and **Engineering & Security Standards**.
+Audit the diff (`git diff` or branch diff) against **Specification Fidelity** and **Industrial Engineering Standards** using [references/review-rubric.md](references/review-rubric.md).
 
 ## Decision tree
 
-1. **Is the target diff (`git diff` / branch diff) non-empty and resolved?**
+1. **Is the target diff (`git status` / `git diff`) resolved and non-empty?**
    - **No** → Inspect `git status` and `git diff` via `run_command`, or ask the user for the base ref.
    - **Yes** → Proceed to step 2.
-2. **Are you reviewing your own multi-file implementation?**
-   - **Yes** → Delegate an independent pass to `adversarial-reviewer` via `invoke_subagent` to avoid confirmation bias, or audit strictly against the checklist below.
-   - **No** → Execute the review workflow below.
+2. **Are you reviewing your own ticket implementation or a multi-module diff?**
+   - **Yes** → Run `node .agents/skills/implement/scripts/audit-diff.mjs` first, then delegate an independent audit to `adversarial-reviewer` via `invoke_subagent`.
+   - **No** → Execute the review workflow below directly.
 
 ## Review workflow
 
-1. **Capture Diff & Caller Blast Radius**:
-   - Inspect `git diff` via `run_command`.
-   - For every modified exported function, component prop, type, or schema, search the codebase (`rg -n` or search tool) to confirm unchanged sibling callers remain valid.
-2. **Axis 1 — Specification Fidelity, DRY & Test Integrity**:
-   - Verify all requirements (`REQ-###`, `INV-###`, `SEC-###`, `ERR-###`, or ticket acceptance criteria) are satisfied without invented endpoints, fields, or unsourced assumptions (`🔴 Blocking` if invented).
-   - **Shared UI & DRY Audit**: Flag as `🔴 Blocking` any duplicated UI component, parallel utility/formatter/fetcher, hardcoded color/spacing token, or copy-pasted page logic where an existing primitive/helper exists.
-   - **Test Tampering Audit**: Flag as `🔴 Blocking` any `.skip`, `xit`, deleted/weakened assertions (`expect(true).toBe(true)`, `toBeDefined()`), or System-Under-Test mocking.
-   - **Production Integrity Audit**: Flag as `🔴 Blocking` any mock stores, dummy tokens, fake data, swallowed errors, `TODO` placeholders, or missing auth/validation/error states.
-3. **Axis 2 — Security, Concurrency & Architecture**:
-   - Check BOLA/IDOR tenant scoping, strict boundary parsing, TOCTOU races, idempotency, timeouts/retries, N+1 queries, float currency math, hardcoded secrets, and unpinned supply-chain scripts.
-4. **Report Ranked Findings**:
-   - Group by `🔴 Blocking`, `🟡 Structural`, and `🟢 Nit` using exact verified `file:line` references (`[Location] -> [Concrete Defect] -> [Exact Fix]`).
+1. **Inspect Diff & Sibling Callers**:
+   - Capture `git diff` via `run_command`.
+   - For every modified exported symbol, widget/component prop, or schema, run `rg -n` to confirm unchanged callers remain valid.
+2. **Audit Against [references/review-rubric.md](references/review-rubric.md)**:
+   - Specification & ambiguity fidelity (zero invented endpoints/fields/assumptions).
+   - Configurability & structured logging (`traceId`, `<REDACTED>` secrets/PII, zero hardcoded URLs/magic constants, zero stray `print`/`console.log`).
+   - Security & credential leak hygiene (zero embedded secrets, BOLA/IDOR `tenant_id` scoping, atomic locks, SSRF/path guards).
+   - Performance & resource lifecycle (zero N+1, optimal data structures, virtualization/pagination, isolate/worker offload, `dispose()`/`close()`).
+   - Shared UI & DRY reuse (`Reuse → Extend → Compose → Create`, design tokens).
+   - Modularity, maintainability & test integrity (zero `.skip`, `skip: true`, SUT mocks, weak assertions, or production fakes).
+3. **Report Ranked Findings**:
+   - Group by `🔴 Blocking`, `🟡 Structural`, and `🟢 Nit` with exact verified `file:line` citations and concrete fixes.
    - Conclude with **`APPROVE`**, **`APPROVE WITH NITS`**, or **`REQUEST CHANGES`**.

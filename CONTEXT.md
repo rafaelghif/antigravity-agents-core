@@ -1,72 +1,76 @@
 # Project Context, Codebase Index & Domain Map
 
-> **Living Codebase Index**: Populate Sections 1–5 by inspecting the actual repository (or running `/index-project`) before implementing features. Never invent paths, components, utilities, or commands—every entry must match real files on disk.
+> **Living Codebase Index**: Populate Sections 1–6 by inspecting the actual repository (or running `/index-project` + `node .agents/skills/index-project/scripts/scan-repo.mjs`) before writing code. Never invent paths, components, utilities, or commands—every entry must exist on disk.
 
 ---
 
 ## 1. Stack, Tooling & Exact Verification Commands
 
 - **Primary Purpose**: _[To be indexed from README / user context]_
-- **Runtime, Language & Package Manager**: _[To be indexed from package.json / manifests]_
-- **Frameworks & Core Libraries**: _[To be indexed with exact versions]_
-- **UI Kit, Styling & Icon Library**: _[e.g., Tailwind / shadcn / Radix / MUI / lucide-react / N/A]_
-- **Validation, State & Data Fetching**: _[e.g., Zod / React Query / Prisma / Drizzle / N/A]_
-- **Path Aliases & Import Style**: _[e.g., plain relative `./` `../`, or exact `tsconfig.json` paths]_
-- **Verification Commands**:
-  - Test: `_[exact command from manifest]_`
-  - Typecheck: `_[exact command or N/A]_`
+- **Languages, Runtimes & Package Manager**: _[e.g., Node 22 / TypeScript, Dart 3.x / Flutter, Go, Python, Rust]_
+- **Frameworks & Core Libraries**: _[To be indexed with exact versions from manifest]_
+- **UI Kit, Styling & Icon Library**: _[e.g., Tailwind + shadcn/ui, Flutter Material 3 / ThemeData + custom design tokens, N/A]_
+- **State, Validation & Data Layer**: _[e.g., Riverpod/BLoC + Freezed, Zod + TanStack Query, SQLx/Prisma/Drift]_
+- **Path Aliases & Import Style**: _[e.g., plain relative `./`, `package:<app>/...`, or exact `tsconfig.json` paths]_
+- **Verification Commands** (discovered from manifest/CI):
+  - Test: `_[exact command, e.g. npm test / flutter test / go test ./... / pytest]_`
+  - Static Analysis / Typecheck: `_[exact command, e.g. tsc --noEmit / dart analyze / flutter analyze / N/A]_`
   - Lint: `_[exact command or N/A]_`
   - Build: `_[exact command or N/A]_`
 
 ---
 
-## 2. Repository Topology & Entry Points
+## 2. Configurability, Logging & Environment Contract
+
+- **Configuration Entry Point**: _[exact file path where env / `--dart-define` / typed config is parsed & validated at startup]_
+- **Required Env / Build Variables** (names only, never values): _[e.g., `DATABASE_URL`, `API_BASE_URL`]_
+- **Structured Logger & Redaction Seam**: _[exact logger file/helper + correlation/traceId field convention]_
+
+---
+
+## 3. Repository Topology & Entry Points
 
 | Directory / File | Responsibility | Key Entry Points / Exports | Notes |
 | :--- | :--- | :--- | :--- |
-| _[e.g., `src/`]_ | _[responsibility]_ | _[exact files]_ | _[routing, conventions]_ |
+| _[e.g., `lib/features/`]_ | _[responsibility]_ | _[exact files]_ | _[routing, conventions]_ |
 
 ---
 
-## 3. Shared UI, Design System & Frontend Inventory
+## 4. Shared UI, Design System & Frontend Inventory
 
-> Mark `N/A` if this repository has no UI layer. Before creating any UI component, check this table and search component directories.
+> Mark `N/A` if this repository has no UI layer. Inspect this table and search component/widget directories before writing UI code.
 
-- **Design Tokens / Theme / CSS Entry**: _[exact path to CSS variables, Tailwind config, or theme file]_
+- **Design Tokens / Theme Entry**: _[exact path to CSS vars, Tailwind config, or Flutter `ThemeData`/`AppColors`/`AppSpacing`]_
 - **Icon Library**: _[package name & import convention]_
-- **Layout & Feedback Patterns**: _[toast/alert helper, modal/dialog pattern, form wrapper, error boundary]_
+- **Layout, Async & Feedback Patterns**: _[toast/snackbar helper, dialog/sheet wrapper, empty/error state widget, router]_
 
-| Component / Primitive | File Path | Exported Symbols & Variants | When to Reuse / Extend |
+| Component / Widget | File Path | Exported Symbols & Props/Variants | Reuse / Extend Guidance |
 | :--- | :--- | :--- | :--- |
-| _[e.g., `Button`]_ | _[exact path]_ | _[exports/props]_ | _[all clickable actions]_ |
+| _[e.g., `AppButton`]_ | _[exact path]_ | _[exports/variants]_ | _[all primary/secondary actions]_ |
 
 ---
 
-## 4. Shared Utilities, Hooks, API Clients & Schemas
+## 5. Shared Utilities, Hooks, API Clients & Schemas
 
-> Before writing a helper, fetcher, formatter, hook, or validation schema, check here first.
+> Search and reuse these canonical helpers instead of writing duplicate utilities or raw HTTP calls.
 
 | Category | File Path | Exported Symbols | Purpose |
 | :--- | :--- | :--- | :--- |
-| API / HTTP Client | _[exact path]_ | _[exports]_ | _[auth headers, retries, error normalization]_ |
+| API / HTTP Client | _[exact path]_ | _[exports]_ | _[auth interceptor, timeouts, retries, error mapping]_ |
 | Auth / Session / Tenancy | _[exact path]_ | _[exports]_ | _[session extraction, RBAC/tenant guard]_ |
-| Validation / Schemas | _[exact path]_ | _[exports]_ | _[shared boundary schemas]_ |
-| Formatting / Domain Utils | _[exact path]_ | _[exports]_ | _[dates, currency, pagination]_ |
-| Shared Hooks | _[exact path]_ | _[exports]_ | _[reusable state/query hooks]_ |
+| Validation / Schemas / Models | _[exact path]_ | _[exports]_ | _[boundary parsers, DTO mappers]_ |
+| Formatting / Domain Utils | _[exact path]_ | _[exports]_ | _[dates, currency minor units, pagination]_ |
+| Shared Hooks / State Holders | _[exact path]_ | _[exports]_ | _[reusable hooks, providers, blocs]_ |
 
 ---
 
-## 5. Module Boundaries & Public Seams
+## 6. Module Boundaries, Invariants (`INV-###`) & State Machines (`ST-###`)
 
-| Module / Path | Responsibility | Public Seam (Entry Point) | Ownership / Auth Boundary | Forbidden Imports |
+| Module / Path | Responsibility | Public Seam | Ownership / Auth Boundary | Forbidden Imports |
 | :--- | :--- | :--- | :--- | :--- |
-| _[module]_ | _[responsibility]_ | _[entry point]_ | _[owner/tenant rule]_ | _[imports banned]_ |
+| _[module]_ | _[responsibility]_ | _[entry point]_ | _[owner/tenant rule]_ | _[banned dependencies]_ |
 
----
-
-## 6. Ubiquitous Language, Invariants & State Machines
-
-| ID | Term / Rule | Canonical Definition & Falsifiable Invariant | Source |
+| ID | Term / Invariant | Canonical Definition & Falsifiable Rule | Source |
 | :--- | :--- | :--- | :--- |
 | `INV-001` | _[term/invariant]_ | _[precise falsifiable statement]_ | _[`DEC-###` / `path:line`]_ |
 

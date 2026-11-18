@@ -4,10 +4,11 @@
 - **Sprint Goal**: <one-sentence production outcome>
 - **Spec Reference**: `specs/<feature-slug>.md`
 - **DDR Reference**: `docs/discovery/<feature-slug>.md`
+- **Handover Log**: `docs/sprint/HANDOFF.md`
 - **Spec Readiness**: `READY FOR TICKETS` (never seed from a `draft` spec)
-- **Quality Bar**: `production` (MVP/stub shortcuts forbidden)
+- **Quality Bar**: `production` (industrial standard; MVP/stub/hardcoded shortcuts forbidden)
 - **Board Status**: `READY` | `NOT READY` (list blocking IDs)
-- **Verification Command**: `<exact test + typecheck + lint command from spec>`
+- **Verification Command**: `<exact test + static analysis + lint command>`
 - **Active Wave**: `Wave 1`
 - **Next Recommended Ticket**: `docs/sprint/tickets/01-<slug>.md`
 
@@ -26,7 +27,7 @@
 | :--- | :--- | :--- |
 | `DEC-###` | `docs/discovery/<feature-slug>.md` | Ticket decisions & constraints |
 | `REQ/NFR/INV/SEC/ERR` | `specs/<feature-slug>.md` | Traceability & acceptance criteria |
-| `INV-###` / `ST-###` | `CONTEXT.md` | Codebase index & domain invariants |
+| `INV-###` / `ST-###` | `CONTEXT.md` | Codebase index, config/logging seams & invariants |
 | `ADR-####` | `docs/adr/` | Architectural & migration constraints |
 
 ## 3. Traceability Matrix
@@ -40,8 +41,8 @@
 
 ## 4. Definition of Ready (DoR), Definition of Done (DoD) & Wave Exit Gate
 
-- **DoR**: `Blocked By` tickets are `done`; source IDs, reusable repo assets, public seam, UI/error/auth contracts, and exact verification command are unambiguous (`ready` tickets have zero `OPEN` items).
-- **DoD**: Acceptance criteria checked `[x]`; full verification command exits `0`; zero test tampering or production fakes; DRY/UI reuse verified; ticket completion log and this board updated.
+- **DoR**: `Blocked By` tickets are `done`; source IDs, reusable repo assets, config/logging seams, UI states, public seam, and exact verification command are unambiguous (`ready` tickets have zero `OPEN` items).
+- **DoD**: Acceptance criteria checked `[x]`; full verification command exits `0`; `audit-diff.mjs` + independent `/code-review` pass; zero test tampering, production fakes, or credential leaks; ticket log, `SPRINT.md`, `CONTEXT.md`, and `docs/sprint/HANDOFF.md` updated; per-ticket atomic handover commit landed (with user consent).
 - **Wave Exit Gate**: All tickets in the wave are `done`, full verification passes on integrated wave diff, migrations rehearsed if applicable, zero unmapped spec IDs remain.
 
 ## 5. Board Hygiene & Change Control
@@ -50,8 +51,8 @@
 - Atomic status transitions: `blocked → ready → in-progress → in-review → done`.
 - Any spec change invalidates affected tickets explicitly and updates the Traceability Matrix before coding resumes.
 
-## 6. Cross-Session Handover Log
+## 6. Cross-Session & Cross-Machine Handover Log
 
-| Session / Date | Tickets Completed | Key Seams / Contracts Introduced | Source IDs Satisfied | Production Gates Verified | Next Ticket |
+| Session / Date | Ticket Completed | Commit SHA | Key Seams / Config / Primitives Added | Production & Review Gates Verified | Next Ticket |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `<YYYY-MM-DD>` | `Sprint Initialized` | <initial seams> | `REQ-###` | <gates> | `#01` |
+| `<YYYY-MM-DD>` | `Sprint Initialized` | `-` | <initial seams> | <gates> | `#01` |

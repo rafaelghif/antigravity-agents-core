@@ -1,36 +1,37 @@
 ---
 name: index-project
-description: Scans and indexes a repository into CONTEXT.md with verified stack versions, verification commands, directory topology, shared UI primitives, design tokens, utilities, hooks, API clients, and module boundaries. Use when starting work on an unindexed repo, when CONTEXT.md is still a template, or after major structural changes.
+description: Scans and indexes any multi-language repository (Node/TS, Dart/Flutter, Go, Python, Rust, JVM, Swift) into CONTEXT.md with verified stack versions, config/logging seams, verification commands, shared UI primitives/widgets, design tokens, utilities, and module boundaries. Use when starting on an unindexed repo, when CONTEXT.md is still a template, or after structural changes.
 ---
 
-# Index Project (Codebase Reconnaissance & Context Map)
+# Index Project (Multi-Language Codebase Reconnaissance)
 
-Build an accurate, file-grounded index in `CONTEXT.md` so downstream discovery, specs, tickets, and implementation never guess existing paths, UI primitives, or utilities.
+Populate `CONTEXT.md` strictly with verified file paths, exported symbols, config/logging seams, and runnable commands so downstream planning and coding never guess or duplicate existing code.
 
 ## Decision tree
 
-1. **Does `CONTEXT.md` already contain verified, non-template repo paths matching current manifests?**
-   - **Yes (and no major refactor occurred)** → Spot-check target directories for the current task rather than re-indexing everything.
-   - **No (empty template, missing file, or stale index)** → Execute the 5-step indexing workflow below.
-2. **Is the repository large (>100 source files)?**
-   - **Yes** → Delegate initial file discovery to `codebase-investigator` via `invoke_subagent`, then read key manifests/barrels directly before writing `CONTEXT.md`.
-   - **No** → Inspect directly using `read_file` and `run_command` (`find` / `rg`).
+1. **Does `CONTEXT.md` already have verified, non-template entries matching current manifests?**
+   - **Yes (and no major refactor occurred)** → Read `CONTEXT.md` and spot-check only the directories touched by the current task.
+   - **No (template placeholders or stale paths)** → Run the indexing workflow below.
+2. **Is the codebase large (>100 source files)?**
+   - **Yes** → Run the black-box scanner script first, then delegate deep symbol extraction to `codebase-investigator` via `invoke_subagent`, and verify key files with `read_file`.
+   - **No** → Run the black-box scanner script, then read key manifests/primitives directly.
 
 ## Indexing workflow
 
-1. **Read Manifests & Configs**:
-   - Locate and read `package.json`, `tsconfig.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, or framework configs (`next.config.*`, `vite.config.*`, `tailwind.config.*`).
-   - Extract **exact** test, typecheck, lint, and build scripts, installed UI/validation/state/ORM dependencies, and configured path aliases (or confirm plain relative imports).
-2. **Map Directory Topology**:
-   - Run a depth-limited listing (`find . -maxdepth 3 -not -path '*/node_modules/*' -not -path '*/.git/*'`) via `run_command`.
-   - Identify entry points (routes, pages, API handlers, CLI bins, services).
-3. **Catalog Shared UI & Design System (if UI exists; otherwise mark `N/A`)**:
-   - Inspect `components/`, `ui/`, `shared/`, `design-system/`, `styles/`, `theme/`.
-   - Read barrel files (`index.ts`) and core primitive files (`Button`, `Input`, `Dialog`/`Modal`, `Table`, `Card`, `Select`, `Toast`) to record **exact file paths, exported symbols, and key variants/props**.
-   - Record design token files (Tailwind theme, CSS variables) and icon library import pattern.
-4. **Catalog Shared Utilities, Hooks, API Clients & Schemas**:
-   - Inspect `lib/`, `utils/`, `helpers/`, `hooks/`, `api/`, `services/`, `schemas/`, `types/`.
-   - Read shared files to record exact reusable exports (HTTP client, auth/session extractor, tenant guard, formatters, validation schemas, error classes).
-5. **Write `CONTEXT.md` & Verify Paths**:
-   - Populate Sections 1–5 of `CONTEXT.md` using only paths and symbols observed in tool output. Preserve existing domain invariants (`INV-###`, `ST-###`, `NFR-###`, `ERR-###`) in Sections 6–7.
-   - Verify every path cited in `CONTEXT.md` exists on disk. Never copy illustrative examples or invent missing sections (mark absent layers `N/A`).
+1. **Run the Black-Box Scanner First**:
+   - Inspect script options via `--help`, then execute:
+     ```bash
+     node .agents/skills/index-project/scripts/scan-repo.mjs --help
+     node .agents/skills/index-project/scripts/scan-repo.mjs
+     ```
+2. **Verify Manifests, Config & Logging Seams**:
+   - Read the detected manifests (`package.json`, `pubspec.yaml`, `go.mod`, `Cargo.toml`, `pyproject.toml`, `tsconfig.json`, `analysis_options.yaml`).
+   - Locate and read the startup configuration module (`.env` loader, `--dart-define` / config class) and structured logger helper.
+3. **Inspect Shared UI / Widgets & Design Tokens (or mark `N/A`)**:
+   - Read barrel files, shared widget/component folders (`components/`, `widgets/`, `ui/`, `shared/`), and theme/token files (`ThemeData`, `AppColors`, `tailwind.config.*`, `globals.css`).
+   - Record **exact file paths, exported symbols, and key props/variants**.
+4. **Inspect Shared Utilities, API Clients, Schemas & State Holders**:
+   - Read existing HTTP/API clients, auth/session guards, boundary validators, formatters, and shared hooks/providers/BLoCs.
+5. **Write `CONTEXT.md` & Verify Every Path**:
+   - Populate Sections 1–5 of `CONTEXT.md` using only observed paths/symbols; preserve domain invariants in Sections 6–7.
+   - Confirm every file path cited in `CONTEXT.md` exists on disk.

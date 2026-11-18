@@ -365,6 +365,20 @@ test('P0-4: Hook contract & full Git + Mock bypass corpus verification', () => {
   assert.equal(editFileBypass.decision, 'ask', 'production-no-mock-guard must intercept mock patterns in edit_file tool calls with Path and Replacement');
   assert.match(editFileBypass.reason, /production-no-mock-guard/i);
 
+  // Dart / Flutter test files are allowed mocks, but blocked on test tampering
+  const dartMockInTest = runHook(mockHookCmd, { toolCall: { args: { Path: 'test/features/auth/login_test.dart', Content: 'final mockRepo = MockAuthRepo();' } } });
+  assert.equal(dartMockInTest.decision, 'allow', 'Dart *_test.dart files must be recognized as test files');
+  const dartSkipProp = 'skip' + ': true';
+  const dartTamper = runHook(mockHookCmd, { toolCall: { args: { Path: 'test/features/auth/login_test.dart', Content: `test("auth", () {}, ${dartSkipProp});` } } });
+  assert.equal(dartTamper.decision, 'ask', 'Dart skip flag must be intercepted by Anti-Test-Tampering Guard');
+  assert.match(dartTamper.reason, /Anti-Test-Tampering Guard/i);
+
+  // Hardcoded secret / credential literal guard in production paths
+  const fakeStripe = 'sk_' + 'live_' + '1234567890abcdef1234';
+  const secretLeak = runHook(mockHookCmd, { toolCall: { args: { Path: 'lib/config/env.dart', Content: `const stripeKey = '${fakeStripe}';` } } });
+  assert.equal(secretLeak.decision, 'ask', 'Secret Leak Guard must block hardcoded credential literals');
+  assert.match(secretLeak.reason, /Secret Leak Guard/i);
+
   // Guard payloads that cannot be parsed must fail closed (ask), never silently allow.
   for (const [name, cmd] of [['git-destructive-guard', gitHookCmd], ['production-no-mock-guard', mockHookCmd]]) {
     const out = runHookRaw(cmd, '{ this is not json');
@@ -411,6 +425,11 @@ test('P0-7: quality-gate-stop-sensor blocks premature completion on NO_TOOL_CALL
     }));
     const dirtyPassingOut = runHook(stopHookCmd, { terminationReason: 'NO_TOOL_CALL', continuationActive: false, workspacePaths: [tmpDir] }, repoRoot);
     assert.equal(dirtyPassingOut.decision, 'allow', 'Stop hook must allow stop when tests pass');
+
+    // 3b. Documentation/markdown diffs mentioning skip patterns must not trigger false positives
+    fs.writeFileSync(path.join(tmpDir, 'README.md'), 'Never use `' + 'it' + '.skip` in tests.\n');
+    const docsPassingOut = runHook(stopHookCmd, { terminationReason: 'NO_TOOL_CALL', continuationActive: false, workspacePaths: [tmpDir] }, repoRoot);
+    assert.equal(docsPassingOut.decision, 'allow', 'Stop hook must not flag documentation files mentioning test-skip patterns');
 
     // 4. When tests pass exit code 0, BUT git diff introduces test skipping (.skip / xit / etc.), reject stop
     fs.writeFileSync(path.join(tmpDir, 'service.test.js'), 'it.skip("bypassed test", () => {});\n');
@@ -514,30 +533,37 @@ test('P1-6 & §11.3: Frontmatter, Antigravity skill spec, subagent policy, and p
   }
 
   // Core LLM invariants in AGENTS.md
-  assert.match(agentsContent, /Anti-Yes-Man & Mandatory Ambiguity Gate/i);
+  assert.match(agentsContent, /Anti-Yes-Man & Mandatory Stop\/Ask Gate/i);
   assert.match(agentsContent, /ask_question/i);
   assert.match(agentsContent, /Read-Before-Cite & Verify-Before-Import/i);
   assert.match(agentsContent, /Pre-Creation DRY Gate/i);
-  assert.match(agentsContent, /Live Search & Temporal Fidelity/i);
+  assert.match(agentsContent, /Mandatory Live Research & Temporal Fidelity/i);
+  assert.match(agentsContent, /Configurability/i);
+  assert.match(agentsContent, /Structured Logging/i);
   assert.match(agentsContent, /Zero Production Fakes/i);
-  assert.match(agentsContent, /Zero Test Tampering & Closed-Loop Verification/i);
-  assert.match(agentsContent, /Anti-Looping Circuit Breaker/i);
+  assert.match(agentsContent, /Closed-Loop Verification & Zero Test Tampering/i);
+  assert.match(agentsContent, /Cross-Session & Cross-Machine Handover/i);
+  assert.match(agentsContent, /Circuit Breaker/i);
 
-  // Glob-triggered everyday rules must auto-activate on matching files
+  // Glob-triggered everyday rules must auto-activate on matching files & support Dart/Flutter
   for (const globRule of ['ui-and-dry.md', 'coding-standards.md', 'database-migrations.md', 'testing.md']) {
     const fm = readFrontmatter(path.join(rulesDir, globRule));
     assert.equal(frontmatterValue(fm, 'trigger'), 'glob', `${globRule} must use trigger: glob so it auto-loads on matching files`);
   }
 
   const uiRule = fs.readFileSync(path.join(rulesDir, 'ui-and-dry.md'), 'utf8');
+  assert.match(uiRule, /\*\.dart/);
   assert.match(uiRule, /Reuse First/i);
-  assert.match(uiRule, /Mandatory UI State/i);
+  assert.match(uiRule, /dispose\(\)/i);
 
   const testingRule = fs.readFileSync(path.join(rulesDir, 'testing.md'), 'utf8');
+  assert.match(testingRule, /\*_test\.dart/);
   assert.match(testingRule, /Anti-Test-Tampering/i);
 
   const codingRule = fs.readFileSync(path.join(rulesDir, 'coding-standards.md'), 'utf8');
-  assert.match(codingRule, /DRY & Reuse Before Authoring/i);
+  assert.match(codingRule, /\*\.dart/);
+  assert.match(codingRule, /Configurability & Zero Hardcoded Values/i);
+  assert.match(codingRule, /Structured Logging & Observability/i);
   assert.match(codingRule, /Parse, Don't Validate/i);
 
   // Security-rule regression: never document a non-existent constant-time API.
@@ -636,68 +662,126 @@ test('P1-8: LLM-native anti-yes-man, codebase indexing, DRY reuse, and provenanc
   const read = (relPath) => fs.readFileSync(path.join(repoRoot, relPath), 'utf8');
   const skillsRoot = '.agents/skills';
 
-  // CONTEXT.md must index shared UI, shared utils, and verification commands alongside domain invariants.
+  // CONTEXT.md must index shared UI, config/logging seams, shared utils, and verification commands.
   const contextMd = read('CONTEXT.md');
+  assert.match(contextMd, /Configurability, Logging & Environment Contract/);
   assert.match(contextMd, /Shared UI, Design System & Frontend Inventory/);
   assert.match(contextMd, /Shared Utilities, Hooks, API Clients & Schemas/);
 
-  // index-project must populate CONTEXT.md with verified repo paths and symbols.
+  // index-project must populate CONTEXT.md using scan-repo.mjs.
   const indexProject = read(`${skillsRoot}/index-project/SKILL.md`);
   assert.match(indexProject, /CONTEXT\.md/);
-  assert.match(indexProject, /Shared UI/i);
+  assert.match(indexProject, /scan-repo\.mjs --help/);
 
-  // discover must resolve ambiguities without inventing facts and write a DDR.
+  // discover must run live research before proposing stack/architecture options.
   const discover = read(`${skillsRoot}/discover/SKILL.md`);
   assert.match(discover, /docs\/discovery\/<feature-slug>\.md/);
+  assert.match(discover, /Mandatory Live Research Gate/);
   assert.match(discover, /`DEC-###`/);
   assert.match(discover, /`OQ-###`/);
   assert.match(discover, /`ASM-###`/);
   assert.match(discover, /ask_question/);
   const discoveryTemplate = read(`${skillsRoot}/discover/resources/discovery-record-template.md`);
   assert.match(discoveryTemplate, /Existing Codebase Reuse/);
+  assert.match(discoveryTemplate, /Configurability & Env Contract/);
   assert.match(discoveryTemplate, /Completeness Gate/);
 
-  // to-spec: audits ambiguous PRDs/DDRs, grounds reuse in repo, and gates ticket readiness.
+  // to-spec: audits ambiguous PRDs/DDRs, enforces config/logging/security/perf, and validates with script.
   const toSpec = read(`${skillsRoot}/to-spec/SKILL.md`);
   assert.match(toSpec, /Anti-Yes-Man Gate/);
-  assert.match(toSpec, /Reusable Codebase/i);
+  assert.match(toSpec, /validate-spec\.mjs --help/);
   assert.match(toSpec, /READY FOR TICKETS/);
   assert.match(toSpec, /resources\/spec-example\.md/);
   const specTemplate = read(`${skillsRoot}/to-spec/resources/spec-template.md`);
   assert.match(specTemplate, /Quality Bar\*\*: `production`/);
   assert.match(specTemplate, /Reusable Codebase Assets/);
-  assert.match(specTemplate, /\| ID \| Requirement \| Given \/ When \/ Then \| Priority \| Source \|/);
+  assert.match(specTemplate, /Config Contract \(Zero Hardcoded Values\)/);
+  assert.match(specTemplate, /Logging & Audit Contract/);
   assert.match(specTemplate, /Traceability Matrix/);
 
-  // to-tickets: grounds every vertical slice in reusable codebase assets and provenance.
+  // to-tickets: grounds every vertical slice in reusable codebase assets and validates DAG with script.
   const toTickets = read(`${skillsRoot}/to-tickets/SKILL.md`);
   assert.match(toTickets, /Reusable Assets/);
-  assert.match(toTickets, /Coverage Ledger/i);
-  assert.match(toTickets, /Anti-hallucination/i);
+  assert.match(toTickets, /validate-board\.mjs --help/);
   const ticketTemplate = read(`${skillsRoot}/to-tickets/resources/ticket-template.md`);
   assert.match(ticketTemplate, /Quality Tier\*\*: `production`/);
   assert.match(ticketTemplate, /Reusable Codebase Assets & Touchpoints/);
-  assert.match(ticketTemplate, /Source Requirements\*\*/);
-  assert.match(ticketTemplate, /Source Decisions\*\*/);
+  assert.match(ticketTemplate, /Config & Structured Logger Seams/);
+  assert.match(ticketTemplate, /Post-Ticket Self-Check/);
   const sprintTemplate = read(`${skillsRoot}/to-tickets/resources/sprint-board-template.md`);
+  assert.match(sprintTemplate, /docs\/sprint\/HANDOFF\.md/);
   assert.match(sprintTemplate, /Traceability Matrix/);
   assert.match(sprintTemplate, /Wave Exit Gate/);
 
-  // domain-modeling: reconciles conflicts via ask_question and preserves 3-Gate ADRs.
+  // domain-modeling & codebase-design: 4-bundle depth + multi-language support.
   const domainModeling = read(`${skillsRoot}/domain-modeling/SKILL.md`);
   assert.match(domainModeling, /3 ADR Gates/);
   assert.match(domainModeling, /ask_question/);
-  const adrTemplate = read(`${skillsRoot}/domain-modeling/resources/adr-template.md`);
-  assert.match(adrTemplate, /DDR Source\*\*/);
-  assert.match(adrTemplate, /Reversibility\*\*/);
+  const codebaseDesign = read(`${skillsRoot}/codebase-design/SKILL.md`);
+  assert.match(codebaseDesign, /Pre-Code Performance & Resource Audit/);
+  assert.match(codebaseDesign, /Configurability & Logging Seam/);
 
-  // implement, tdd, and code-review enforce ambiguity stop, reuse, complete production code, and zero test tampering.
+  // implement, tdd, handoff, and code-review enforce ambiguity stop, reuse, post-ticket review, and cross-machine handover.
   const implement = read(`${skillsRoot}/implement/SKILL.md`);
   assert.match(implement, /Phase 0: Mandatory Ticket \/ PRD Ambiguity Audit/);
-  assert.match(implement, /Phase 1: Codebase Reuse & Touchpoint Plan/);
-  assert.match(implement, /ask_question/);
-  assert.match(implement, /smallest complete production slice/);
+  assert.match(implement, /Phase 1: Pre-Code Design, Config\/Logging & Reuse Plan/);
+  assert.match(implement, /Phase 3: Post-Ticket Re-Check, Independent Review & Handover Commit/);
+  assert.match(implement, /audit-diff\.mjs --help/);
   assert.match(read(`${skillsRoot}/tdd/SKILL.md`), /complete production behavior/);
-  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /Shared UI & DRY Audit/);
-  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /Test Tampering Audit/);
+  assert.match(read(`${skillsRoot}/handoff/SKILL.md`), /docs\/sprint\/HANDOFF\.md/);
+  assert.match(read(`${skillsRoot}/code-review/SKILL.md`), /review-rubric\.md/);
+});
+
+test('P1-9: Black-box skill scripts support --help and validate multi-language repos, specs, boards, and diffs', () => {
+  const scripts = [
+    '.agents/skills/index-project/scripts/scan-repo.mjs',
+    '.agents/skills/to-spec/scripts/validate-spec.mjs',
+    '.agents/skills/to-tickets/scripts/validate-board.mjs',
+    '.agents/skills/implement/scripts/audit-diff.mjs',
+  ];
+  for (const rel of scripts) {
+    const out = execFileSync(process.execPath, [path.join(repoRoot, rel), '--help'], { encoding: 'utf8' });
+    assert.match(out, /Usage:/i, `${rel} --help must print Usage instructions`);
+  }
+
+  // scan-repo.mjs detects Dart / Flutter project topology
+  const tmpFlutter = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-flutter-scan-'));
+  try {
+    fs.writeFileSync(path.join(tmpFlutter, 'pubspec.yaml'), 'name: sample_app\ndependencies:\n  flutter:\n    sdk: flutter\n  riverpod: ^2.6.0\n');
+    fs.mkdirSync(path.join(tmpFlutter, 'lib', 'widgets'), { recursive: true });
+    fs.mkdirSync(path.join(tmpFlutter, 'test'), { recursive: true });
+    const scanOut = JSON.parse(execFileSync(process.execPath, [path.join(repoRoot, scripts[0]), '--root', tmpFlutter, '--json'], { encoding: 'utf8' }));
+    assert.ok(scanOut.stacks.includes('Dart / Flutter'));
+    assert.ok(scanOut.commands.test.includes('flutter test'));
+    assert.ok(scanOut.commands.analyze.includes('flutter analyze'));
+    assert.ok(scanOut.directoryBuckets.ui.includes('lib/widgets'));
+  } finally {
+    fs.rmSync(tmpFlutter, { recursive: true, force: true });
+  }
+
+  // validate-spec.mjs rejects READY FOR TICKETS spec containing vague qualifier / TBD
+  const tmpSpecDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-spec-val-'));
+  try {
+    const badSpec = path.join(tmpSpecDir, 'bad.md');
+    fs.writeFileSync(badSpec, '# Spec: X\n- **Readiness Verdict**: `READY FOR TICKETS`\n- **Verification Command**: `TBD`\n## 1. Problem, Scope & Non-Goals\nfast\n');
+    const res = spawnSync(process.execPath, [path.join(repoRoot, scripts[1]), badSpec], { encoding: 'utf8' });
+    assert.notEqual(res.status, 0, 'validate-spec.mjs must fail on incomplete READY spec');
+  } finally {
+    fs.rmSync(tmpSpecDir, { recursive: true, force: true });
+  }
+
+  // validate-board.mjs detects circular Blocked by dependencies
+  const tmpBoardDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aac-board-val-'));
+  try {
+    fs.mkdirSync(path.join(tmpBoardDir, 'tickets'), { recursive: true });
+    fs.writeFileSync(path.join(tmpBoardDir, 'SPRINT.md'), '| [`#01`](tickets/01-a.md) | A |\n| [`#02`](tickets/02-b.md) | B |\n');
+    const baseTicket = (id, blockedBy) => `# Ticket #${id}\n- **Status**: \`blocked\`\n- **Blocked by**: ${blockedBy}\n- **Source Requirements**: REQ-001\n- **Source Decisions**: DEC-001\n## Reusable Codebase Assets\n## Verification Command\n\`npm test\`\n`;
+    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '01-a.md'), baseTicket('01', '#02'));
+    fs.writeFileSync(path.join(tmpBoardDir, 'tickets', '02-b.md'), baseTicket('02', '#01'));
+    const res = spawnSync(process.execPath, [path.join(repoRoot, scripts[2]), path.join(tmpBoardDir, 'SPRINT.md')], { encoding: 'utf8' });
+    assert.notEqual(res.status, 0, 'validate-board.mjs must reject cyclic Blocked by dependencies');
+    assert.match(res.stderr, /Cycle detected/i);
+  } finally {
+    fs.rmSync(tmpBoardDir, { recursive: true, force: true });
+  }
 });

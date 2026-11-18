@@ -1,22 +1,39 @@
-# Session & Sprint Handoff
+# Session & Cross-Machine Handoff
 
-## 1. Sprint & Initiative Snapshot
-- **Sprint Goal**: <One-sentence objective of the active initiative>
-- **Sprint Board**: `docs/sprint/SPRINT.md` (`<X>/<Y> tickets done`, Active: `Wave <W>`)
-- **Active / Next Ticket**: `docs/sprint/tickets/<NN>-<slug>.md` (`in-progress` | `ready`)
+- **Date / UTC Timestamp**: `YYYY-MM-DDTHH:MM:SSZ`
+- **Branch / Base Commit**: `<branch>` @ `<short-sha>`
+- **Sprint Board**: `docs/sprint/SPRINT.md` (or `N/A`)
+- **Last Completed Ticket**: `<#NN - Title | None>`
+- **Active / Next Ticket**: `<#MM - Title>` (`docs/sprint/tickets/<MM>-<slug>.md`)
 
-## 2. Working Tree & Verification State
-- **Branch & HEAD**: `<branch>` @ `<short-sha>`
-- **Working Tree**: `<clean | list of WIP uncommitted files>`
-- **Last Verification Command**: `<exact command>` (`PASS` / `FAIL`)
+---
 
-## 3. Completed in This Session
-- <Ticket `#NN` or sub-tasks finished, commit SHAs, and key files touched>
+## 1. Current State & Verification Proof
 
-## 4. Cross-Session Context & Guardrails
-- **Downstream Seam & Contract Notes**: <Exact interfaces, types, or invariants created in this session that the next ticket consumes>
-- **Falsified Hypotheses / Dead-Ends**: <Approaches tried and rejected so the next session does not repeat them>
-- **Open Blockers (if any)**: <None | specific external blocker>
+- **Completed in This Session**: <concise bullet list with exact `path:symbol`>
+- **Verification Command Run**: `<exact command>` → `PASS (exit 0)` | `WIP (<summary>)`
+- **Post-Ticket `/code-review` Verdict**: `APPROVE` | `N/A (WIP)`
+- **Uncommitted / Pending Files**: `<clean tree after commit | exact modified files>`
+
+## 2. Downstream Seam, Config & Shared-Asset Notes
+
+- **New / Updated Public Seams**: `<exact file:symbol and signature>`
+- **New Config Keys / Env Vars (names only, zero values)**: `<KEY_NAME>`
+- **New Shared UI Primitives / Helpers Added to `CONTEXT.md`**: `<exact path:symbol>`
+
+## 3. Falsified Approaches (Do Not Repeat)
+
+- <dead end or rejected pattern + why it failed>
+
+## 4. Machine-Portable Resume Checklist
+
+1. Pull latest branch (`git pull`) and verify toolchain/env vars match `CONTEXT.md` §1–2.
+2. Read `CONTEXT.md`, `docs/sprint/SPRINT.md`, and the target ticket below.
 
 ## 5. Immediate Next Session Action
-- <Exactly ONE concrete, runnable instruction to execute first in the next session, e.g.: `Run /implement on docs/sprint/tickets/02-<slug>.md (starting at Step 1: Red test at ...)`>
+
+Run exactly one command or skill invocation to continue:
+
+```text
+/implement docs/sprint/tickets/<MM>-<slug>.md
+```

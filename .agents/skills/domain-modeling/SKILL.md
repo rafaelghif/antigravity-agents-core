@@ -1,36 +1,36 @@
 ---
 name: domain-modeling
-description: Reconciles domain terminology, invariants, state machines, and ownership boundaries in CONTEXT.md against Discovery Decision Records and specs, and records hard-to-reverse architectural decisions as ADRs. Use when defining domain concepts, resolving vocabulary conflicts, specifying state machines, or evaluating an ADR.
+description: Reconciles domain terminology, falsifiable invariants, sealed/union state machines, and ownership boundaries in CONTEXT.md across TypeScript, Dart, Go, Python, and Rust, and records costly-to-reverse architectural decisions as ADRs. Use when defining domain rules, resolving vocabulary conflicts, or evaluating an ADR.
 ---
 
 # Domain Modeling (Ubiquitous Language, Invariants & 3-Gate ADRs)
 
-Maintain canonical domain definitions, falsifiable invariants (`INV-###`), state machines (`ST-###`), and ADRs (`docs/adr/NNNN-<slug>.md`) without inventing unsourced business rules.
+Keep domain rules unambiguous, falsifiable, and impossible to violate across specs, tickets, code, and tests. Consult [references/modeling-checklist.md](references/modeling-checklist.md) and [examples/domain-invariant-example.md](examples/domain-invariant-example.md).
 
 ## Decision tree
 
-1. **Does a new term, invariant, or state machine conflict with `CONTEXT.md`, a DDR (`DEC-###`), a spec, an ADR, or existing code?**
-   - **Yes** → **STOP.** Present both definitions with exact `path:line` / ID sources and their production consequence, then resolve via `ask_question`. Never silently pick one.
+1. **Does a term, invariant, or state machine conflict with `CONTEXT.md`, a DDR (`DEC-###`), a spec, an ADR, or existing code?**
+   - **Yes** → **STOP.** Present both statements with exact `path:line` / ID citations and production consequences, then resolve via `ask_question`. Never silently pick one.
    - **No** → Proceed to step 2.
 2. **Did a domain term, invariant, ownership rule, or state transition settle or change?**
-   - **Yes** → Record it in `CONTEXT.md` §6–7 with a stable ID (`INV-###`, `ST-###`, `NFR-###`, `ERR-###`), then search `specs/`, `docs/sprint/`, and `docs/adr/` via `rg -n` (or search tool) to propagate updates before implementation resumes.
+   - **Yes** → Record it in `CONTEXT.md` §6–7 with a stable ID (`INV-###`, `ST-###`, `NFR-###`, `ERR-###`), then search `specs/`, `docs/sprint/`, and `docs/adr/` via `rg -n` and propagate updates before coding resumes.
    - **No** → Proceed to step 3.
 3. **Does an architectural decision pass all 3 ADR Gates?**
-   - Gate 1: **Costly to reverse** (significant migration cost later).
+   - Gate 1: **Costly to reverse** (significant data/API migration cost later).
    - Gate 2: **Non-obvious without context** (future engineers will ask *why*).
-   - Gate 3: **Genuine trade-off** (real alternatives existed).
+   - Gate 3: **Genuine trade-off** (viable alternatives were evaluated).
    - **All 3 hold** → Write `docs/adr/NNNN-<slug>.md` using [resources/adr-template.md](resources/adr-template.md).
-   - **Any missing** → Skip ADR and keep the rationale in the DDR or `CONTEXT.md`.
+   - **Any missing** → Skip ADR and keep rationale in the DDR or `CONTEXT.md`.
 
 ## Modeling protocol
 
-1. **Read Upstream Sources End-to-End**: `CONTEXT.md`, `docs/discovery/<slug>.md`, `specs/<slug>.md`, `docs/adr/`, and relevant domain files.
-2. **Eliminate Overloaded Nouns**: Replace ambiguous labels (`item`, `data`, `record`) with canonical bounded nouns (`InvoiceLineItem`, `SubscriptionSeat`).
-3. **Collapse Flag Clusters into State Machines**: Define allowed transitions, forbidden transitions, triggers, and guards so illegal combinations cannot exist.
-4. **Keep Invariants Falsifiable**: Every `INV-###` must map to a boundary or forbidden-transition test.
-5. **Propagate Changes Explicitly**: Emit a short propagation table (`Changed ID`, `Affected File`, `Required Update`, `Status`) before concluding.
+1. **Read Upstream Sources End-to-End**: `CONTEXT.md`, `docs/discovery/<slug>.md`, `specs/<slug>.md`, `docs/adr/`, and relevant domain models.
+2. **Eliminate Vague Nouns**: Replace overloaded terms (`item`, `data`, `status`, `account`) with bounded domain types (`InvoiceLineItem`, `TenantMember`).
+3. **Make Illegal States Unrepresentable**: Collapse flag clusters into language-native sum types (TS discriminated unions, Dart 3 `sealed class`, Rust `enum`, Python `Literal` union, Go typed state interface).
+4. **Keep Invariants Falsifiable**: Every `INV-###` must specify the exact illegal state it forbids and the boundary/forbidden-transition test that catches regressions.
+5. **Propagate Explicitly**: Emit a short propagation table (`Changed ID`, `Affected File`, `Required Action`, `Status`) before finishing.
 
 ## Anti-hallucination rules
 
-- Never invent domain terms, invariants, tenant rules, numeric budgets, or error codes; unknowns become `OPEN` (`OQ-###`).
-- Never infer business semantics solely from variable names (`isAdmin`); inspect the actual enforcement code and cite `path:line`.
+- Never invent domain rules, tenant boundaries, budgets, or error codes; unknowns become `OPEN` (`OQ-###`).
+- Never infer authorization semantics from a property name (`isAdmin`); inspect the actual enforcement code (`path:line`).

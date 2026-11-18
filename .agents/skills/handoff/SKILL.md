@@ -1,22 +1,23 @@
 ---
 name: handoff
-description: Checkpoints current Scrum Sprint progress, active ticket state, downstream seam notes, and the single immediate next action into .scratch/handoff.md and docs/sprint/SPRINT.md. Use when ending a session, switching context, or handing off work to a fresh session.
+description: Checkpoints current ticket, verification evidence, downstream contracts, and single immediate next action into git-tracked docs/sprint/HANDOFF.md, docs/sprint/SPRINT.md, and local .scratch/handoff.md so sessions or other computers can resume seamlessly. Use after finishing a ticket or ending a session.
 ---
 
-# Handoff (Multi-Session Continuity)
+# Handoff (Cross-Session & Cross-Machine Continuity)
 
-Checkpoint active session state into `.scratch/handoff.md` (and sync `docs/sprint/SPRINT.md` if present) using [resources/handoff-template.md](resources/handoff-template.md).
+Persist complete resume state after every ticket or session end using [resources/handoff-template.md](resources/handoff-template.md) so a fresh session—or a different machine after `git pull`—resumes immediately without losing context.
 
 ## Decision tree
 
-1. **Are there uncommitted functional changes passing full verification and satisfying the current ticket DoD?**
-   - **Yes** → If commits were authorized in this session, create an atomic Conventional Commit and log the SHA. Otherwise leave the tree green and record the ready file list + proposed commit message.
-   - **No (WIP)** → Record completed steps, remaining steps, and exact failing/passing test output in both the ticket file and `.scratch/handoff.md`.
-2. **Did codebase index facts, shared components, or domain invariants change?**
-   - **Yes** → Update `CONTEXT.md` (or `docs/adr/`) first so durable facts are not trapped in ephemeral `.scratch/handoff.md`.
-   - **No** → Write `.scratch/handoff.md`.
+1. **Are you handing off after completing a ticket that passed verification and `/code-review`?**
+   - **Yes** → Update `CONTEXT.md` (if new seams/primitives/config vars were added), update the ticket's completion log, update `docs/sprint/SPRINT.md`, write `docs/sprint/HANDOFF.md` (git-tracked for cross-machine resume) + mirror `.scratch/handoff.md`, and execute/propose **one atomic handover commit** (committing only when authorized in this session).
+   - **No (stopping mid-ticket / token budget low)** → Record completed steps, remaining steps, exact failing/passing test output, and modified file list in `.scratch/handoff.md` (and `docs/sprint/HANDOFF.md` if tracking sprint in git).
+2. **Are there any secrets, tokens, or `.env` values in the handover notes?**
+   - **Yes** → Never write secret values; record only variable names and redact any captured trace values with `<REDACTED>`.
 
-## Workflow
+## Handoff workflow
 
-1. Run `git status -sb` and `git log -3 --oneline` via `run_command`, and read `docs/sprint/SPRINT.md` if present.
-2. Populate [resources/handoff-template.md](resources/handoff-template.md) with file links (no large code dumps), **Downstream Seam & Contract Notes**, **Falsified Approaches**, redacted secrets (`<REDACTED>`), and **one** runnable next-session command (`/implement docs/sprint/tickets/<NN>-<slug>.md`).
+1. Inspect `git status -sb` and `git log -3 --oneline` via `run_command`, plus `docs/sprint/SPRINT.md` if present.
+2. Populate [resources/handoff-template.md](resources/handoff-template.md) into `docs/sprint/HANDOFF.md` (for sprint/cross-machine continuity) and `.scratch/handoff.md` (for local session resume).
+3. Include **Downstream Seam & Config Notes**, **Falsified Approaches**, and **exactly one** concrete runnable command under `## 5. Immediate Next Session Action`.
+4. If commits are authorized in this session, commit the ticket + `CONTEXT.md` + `docs/sprint/*` cleanly with Conventional Commits (`feat(scope): ... (#NN)`); otherwise output the exact ready-to-run `git add` / `git commit` command for user approval.

@@ -1,33 +1,39 @@
 ---
 trigger: glob
-globs: "*.ts, *.tsx, *.js, *.jsx, *.mjs, *.cjs, *.py, *.go, *.rs, *.java, *.kt, *.rb, *.php, *.cs"
-description: "Core LLM coding invariants: DRY single source of truth, boundary parsing, type-driven states, guard clauses, error wrapping, and precision."
+globs: "*.ts, *.tsx, *.js, *.jsx, *.mjs, *.cjs, *.dart, *.py, *.go, *.rs, *.java, *.kt, *.kts, *.swift, *.rb, *.php, *.cs, *.c, *.cpp, *.ex, *.exs"
+description: "Multi-language industrial coding standards: configurability, structured logging, performance optimization, security/secret hygiene, boundary parsing, and maintainability."
 ---
 
-# Coding Standards & Implementation Invariants
+# Industrial Coding Standards (Multi-Language)
 
-## 1. DRY & Reuse Before Authoring
+## 1. Configurability & Zero Hardcoded Values
 
-- Before writing a helper, validator, API wrapper, formatter, constant, or type, search `utils/`, `lib/`, `helpers/`, `hooks/`, `schemas/`, `types/`, and `CONTEXT.md`. Reuse or extend existing code.
-- Maintain a single canonical source of truth for validation schemas, domain constants, error codes, and API fetchers. Never maintain parallel configs or duplicate helper implementations.
-- Use standard library and already-installed packages before adding dependencies or bespoke wrappers.
+- **Externalize All Runtime Parameters**: Base URLs, ports, timeouts, retry counts, rate/page limits, cache TTLs, feature flags, and credentials MUST come from typed, startup-validated configuration (`process.env`/Zod, `--dart-define`/typed config class, `os.Getenv`/config struct, `pydantic-settings`).
+- **Fail Fast on Missing Config**: Validate required configuration at application boot; never silently fall back to hardcoded localhost URLs, dummy secrets, or magic defaults in production paths.
 
-## 2. Type-Driven Design & Boundary Parsing
+## 2. Structured Logging & Observability
 
-- **Parse, Don't Validate**: Parse untrusted ingress payloads (HTTP bodies, query params, CLI args, env vars, webhook JSON) at the boundary into strict domain types using the project's schema library (or explicit strict parsers). Never pass raw `any`/untyped dicts into domain logic.
-- **Make Illegal States Unrepresentable**: Model mutually exclusive states with discriminated unions / sum types instead of clusters of optional booleans (`isLoading`, `isError`, `isSuccess`).
-- **Intention-Revealing Names**: Name identifiers for domain meaning (`activeSessionCount`, `calculateProratedRefundCents`). Avoid ambiguous abbreviations (`tmp`, `val`, `data2`).
+- Use the project's structured logger (JSON/structured key-value fields with `traceId`/`requestId`/`userId` or `tenantId`), never stray `console.log`/`print`/`debugPrint` in production logic.
+- Log critical lifecycle transitions, boundary rejections, external call durations, and failures with preserved error causes (`{ cause: err }`, `%w`, `Error.throwWithStackTrace`).
+- **Mandatory Redaction**: Never log passwords, API keys, JWTs, auth headers, cookies, or raw PII; replace sensitive values with `<REDACTED>`.
 
-## 3. Control Flow, Error Handling & Readability
+## 3. Best-of-the-Best Performance & Efficiency
 
-- **Guard Clauses**: Validate preconditions and failure exits at the top of functions with early returns; keep nesting depth ≤ 3.
-- **Explicit Error Wrapping**: Never write empty `catch {}` blocks or ignore returned errors. Wrap failures with operational context and preserve the cause chain (`{ cause: err }` in JS/TS, `%w` in Go).
-- **Why-Only Comments**: Do not narrate *what* the code does. Comment only non-obvious invariants, protocol constraints, or explicit scaling ceilings (`// ponytail: <ceiling + upgrade path>`).
-- **Complete Edits**: Never emit placeholder comments (`// ... rest unchanged ...`) or deferred `TODO` stubs in production code.
+- **Algorithmic & Memory Efficiency**: Choose optimal data structures (`Set`/`Map` lookups over repeated O(n²) `.find()`/`.any()` scans in loops), stream large files/exports with backpressure, and bound all list queries with cursor/keyset pagination.
+- **Zero N+1 & Minimal Round-Trips**: Batch/join DB queries and parallelize independent I/O (`Promise.all`, `Future.wait`, `errgroup`, `asyncio.gather`) with bounded concurrency.
+- **Explicit Timeouts & Resource Cleanup**: Set explicit connect/read timeouts on every HTTP, DB, and queue call. Always close/dispose connections, streams, file handles, timers, and controllers (`try/finally`, `defer`, `use`, `dispose()`).
+- **Non-Blocking Hot Paths**: Never run heavy synchronous CPU work (large JSON parsing, hashing, compression, image processing) on the Node event loop or Flutter/mobile UI thread—offload to worker threads / Isolates / background workers.
 
-## 4. Data Precision, I/O & Lifecycle Safety
+## 4. Modularity, DRY & Type-Driven Correctness
 
-- **Timestamps**: Compute and store timestamps in UTC (`epoch ms` or ISO-8601 with `Z`), serializing one canonical form per API contract. Convert timezones only at the presentation layer.
-- **Currency**: Represent money in integer minor units (e.g., `int64`/`BigInt` cents) or fixed-point `Decimal`—never IEEE-754 floats. Never pass raw `BigInt` directly to `JSON.stringify`; serialize as integer or decimal string with explicit scale.
-- **Bounded Memory & External I/O**: Enforce explicit timeouts on every external HTTP, DB, and queue call. Stream large payloads with backpressure and paginate list queries instead of loading unbounded collections into memory.
-- **Graceful Shutdown**: Long-running services must handle `SIGTERM`/`SIGINT` by rejecting new work, draining in-flight requests within a bounded timeout, and closing DB pools/sockets cleanly.
+- **Search Before Creating**: Inspect `lib/`, `utils/`, `helpers/`, `hooks/`, `schemas/`, `services/`, and `CONTEXT.md` before writing any helper, validator, formatter, or HTTP wrapper. Maintain one canonical source of truth.
+- **Parse, Don't Validate**: Parse untrusted ingress payloads (HTTP, webhook, CLI, deep links, local storage) at the boundary into strongly-typed domain models; reject unknown fields.
+- **Make Illegal States Unrepresentable**: Use discriminated unions / `sealed class` / `enum` sum types (TS unions, Dart 3 `sealed class`, Rust `enum`, Python `Literal` unions) instead of conflicting boolean flags.
+- **Guard Clauses & Shallow Nesting**: Validate preconditions at the top of functions and return/throw early (max nesting depth ≤ 3). Keep functions focused on a single level of abstraction.
+- **Why-Only Comments & Complete Edits**: Comment only non-obvious invariants or `// ponytail: <ceiling + upgrade path>`. Never emit placeholder comments (`// ... rest unchanged ...`) or `TODO` stubs.
+
+## 5. Data Precision & Production Integrity
+
+- **Timestamps**: Compute/store in UTC (`epoch ms` or ISO-8601 `Z`), one canonical format per API contract; format to local time only at presentation.
+- **Currency**: Use integer minor units (`int`/`int64`/`BigInt` cents) or fixed-point `Decimal`—never IEEE-754 floats. Never pass raw `BigInt` directly to `JSON.stringify`.
+- **Zero Production Fakes**: No mock stores, dummy IDs/tokens, hardcoded fake responses, or simulated delays in production directories.

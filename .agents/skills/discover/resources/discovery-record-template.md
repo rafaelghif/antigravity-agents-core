@@ -5,28 +5,30 @@
 - **Status**: `draft` | `confirmed` | `superseded`
 - **Next Artifact**: `specs/<feature-slug>.md` or `docs/sprint/SPRINT.md`
 
-> Provenance rule: cite `DEC-###`, `path:line`, or a verified primary source URL for every claim. Unknowns stay `OQ-###` (`open`); genuinely inapplicable sections use `N/A — <reason>`.
+> Provenance rule: cite `DEC-###`, `path:line`, or a live primary-source URL (`/research` / `search_web`). Unknowns stay `OQ-###` (`open`); inapplicable areas use `N/A — <reason>`.
 
 ---
 
 ## 1. Problem, Goal & Non-Goals
 
-- **Problem**: <concrete user or system problem with source>
-- **Goal**: <observable outcome>
+- **Problem & Goal**: <observable problem and outcome>
 - **Success Metrics**: <metric, target, measurement method, or `N/A — reason`>
-- **Non-Goals**: <what is explicitly excluded>
+- **Non-Goals**: <explicit exclusions>
 
 ## 2. Existing Codebase Reuse & Constraints (`CONTEXT.md`)
 
-- **Reusable UI Primitives / Tokens**: <exact file paths & symbols to reuse/extend, or `N/A`>
-- **Reusable Utilities / Hooks / Clients / Schemas**: <exact file paths & symbols>
-- **Existing Seams & Conflicts**: <repo constraints with `path:line`>
+- **Reusable UI Primitives / Widgets / Tokens**: <exact `path:symbol` or `N/A`>
+- **Reusable Utils / API Clients / State Holders / Schemas**: <exact `path:symbol`>
+- **Existing Constraints / Conflicts**: <`path:line`>
 
-## 3. Architecture & Decisions
+## 3. Architecture, Config & Live-Researched Decisions
 
-| ID | Decision | Alternatives Considered | Rationale | Trade-Off / Ceiling | Status | Source |
+| ID | Decision | Alternatives Considered | Rationale (6 Pillars) | Trade-Off / Ceiling | Primary Source / Citation | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `DEC-001` | <decision> | <options> | <why> | <limit/upgrade path> | `settled` | <user answer / `path:line`> |
+| `DEC-001` | <decision> | <options> | <why> | <ceiling/upgrade path> | <user answer / URL / `path:line`> | `settled` |
+
+- **Configurability & Env Contract**: <typed config keys, validation, zero hardcoded URLs/secrets>
+- **Structured Logging & Audit Trail**: <logger seam, trace/correlation fields, `<REDACTED>` policy>
 
 ## 4. Domain Language, Invariants & UI/State Behavior
 
@@ -36,16 +38,16 @@
 
 - **State Machine (`ST-###`)**: <states, allowed/forbidden transitions, guards>
 - **Authorization / Tenancy (`SEC-###`)**: <principal, owner/tenant rule, forbidden access>
-- **UI States (if UI)**: <loading, empty, validation error, server error, disabled, responsive>
+- **UI States (if UI)**: <loading, empty, validation error, server/offline error, disabled, responsive, controller disposal>
 
-## 5. Data Contracts, Resilience & Verification
+## 5. Data Contracts, Performance & Verification
 
-| Contract / Seam | Input / Output Schema | Idempotency & Concurrency | Error Contract (`ERR-###`) | Source |
+| Contract / Seam | Schema & Bounds | Idempotency & Concurrency | Error Contract (`ERR-###`) | Source |
 | :--- | :--- | :--- | :--- | :--- |
 | `<seam>` | `<shape>` | `<key/lock/version or N/A>` | `<condition -> status/code>` | `DEC-###` |
 
-- **Measurable Quality Budgets (`NFR-###`)**: <exact numbers with units, or `N/A — reason`>
-- **Failure & Rollback**: <timeouts/retries/degradation, expand-migrate-contract, rollback trigger>
+- **Performance & Scaling Budgets (`NFR-###`)**: <complexity/N+1/pagination/memory/latency budgets or `N/A — reason`>
+- **Failure, Resilience & Migration**: <timeouts/retries/degradation, expand-migrate-contract, rollback trigger>
 - **Verification Command**: `<exact runnable command>`
 - **Required Test Cases**: happy path, `N-1`/`N`/`N+1`, empty/malformed, auth (`401`/`403`/`404`), duplicate idempotency, failure mode.
 
@@ -58,7 +60,8 @@
 
 ## 7. Completeness Gate
 
+- [ ] Live research (`search_web`) was executed for external library/architecture recommendations.
 - [ ] Every blocking `OQ-###` is resolved before routing to `/to-spec`, `/to-tickets`, or `/implement`.
 - [ ] Existing codebase reusable UI primitives/helpers are verified against real files.
-- [ ] All codebase facts cite `path:line`; zero numbers or endpoints are invented.
+- [ ] Zero numbers, endpoints, schemas, or commands are invented.
 - [ ] User has confirmed this record.

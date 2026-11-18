@@ -1,41 +1,41 @@
 ---
 trigger: glob
-globs: "*.tsx, *.jsx, *.vue, *.svelte, *.astro, *.html, *.css, *.scss, **/components/**, **/ui/**, **/app/**, **/pages/**"
-description: "Shared UI reuse, design-token discipline, DRY component composition, mandatory UI state matrices, and frontend anti-duplication gates."
+globs: "*.tsx, *.jsx, *.vue, *.svelte, *.astro, *.html, *.css, *.scss, *.dart, **/components/**, **/widgets/**, **/screens/**, **/pages/**, **/ui/**, **/app/**, **/features/**"
+description: "Multi-framework UI & DRY rules (Web + Dart/Flutter + Mobile): shared widget/component discovery, Reuse->Extend->Compose->Create, design tokens, UI state matrix, lifecycle disposal, and rebuild performance."
 ---
 
-# UI, Shared Components & Frontend DRY Rules
+# UI, Shared Components & Frontend/Mobile DRY Rules
 
-## 1. Mandatory Pre-UI Discovery Gate (Run Before Writing JSX/CSS)
+## 1. Mandatory Pre-UI Discovery Gate (Run Before Writing UI)
 
-Before creating or modifying any UI component, page, or stylesheet:
-1. Read `CONTEXT.md` §3–4 (if populated) and `package.json` to identify the active UI kit, styling system, icon library, form library, and data-fetching client.
-2. Search existing UI and helper directories (`components/`, `ui/`, `shared/`, `design-system/`, `hooks/`, `styles/`, `app/`, `pages/`) via search tools or `rg`/`find`.
-3. Read the target primitive files (`Button`, `Input`, `Select`, `Dialog`, `Modal`, `Table`, `Card`, `Badge`, `Toast`) and theme/CSS token files so your props, variants, and classes match real exports.
+Before creating or modifying any UI component, widget, screen, or style:
+1. Read `CONTEXT.md` §4–5 (if populated) and the project manifest (`package.json`, `pubspec.yaml`, etc.) to identify the active UI kit, styling/theming system, icon library, state manager, and HTTP client.
+2. Search existing UI directories (`components/`, `widgets/`, `shared/`, `design-system/`, `theme/`, `hooks/`, `features/`, `screens/`, `pages/`, `app/`) via search tool or `rg`/`find`.
+3. Read the real primitive/theme files (`Button`/`AppButton`, `Input`/`AppTextField`, `Dialog`/`Modal`, `Table`, `ThemeData`/`ColorScheme`/`globals.css`) so props, variants, and theme tokens match verified code.
 
-## 2. Strict Component Reuse Hierarchy
+## 2. Strict Component / Widget Reuse Hierarchy
 
-1. **Reuse First**: Always import existing UI primitives, layout wrappers, form controls, icon libraries, and formatting helpers.
-2. **Extend Second**: If an existing component lacks a visual variant, size, or callback, extend it cleanly with backward-compatible props/variants—never copy it into `CustomModal.tsx` or `UserCardV2.tsx`.
-3. **Compose Third**: Build feature UI by composing existing primitives (`Card` + `Table` + `Badge`) instead of duplicating markup.
-4. **Create Last**: Create a new shared or feature component only when search confirms no existing primitive covers the pattern, and only when justified by reuse or clear single responsibility.
-5. **Zero Copy-Paste Across Routes**: If two views share table, filter, form, or modal structure, extract one parameterized component or shared hook instead of duplicating JSX across pages.
+1. **Reuse First**: Always import existing UI primitives, layout wrappers, form controls, icon packs, and formatting helpers.
+2. **Extend Second**: If an existing component/widget lacks a variant, size, or callback, extend it cleanly with optional/backward-compatible parameters—never copy it into `CustomModal.tsx` or `CustomPrimaryButton.dart`.
+3. **Compose Third**: Build feature views by composing existing primitives instead of duplicating markup/widget trees.
+4. **Create Last**: Create a new shared component/widget only when search proves no existing primitive covers it and it warrants reuse or single-responsibility isolation.
+5. **Zero Copy-Paste Across Screens/Routes**: Extract shared cards, list items, filters, and form sections into parameterized shared components/widgets.
 
 ## 3. Design Tokens, Styling & Icon Discipline
 
-- Never hardcode hex colors, pixel magic numbers, or inline `<svg>` paths when theme tokens, CSS variables, Tailwind theme scales, or an installed icon library exist in the repo.
-- Match the repository's existing styling mechanism (`cn`/`clsx`, CSS Modules, Tailwind utility classes, styled components). Do not introduce a competing CSS approach in the same project.
+- Never hardcode hex colors (`#123456` / `Color(0xFF...)`), magic spacing/font sizes, or inline SVG/custom paths when theme tokens (`Theme.of(context).colorScheme` / `TextTheme`, CSS variables, Tailwind theme scales) or installed icon libraries exist.
+- Match the repository's styling & state architecture (e.g., Tailwind/`cn`, CSS Modules, Riverpod/BLoC, React Query) instead of mixing paradigms.
 
-## 4. Mandatory UI State & Accessibility Matrix
+## 4. Mandatory UI State, Lifecycle & Rendering Performance Matrix
 
-Every interactive component, form, or data view must explicitly handle (or confirm via `ask_question` if omitted from the ticket/PRD):
-- **Loading**: skeleton, spinner, or disabled submit state.
-- **Empty**: explicit empty-state message/action rather than blank space.
-- **Error**: validation errors (field-level + summary) and server/network error recovery (retry or clear message).
-- **Disabled / In-Flight**: prevent duplicate form/button submissions while mutations are pending.
-- **Accessibility**: native semantic elements (`<button type="button">` for actions, `<a href>` for navigation, `<label>`/`aria-label` for inputs, keyboard focus/Escape handling for dialogs).
+Every interactive screen, widget, or form must explicitly handle (or stop and `ask_question` if undefined in the ticket/PRD):
+- **Loading / Empty / Validation Error / Server Error / Disabled In-Flight**: never leave dead blank states or allow double-submission.
+- **UI Thread & Rebuild Optimization**:
+  - **Flutter/Dart**: Prefer `const` constructors/widgets, use `ListView.builder`/`SliverChildBuilderDelegate` for dynamic lists (never `.map().toList()` inside `Column` for unbounded data), narrow state rebuild scopes (`Consumer`/`BlocSelector`), and offload heavy JSON parsing/crypto to `compute()`/`Isolate`.
+  - **Web (React/Vue/Svelte)**: Virtualize large lists, avoid allocating inline handlers/objects unnecessarily in hot lists, keep render bodies pure.
+- **Resource Disposal (Zero Memory Leaks)**: Always dispose `TextEditingController`, `AnimationController`, `ScrollController`, `FocusNode`, `StreamSubscription`, `Timer`, `AbortController`, and event listeners on unmount/`dispose()`.
+- **Accessibility**: Semantic elements (`<button type="button">` vs `<a href>`, `<label>`/`aria-*`, Flutter `Semantics`, proper focus/keyboard navigation).
 
 ## 5. Logic Separation
 
-- Keep API calls, data normalization, and complex business rules out of JSX render bodies—use the project's shared API client, validation schemas, and custom hooks/actions.
-- Never invent API endpoints, response fields, or prop names. Read the actual backend/API type or schema first; if missing, ask the user.
+- Keep API calls, DTO parsing, caching, and domain rules out of UI render/`build()` methods—use the project's shared API client, schemas, and state holders. Never invent API fields or routes; ask if missing.
