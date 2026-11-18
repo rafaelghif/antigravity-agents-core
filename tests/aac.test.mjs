@@ -96,13 +96,32 @@ test('P0-1 & P2-7: CLI init, idempotency, non-destructive upgrade, conflict back
     hooksObj['custom-user-hook'] = { enabled: true, Stop: [] };
     fs.writeFileSync(dstHooksPath, JSON.stringify(hooksObj, null, 2));
 
-    // 4. Non-destructive upgrade preserves user-modified AGENTS.md & rule, writes .aac-new, and merges hooks
+    // 4. Non-destructive upgrade preserves user-modified AGENTS.md & rule, writes .aac-new, prunes unmodified deprecated files, and merges hooks
+    const legacyManifest = JSON.parse(fs.readFileSync(path.join(tmpDir, '.agents', '.aac-manifest.json'), 'utf8'));
+    const deprecatedUnmodified = path.join(tmpDir, '.agents', 'rules', 'caveman.md');
+    const deprecatedContent = '# Deprecated rule\n';
+    fs.writeFileSync(deprecatedUnmodified, deprecatedContent);
+    legacyManifest.files['.agents/rules/caveman.md'] = crypto.createHash('sha256').update(deprecatedContent).digest('hex');
+    const deprecatedModified = path.join(tmpDir, '.agents', 'rules', 'ponytail.md');
+    fs.writeFileSync(deprecatedModified, '# User customized legacy rule\n');
+    legacyManifest.files['.agents/rules/ponytail.md'] = crypto.createHash('sha256').update('# Old upstream\n').digest('hex');
+    fs.writeFileSync(path.join(tmpDir, '.agents', '.aac-manifest.json'), JSON.stringify(legacyManifest, null, 2));
+
     execFileSync(process.execPath, [cliPath, 'upgrade', '--target', tmpDir], { encoding: 'utf8' });
+    assert.equal(fs.existsSync(deprecatedUnmodified), false, 'Unmodified deprecated managed file must be pruned on upgrade');
+    assert.equal(fs.existsSync(deprecatedModified), true, 'User-modified deprecated file must be preserved on upgrade');
     assert.match(fs.readFileSync(agentsPath, 'utf8'), /Custom User Constitution Line/);
     assert.equal(fs.existsSync(`${agentsPath}.aac-new`), true);
     assert.match(fs.readFileSync(rulePath, 'utf8'), /Custom Rule Tweak/);
     assert.equal(fs.existsSync(`${rulePath}.aac-new`), true);
     assert.equal(fs.readFileSync(contextPath, 'utf8'), '# Custom User Context\n');
+
+    // 4b. CLI --help and --version exit 0 cleanly
+    const pkgMeta = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
+    const helpOut = execFileSync(process.execPath, [cliPath, '--help'], { encoding: 'utf8' });
+    assert.match(helpOut, /Usage:/);
+    const verOut = execFileSync(process.execPath, [cliPath, '--version'], { encoding: 'utf8' }).trim();
+    assert.equal(verOut, pkgMeta.version);
 
     const mergedHooks = JSON.parse(fs.readFileSync(dstHooksPath, 'utf8'));
     assert.equal(mergedHooks['git-destructive-guard'].enabled, false);

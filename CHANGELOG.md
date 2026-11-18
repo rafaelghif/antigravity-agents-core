@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.3.0] - 2026-11-18
+
+### Added
+
+- **Multi-Language Support (Dart/Flutter, Go, Python, Rust, JVM, Swift, JS/TS)**:
+  - Expanded `coding-standards.md`, `ui-and-dry.md`, `testing.md`, and `.agents/hooks.json` beyond JS/TS to cover `*.dart`, `*_test.dart`, `integration_test/`, `pubspec.yaml` (`flutter test` / `dart test`), `Package.swift`, `mix.exs`, and JVM test conventions.
+  - Added Flutter/Dart specifics: `const` widget rebuild optimization, `ListView.builder` virtualization, `Isolate`/`compute` offloading, `ThemeData`/`ColorScheme` token reuse, and mandatory `dispose()` cleanup.
+- **Shared UI & Frontend/Mobile DRY Rule (`.agents/rules/ui-and-dry.md`)**:
+  - `glob`-triggered rule enforcing pre-UI primitive/token discovery, `Reuse → Extend → Compose → Create` component hierarchy, mandatory UI state handling (`loading`, `empty`, `error`, `disabled`, accessibility), and resource disposal.
+- **Codebase Indexing Skill (`.agents/skills/index-project/`)**:
+  - Added `/index-project` with black-box multi-language scanner `scripts/scan-repo.mjs` (`--help`, `--json`) to populate `CONTEXT.md` with verified stack versions, config/logging seams, UI primitives, shared helpers, and verification commands.
+- **4-Bundle Antigravity Skill Resources & Black-Box Validators**:
+  - Added `--help`-compatible validator scripts: `.agents/skills/to-spec/scripts/validate-spec.mjs`, `.agents/skills/to-tickets/scripts/validate-board.mjs`, and `.agents/skills/implement/scripts/audit-diff.mjs`.
+  - Added `references/` checklists and `examples/` across `discover`, `codebase-design`, `domain-modeling`, `tdd`, and `code-review`.
+- **Cross-Machine Handover & Secret Leak Guard**:
+  - Updated `/handoff` and `git-and-context.md` to persist git-tracked handover state in `docs/sprint/HANDOFF.md` alongside `.scratch/handoff.md`.
+  - Added hardcoded credential/key literal detection (`sk_live_`, `ghp_`, `AKIA`, private keys) to `production-no-mock-guard` and `audit-diff.mjs`.
+- **CLI Enhancements (`bin/cli.mjs`)**:
+  - Added `--help`/`-h`, `--version`/`-v`, `--target=<dir>` support, and safe pruning of unmodified deprecated managed files during `upgrade`.
+
+### Changed
+
+- **LLM-Native `AGENTS.md` (< 10 KB)**: Rewrote `AGENTS.md` from 27,270 bytes (which exceeded Antigravity's 24 KB limit and truncated the bottom rules/skills index) down to ~9.7 KB of direct, zero-slang execution invariants, adding a 7-dimension Mandatory Ambiguity Gate (`ask_question` on unclear prompts/PRDs/tickets) and pre-code configurability/logging/performance/security checks.
+- **Glob-Triggered Core Rules**: Converted `coding-standards.md` and `database-migrations.md` from `model_decision` to `trigger: glob` so code/SQL invariants auto-load when matching files are touched; removed redundant `caveman.md` and `ponytail.md`.
+- **Built-in `/grill-me` Collision Fix**: Renamed custom `grill-me` skill to `discover` with a mandatory live-research (`search_web`) gate before recommending libraries or architectures.
+- **Surface-Compatible Subagents & Package Metadata**: Updated `.agents/agents/*.md` tools to native cross-surface Antigravity tool names (`read_file`, `edit_file`, `write_file`, `run_command`, `manage_task`, `search_web`), updated `README.md`, refreshed `assets/banner.png` as a genuine wide PNG, and updated `package.json` metadata.
+
+### Fixed
+
+- **Stop Hook `NO_TOOL_CALL` & False-Positive Fixes (`.agents/hooks.json`)**:
+  - Fixed `quality-gate-stop-sensor` to match Antigravity's documented `NO_TOOL_CALL` / `MAX_INVOCATIONS` `terminationReason` values (replacing non-existent `'model_stop'`) and respect `continuationActive` to prevent continuation loops.
+  - Restricted Stop diff test-tampering checks to test files only, eliminating false positives on documentation/hook diffs.
+
 ## [6.2.1] - 2026-11-09
 
 ### Fixed

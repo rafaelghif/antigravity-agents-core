@@ -1,7 +1,7 @@
 {
   "name": "@rafaelghif/aac-core",
-  "version": "6.2.1",
-  "description": "Savage Gen-Z Principal Software Engineering & Technical Scrum Agent for Google Antigravity",
+  "version": "6.3.0",
+  "description": "LLM-native engineering rules, multi-language skills, sandboxed subagents, and lifecycle hooks for Google Antigravity",
   "publishConfig": {
     "access": "public"
   },

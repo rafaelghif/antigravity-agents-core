@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const VERSION = '6.2.1';
+const VERSION = '6.3.0';
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 
@@ -19,12 +19,15 @@ let projectId = process.env.AAC_PROJECT_ID || '';
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
   if (a === 'init' || a === 'upgrade' || a === 'uninstall' || a === 'help') cmd = a;
+  else if (a === '--help' || a === '-h') cmd = 'help';
+  else if (a === '--version' || a === '-v') cmd = 'version';
   else if (a === '--force' || a === '-f') force = true;
   else if (a === '--dry-run') dryRun = true;
   else if (a === '--with-sidecar') withSidecar = true;
   else if (a === '--project-id' && args[i + 1]) projectId = args[++i];
   else if (a.startsWith('--project-id=')) projectId = a.slice('--project-id='.length);
   else if (a === '--target' && args[i + 1]) targetDir = path.resolve(args[++i]);
+  else if (a.startsWith('--target=')) targetDir = path.resolve(a.slice('--target='.length));
   else if (a.startsWith('-')) {
     console.error(`❌ Unknown flag: ${a}`);
     process.exit(1);
@@ -204,6 +207,30 @@ function runInstallOrUpgrade() {
     }
   }
 
+  // Prune deprecated upstream files on upgrade (only if unmodified or --force)
+  if (cmd === 'upgrade') {
+    const managedSet = new Set(managedRelPaths);
+    for (const [prevRel, prevHash] of Object.entries(prevManifest.files || {})) {
+      if (managedSet.has(prevRel)) continue;
+      const obsoletePath = resolveManagedPath(targetDir, prevRel);
+      if (!obsoletePath || !fs.existsSync(obsoletePath)) {
+        delete nextManifest.files[prevRel];
+        continue;
+      }
+      const stat = fs.lstatSync(obsoletePath);
+      if (!stat.isFile() && !stat.isSymbolicLink()) continue;
+      const curHash = sha256(fs.readFileSync(obsoletePath));
+      if (curHash === prevHash || force) {
+        backupFile(obsoletePath, prevRel, backupRoot);
+        if (!dryRun) fs.rmSync(obsoletePath, { force: true });
+        delete nextManifest.files[prevRel];
+        console.log(`${dryRun ? '[dry-run] ' : ''}🗑️ Removed deprecated ${prevRel}`);
+      } else {
+        console.log(`⚠️ Kept user-modified deprecated file ${prevRel}`);
+      }
+    }
+  }
+
   mergeHooks(path.join(packageRoot, '.agents', 'hooks.json'), path.join(targetDir, '.agents', 'hooks.json'), backupRoot);
 
   const dstContext = path.join(targetDir, 'CONTEXT.md');
@@ -269,10 +296,12 @@ function runUninstall() {
 
 if (cmd === 'init' || cmd === 'upgrade') runInstallOrUpgrade();
 else if (cmd === 'uninstall') runUninstall();
+else if (cmd === 'version') console.log(VERSION);
 else {
   console.log(`AAC (Antigravity Agent Core) CLI v${VERSION}
 Usage:
-  npx @rafaelghif/aac-core init [--force] [--dry-run] [--with-sidecar --project-id <id>]
-  npx @rafaelghif/aac-core upgrade [--force] [--dry-run] [--with-sidecar --project-id <id>]
-  npx @rafaelghif/aac-core uninstall [--force] [--dry-run]`);
+  npx @rafaelghif/aac-core init [--target <dir>] [--force] [--dry-run] [--with-sidecar --project-id <id>]
+  npx @rafaelghif/aac-core upgrade [--target <dir>] [--force] [--dry-run] [--with-sidecar --project-id <id>]
+  npx @rafaelghif/aac-core uninstall [--target <dir>] [--force] [--dry-run]
+  npx @rafaelghif/aac-core --version`);
 }
